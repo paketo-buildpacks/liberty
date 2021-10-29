@@ -1,0 +1,143 @@
+api = "0.6"
+Path = ""
+
+[buildpack]
+  id = "paketo-buildpacks/open-liberty"
+  name = "Paketo Open Liberty Buildpack"
+  version = "{{.version}}"
+  homepage = "https://github.com/paketo-buildpacks/open-liberty"
+  clear-env = false
+  description = "A Cloud Native Buildpack that provides the Open Liberty runtime"
+  keywords = ["java", "javaee", "open-liberty"]
+
+  [[buildpack.licenses]]
+    type = "Apache-2.0"
+    uri = "https://github.com/paketo-buildpacks/open-liberty/blob/main/LICENSE"
+
+[[stacks]]
+  id = "io.buildpacks.stacks.bionic"
+
+[metadata]
+  configurations = []
+  include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "buildpack.toml"]
+  pre-package = "scripts/build.sh"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.11-full"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-21.0.0.11.zip"
+    sha256 = "27c2c2f8844279fef0e10b361a04ebfbdf15f46843eab58bd9f8039decbcd010"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.11-javaee8"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-javaee8-21.0.0.11.zip"
+    sha256 = "1365a0fc00e1ac2d28ecea382b03535dd40ed4449d6ccb3c88617f4cb3c40051"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.11-webProfile8"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-webProfile8-21.0.0.11.zip"
+    sha256 = "1bb90d605ecd464b1cddb72ff788fda74d5c5a7cca2e6728021fb19bf2cfa231"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.11-microProfile4"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-microProfile4-21.0.0.11.zip"
+    sha256 = "9da317fe28f8cf66009075ab5d114de362a170f2fcef911b2434d5192f50f264"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.11-kernel"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-kernel-21.0.0.11.zip"
+    sha256 = "f5448f4fceb6c22dcd44a7be3b3be3af579ff72ac1aa0e6c7f2a4f84a8e14e33"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.10-full"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-09-20_1900/openliberty-21.0.0.10.zip"
+    sha256 = "70225624e4736475ae45f349bed96d7d9886878eaf6061ce16dbb5591c277ecf"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.10-javaee8"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-09-20_1900/openliberty-javaee8-21.0.0.10.zip"
+    sha256 = "caedb8cc99759e86fe70f2e0cfa32ca25ec5d098350241a02101de747e5a61a1"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.10-webProfile8"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-09-20_1900/openliberty-webProfile8-21.0.0.10.zip"
+    sha256 = "05205c3c5e147e92fe285d5fc1d30417d6bf783071b359de9dcac52d144b02e8"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.10-microProfile4"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-09-20_1900/openliberty-microProfile4-21.0.0.10.zip"
+    sha256 = "f808b2ae3bb27c988e34cfb759ac0cd61dd0b0cc07ab11e316adf27cf6ca10ed"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    id = ""
+    name = "open-liberty-runtime"
+    version = "21.0.10-kernel"
+    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-09-20_1900/openliberty-kernel-21.0.0.10.zip"
+    sha256 = "ae2cd4e63fd7628fb6dcdf2dc8057ecb5111f525fcd478b0c9034de2d733c28d"
+    stacks = ["io.buildpacks.stacks.bionic"]
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
