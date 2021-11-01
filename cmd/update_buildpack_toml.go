@@ -84,10 +84,27 @@ func main() {
 		allDependencies = append(allDependencies, deps...)
 	}
 
+	latestVersion := strings.Split(allDependencies[0].Version, "-")[0]
+
 	defaultBuildpack.Metadata = map[string]interface{}{
-		"configurations": []libpak.BuildpackConfiguration{},
-		"dependencies":   allDependencies,
-		"pre-package":    "scripts/build.sh",
+		"configurations": []libpak.BuildpackConfiguration{
+			{
+				Name:        "BP_OPENLIBERTY_VERSION",
+				Description: "Which version of the Open Liberty runtime to install. Defaults to latest supported version",
+				Default:     latestVersion,
+				Build:       true,
+				Launch:      false,
+			},
+			{
+				Name:        "BP_OPENLIBERTY_PROFILE",
+				Description: "The Liberty profile to install. Current options are 'full', 'javaee8', 'webProfile8', 'microProfile4', and 'kernel'",
+				Default:     "full",
+				Build:       true,
+				Launch:      false,
+			},
+		},
+		"dependencies": allDependencies,
+		"pre-package":  "scripts/build.sh",
 		"include-files": []string{
 			"LICENSE",
 			"NOTICE",

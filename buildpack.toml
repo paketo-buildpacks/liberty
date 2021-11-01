@@ -18,9 +18,22 @@ Path = ""
   id = "io.buildpacks.stacks.bionic"
 
 [metadata]
-  configurations = []
   include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "buildpack.toml"]
   pre-package = "scripts/build.sh"
+
+  [[metadata.configurations]]
+    build = true
+    default = "21.0.11"
+    description = "Which version of the Open Liberty runtime to install. Defaults to latest supported version"
+    launch = false
+    name = "BP_OPENLIBERTY_VERSION"
+
+  [[metadata.configurations]]
+    build = true
+    default = "full"
+    description = "The Liberty profile to install. Current options are 'full', 'javaee8', 'webProfile8', 'microProfile4', and 'kernel'"
+    launch = false
+    name = "BP_OPENLIBERTY_PROFILE"
 
   [[metadata.dependencies]]
     id = ""
