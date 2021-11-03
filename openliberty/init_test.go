@@ -9,8 +9,8 @@ import (
 
 func TestUnit(t *testing.T) {
 	suite := spec.New("openliberty", spec.Report(report.Terminal{}))
-	// suite("Build", testBuild)
+	suite("Build", testBuild)
 	suite("Detect", testDetect)
-	// suite("Distribution", testDistribution)
+	suite("Distribution", testDistribution)
 	suite.Run(t)
 }
