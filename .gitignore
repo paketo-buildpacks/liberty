@@ -1,1 +1,5 @@
 .vscode
+*.cnb
+**/*.cnb
+build/
+bin/
