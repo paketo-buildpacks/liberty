@@ -59,6 +59,11 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		layer.LaunchEnvironment.Default("BPI_OL_DROPIN_DIR", d.ApplicationPath)
 		layer.LaunchEnvironment.Default("BPI_OL_RUNTIME_ROOT", layer.Path)
 
+		// set logging to write to the console. Using `server run` instead of `server start` ensures that
+		// stdout/stderr are actually written to their respective streams instead of to `console.log`
+		layer.LaunchEnvironment.Override("WLP_LOGGING_MESSAGE_SOURCE", "")
+		layer.LaunchEnvironment.Default("WLP_LOGGING_CONSOLE_SOURCE", "message,trace,accessLog,ffdc,audit")
+
 		return layer, nil
 	})
 }
