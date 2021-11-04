@@ -15,7 +15,7 @@ require (
 require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/VividCortex/ewma v1.1.1 // indirect
-	github.com/creack/pty v1.1.16 // indirect
+	github.com/creack/pty v1.1.17 // indirect
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/heroku/color v0.0.6 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
