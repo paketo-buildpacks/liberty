@@ -15,7 +15,7 @@ import (
 func testLink(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
-		linker helper.ApplicationLinker
+		linker helper.FileLinker
 
 		appDir   string
 		layerDir string

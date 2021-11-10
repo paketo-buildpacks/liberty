@@ -29,6 +29,7 @@ The buildpack will support all available profiles of the two most recent version
 | -------------------- | -----------
 | `$BP_OPENLIBERTY_VERSION` | The version of Open Liberty to install. Defaults to the latest version of the runtime. 
 | `$BP_OPENLIBERTY_PROFILE` | The Open Liberty profile to use. Defaults to `full`.
+| `$BP_OPENLIBERTY_APP_NAME` | If the [server.xml](#bindings) does not specify a context root, Open Liberty will use this value as the context root. Defaults to the value of `$CNB_APP_DIR`, currently `workspace`.
 
 ## License
 This buildpack is released under version 2.0 of the [Apache License][a].

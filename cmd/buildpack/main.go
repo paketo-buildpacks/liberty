@@ -10,7 +10,9 @@ import (
 
 func main() {
 	libpak.Main(
-		openliberty.Detect{},
+		openliberty.Detect{
+			Logger: bard.NewLogger(os.Stdout),
+		},
 		openliberty.Build{
 			Logger: bard.NewLogger(os.Stdout),
 		},

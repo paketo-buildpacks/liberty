@@ -3,3 +3,4 @@
 **/*.cnb
 build/
 bin/
+*.yaml

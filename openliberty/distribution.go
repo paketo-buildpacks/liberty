@@ -5,8 +5,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libjvm/count"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/crush"
@@ -52,8 +54,15 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			Stdout:  outErrWriter,
 			Stderr:  outErrWriter,
 		}); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("could not create default server\n%w", err)
+			return libcnb.Layer{}, fmt.Errorf("could not create default server: %w", err)
 		}
+
+		libertyClasses, err := count.Classes(layer.Path)
+		if err != nil {
+			return libcnb.Layer{}, fmt.Errorf("could not count liberty classes: %w", err)
+		}
+
+		layer.LaunchEnvironment.Default("BPL_JVM_CLASS_ADJUSTMENT", strconv.Itoa(libertyClasses))
 
 		// these are used by the exec.d helper to successfully create the symlink to the dropin app
 		layer.LaunchEnvironment.Default("BPI_OL_DROPIN_DIR", d.ApplicationPath)

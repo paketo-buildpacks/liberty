@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libjvm"
+	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/bindings"
 )
 
 const (
@@ -18,7 +22,9 @@ const (
 	PlanEntryJVMApplication        = "jvm-application"
 )
 
-type Detect struct{}
+type Detect struct {
+	Logger bard.Logger
+}
 
 type detector func(libcnb.DetectContext) (bool, error)
 
@@ -27,12 +33,11 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 	var err error
 
 	fullDetector := d.and(
-		d.or(
-			d.checkWebInf,
-			d.checkRootServerXML,
-			d.checkNestedServerXML,
-		),
 		d.checkManifest,
+		d.or(
+			d.checkRootServerXML,
+			d.checkWebInf,
+		),
 	)
 
 	if result.Pass, err = fullDetector(context); err != nil {
@@ -44,11 +49,9 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 			{
 				Provides: []libcnb.BuildPlanProvide{
 					{Name: PlanEntryOpenLiberty},
-					{Name: PlanEntryJVMApplication},
 				},
 
 				Requires: []libcnb.BuildPlanRequire{
-					{Name: PlanEntryJDK, Metadata: map[string]interface{}{"build": true}},
 					{Name: PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryOpenLiberty},
@@ -97,27 +100,37 @@ func (d Detect) and(detectors ...detector) detector {
 }
 
 func (d Detect) checkRootServerXML(context libcnb.DetectContext) (bool, error) {
-	serverXML := filepath.Join(context.Application.Path, "server.xml")
-	if _, err := os.Stat(serverXML); err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-
-		return false, err
+	b, ok, err := bindings.ResolveOne(context.Platform.Bindings, bindings.OfType("open-liberty"))
+	if err != nil {
+		return false, fmt.Errorf("error resolving bindings: %w", err)
 	}
 
-	return true, nil
-}
+	if ok {
+		_, ok = b.SecretFilePath("server.xml")
+	}
 
-func (d Detect) checkNestedServerXML(context libcnb.DetectContext) (bool, error) {
-	glob := filepath.Join(context.Application.Path, "wlp", "usr", "servers", "*", "server.xml")
-	matches, err := filepath.Glob(glob)
-
-	return len(matches) > 0, err
+	return ok, nil
 }
 
 func (d Detect) checkWebInf(context libcnb.DetectContext) (bool, error) {
-	path := filepath.Join(context.Application.Path, "WEB-INF")
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &d.Logger)
+	if err != nil {
+		return false, fmt.Errorf("could not create configuration resolver\n%w", err)
+	}
+
+	srcPath, _ := cr.Resolve("BP_OPENLIBERTY_WEBINF_PATH")
+
+	path := filepath.Join(context.Application.Path, srcPath, "WEB-INF")
+	path, err = filepath.Abs(path)
+	if err != nil {
+		return false, fmt.Errorf("could not determine absolute path to WEB-INF directory: %w", err)
+	}
+
+	// make sure we don't try to escape the app path
+	if !strings.HasPrefix(path, context.Application.Path) {
+		return false, fmt.Errorf("setting BP_OPENLIBERTY_WEBINF_PATH must result in a path below %s. Requested path: %s", context.Application.Path, path)
+	}
+
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {

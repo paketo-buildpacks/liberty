@@ -112,6 +112,7 @@ func main() {
 			"bin/build",
 			"bin/detect",
 			"bin/main",
+			"bin/helper",
 			"buildpack.toml",
 		},
 	}

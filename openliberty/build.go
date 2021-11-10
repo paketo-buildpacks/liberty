@@ -50,6 +50,13 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("could not resolve dependency: %w", err)
 	}
+
+	h, be := libpak.NewHelperLayer(context.Buildpack, "linker")
+	h.Logger = b.Logger
+
+	result.Layers = append(result.Layers, h)
+	result.BOM.Entries = append(result.BOM.Entries, be)
+
 	distro, bomEntry := NewDistribution(dep, dc, context.Application.Path)
 	distro.Logger = b.Logger
 

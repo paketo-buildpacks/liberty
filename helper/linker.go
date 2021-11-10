@@ -1,17 +1,22 @@
 package helper
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/bindings"
 )
 
-type ApplicationLinker struct {
-	Logger bard.Logger
+type FileLinker struct {
+	Bindings libcnb.Bindings
+	Logger   bard.Logger
 }
 
-func (a ApplicationLinker) Execute() (map[string]string, error) {
+func (f FileLinker) Execute() (map[string]string, error) {
+	var err error
 	appDir, ok := os.LookupEnv("BPI_OL_DROPIN_DIR")
 	if !ok {
 		appDir = "/workspace"
@@ -22,5 +27,70 @@ func (a ApplicationLinker) Execute() (map[string]string, error) {
 		layerDir = "/layers/paketo-buildpacks_open-liberty/open-liberty-runtime"
 	}
 
-	return nil, os.Symlink(appDir, filepath.Join(layerDir, "usr", "servers", "defaultServer", "dropins", filepath.Base(appDir)))
+	b, ok, err := bindings.ResolveOne(f.Bindings, bindings.OfType("open-liberty"))
+	if err != nil {
+		return nil, fmt.Errorf("error resolving bindings: %w", err)
+	}
+
+	if ok {
+		bindingXML, ok := b.SecretFilePath("server.xml")
+		if ok {
+			serverXML := filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml")
+			if _, err = os.Stat(serverXML); err != nil && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("error checking for server.xml: %w", err)
+			}
+
+			if err = os.Remove(serverXML); err != nil && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("error deleting original server.xml: %w", err)
+			}
+
+			if err = os.Symlink(bindingXML, serverXML); err != nil {
+				return nil, fmt.Errorf("error linking server.xml: %w", err)
+			}
+		}
+
+		bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties")
+		if ok {
+			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
+			if _, err = os.Stat(existingBSP); err != nil && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("error checking for bootstrap.properties: %w", err)
+			}
+
+			if err = os.Remove(existingBSP); err != nil && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("error removing existing bootstrap.properties: %w", err)
+			}
+
+			if err = os.Symlink(bootstrapProperties, existingBSP); err != nil {
+				return nil, fmt.Errorf("error linking bootstrap.properties: %w", err)
+			}
+		}
+	}
+
+	linkPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "dropins", f.getLinkName(appDir))
+
+	os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
+
+	return nil, os.Symlink(appDir, linkPath)
+}
+
+func (f FileLinker) getLinkName(appDir string) string {
+	name := os.Getenv("BP_OPENLIBERTY_APP_NAME")
+	if name == "" {
+		name = filepath.Base(appDir)
+	}
+
+	// first, let's check to see if it's an EAR
+	_, err := os.Stat(filepath.Join(appDir, "META-INF", "application.xml"))
+	if err == nil {
+		return name + ".ear"
+	}
+
+	// now, we can check if it's a war
+	_, err = os.Stat(filepath.Join(appDir, "WEB-INF", "web.xml"))
+	if err == nil {
+		return name + ".war"
+	}
+
+	// at this point, we don't know what it is, so just return the name
+	return name
 }
