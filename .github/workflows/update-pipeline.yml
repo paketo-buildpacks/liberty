@@ -61,10 +61,10 @@ jobs:
                 echo "::set-output name=release-notes::${RELEASE_NOTES//$'\n'/%0A}"
               env:
                 DESCRIPTOR: .github/pipeline-descriptor.yml
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
             - uses: peter-evans/create-pull-request@v3
               with:
-                author: ${{ secrets.GITHUB_USERNAME }} <${{ secrets.GITHUB_USERNAME }}@users.noreply.github.com>
+                author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
                 body: |-
                     Bumps pipeline from `${{ steps.pipeline.outputs.old-version }}` to `${{ steps.pipeline.outputs.new-version }}`.
 
@@ -81,5 +81,4 @@ jobs:
                 labels: semver:patch, type:task
                 signoff: true
                 title: Bump pipeline from ${{ steps.pipeline.outputs.old-version }} to ${{ steps.pipeline.outputs.new-version }}
-                token: ${{ secrets.GITHUB_TOKEN }}
-
+                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
