@@ -70,8 +70,15 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		// set logging to write to the console. Using `server run` instead of `server start` ensures that
 		// stdout/stderr are actually written to their respective streams instead of to `console.log`
-		layer.LaunchEnvironment.Override("WLP_LOGGING_MESSAGE_SOURCE", "")
+		layer.LaunchEnvironment.Default("WLP_LOGGING_MESSAGE_SOURCE", "")
 		layer.LaunchEnvironment.Default("WLP_LOGGING_CONSOLE_SOURCE", "message,trace,accessLog,ffdc,audit")
+
+		// because of a liberty design decision, we can only force things to stdout if we are logging in
+		// JSON format
+		layer.LaunchEnvironment.Default("WLP_LOGGING_MESSAGE_FORMAT", "JSON")
+		layer.LaunchEnvironment.Default("WLP_LOGGING_CONSOLE_FORMAT", "JSON")
+		layer.LaunchEnvironment.Default("WLP_LOGGING_APPS_WRITE_JSON", "true")
+		layer.LaunchEnvironment.Default("WLP_LOGGING_JSON_ACCESS_LOG_FIELDS", "default")
 
 		return layer, nil
 	})
