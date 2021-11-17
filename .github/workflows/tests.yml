@@ -47,3 +47,4 @@ jobs:
                 richgo test ./...
               env:
                 RICHGO_FORCE_COLOR: "1"
+
