@@ -17,9 +17,12 @@
 package helper
 
 import (
+	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -27,8 +30,24 @@ import (
 )
 
 type FileLinker struct {
-	Bindings libcnb.Bindings
-	Logger   bard.Logger
+	Bindings     libcnb.Bindings
+	Logger       bard.Logger
+	Config       ServerConfig
+	TemplatePath string
+}
+
+type ApplicationConfig struct {
+	Path        string
+	ContextRoot string
+	Type        string
+}
+
+type ServerConfig struct {
+	XMLName     xml.Name `xml:"server"`
+	Application struct {
+		XMLName xml.Name `xml:"application"`
+		Name    string   `xml:"name,attr"`
+	} `xml:"application"`
 }
 
 func (f FileLinker) Execute() (map[string]string, error) {
@@ -43,70 +62,139 @@ func (f FileLinker) Execute() (map[string]string, error) {
 		layerDir = "/layers/paketo-buildpacks_open-liberty/open-liberty-runtime"
 	}
 
-	b, ok, err := bindings.ResolveOne(f.Bindings, bindings.OfType("open-liberty"))
-	if err != nil {
-		return nil, fmt.Errorf("error resolving bindings: %w", err)
+	if err = f.Configure(layerDir, appDir); err != nil {
+		return nil, fmt.Errorf("error during configuration: %w", err)
 	}
-
-	if ok {
-		bindingXML, ok := b.SecretFilePath("server.xml")
-		if ok {
-			serverXML := filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml")
-			if _, err = os.Stat(serverXML); err != nil && !os.IsNotExist(err) {
-				return nil, fmt.Errorf("error checking for server.xml: %w", err)
-			}
-
-			if err = os.Remove(serverXML); err != nil && !os.IsNotExist(err) {
-				return nil, fmt.Errorf("error deleting original server.xml: %w", err)
-			}
-
-			if err = os.Symlink(bindingXML, serverXML); err != nil {
-				return nil, fmt.Errorf("error linking server.xml: %w", err)
-			}
-		}
-
-		bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties")
-		if ok {
-			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
-			if _, err = os.Stat(existingBSP); err != nil && !os.IsNotExist(err) {
-				return nil, fmt.Errorf("error checking for bootstrap.properties: %w", err)
-			}
-
-			if err = os.Remove(existingBSP); err != nil && !os.IsNotExist(err) {
-				return nil, fmt.Errorf("error removing existing bootstrap.properties: %w", err)
-			}
-
-			if err = os.Symlink(bootstrapProperties, existingBSP); err != nil {
-				return nil, fmt.Errorf("error linking bootstrap.properties: %w", err)
-			}
-		}
-	}
-
-	linkPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "dropins", f.getLinkName(appDir))
-
-	os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
-
-	return nil, os.Symlink(appDir, linkPath)
+	return nil, nil
 }
 
-func (f FileLinker) getLinkName(appDir string) string {
-	name := os.Getenv("BPL_OPENLIBERTY_APP_NAME")
-	if name == "" {
-		name = filepath.Base(appDir)
+func (f FileLinker) Configure(layerDir, appDir string) error {
+	b, hasBindings, err := bindings.ResolveOne(f.Bindings, bindings.OfType("open-liberty"))
+	if err != nil {
+		return fmt.Errorf("error resolving bindings: %w", err)
 	}
 
-	// first, let's check to see if it's an EAR
-	_, err := os.Stat(filepath.Join(appDir, "META-INF", "application.xml"))
-	if err == nil {
-		return name + ".ear"
+	configPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml")
+
+	if hasBindings {
+		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
+			if err = replaceFile(bindingXML, configPath); err != nil {
+				return fmt.Errorf("error replacing server.xml: %w", err)
+			}
+		}
+
+		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
+			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
+			if err = replaceFile(bootstrapProperties, existingBSP); err != nil {
+				return fmt.Errorf("error replacing bootstrap.properties: %w", err)
+			}
+		}
 	}
 
-	// now, we can check if it's a war
-	_, err = os.Stat(filepath.Join(appDir, "WEB-INF", "web.xml"))
-	if err == nil {
-		return name + ".war"
+	f.Config, err = readServerConfig(configPath)
+	if err != nil {
+		return fmt.Errorf("unable to read server config: %w", err)
 	}
 
-	// at this point, we don't know what it is, so just return the name
-	return name
+	baseRoot := os.Getenv("BPI_OL_BASE_ROOT")
+	if baseRoot == "" {
+		baseRoot = "/layers/paketo-buildpacks_open-liberty/base"
+	}
+	f.TemplatePath = filepath.Join(baseRoot, "templates")
+
+	if err = f.ContributeApp(appDir, layerDir, b); err != nil {
+		return fmt.Errorf("unable to contribute app and config to runtime root: %w", err)
+	}
+
+	return nil
+}
+
+func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Binding) error {
+	linkPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "apps", "app")
+	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
+	if err := os.Symlink(appPath, linkPath); err != nil {
+		return fmt.Errorf("error symlinking application to '%v':\n%w", linkPath, err)
+	}
+
+	// Skip contributing app config if already defined in the server.xml
+	if f.Config.Application.Name == "app" {
+		f.Logger.Debugf("server.xml already has an application named 'app' defined. Skipping contribution of app config snippet...")
+		return nil
+	}
+
+	contextRoot := os.Getenv("BP_OPENLIBERTY_CONTEXT_ROOT")
+	if contextRoot == "" {
+		contextRoot = "/"
+	}
+
+	appType := "war"
+	if _, err := os.Stat(filepath.Join(appPath, "META-INF", "application.xml")); err == nil {
+		appType = "ear"
+	}
+
+	appConfig := ApplicationConfig{
+		Path:        linkPath,
+		ContextRoot: contextRoot,
+		Type:        appType,
+	}
+
+	templatePath := f.getConfigTemplate(binding, "app.tmpl")
+	t, err := template.New("app.tmpl").ParseFiles(templatePath)
+	if err != nil {
+		return fmt.Errorf("unable to create app template:\n%w", err)
+	}
+	appConfigPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml")
+	file, err := os.Create(appConfigPath)
+	if err != nil {
+		return fmt.Errorf("unable to create file '%v':\n%w", appConfig, err)
+	}
+	defer file.Close()
+	err = t.Execute(file, appConfig)
+	if err != nil {
+		return fmt.Errorf("unable to execute template:\n%w", err)
+	}
+	return nil
+}
+
+func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) string {
+	// Get customized template if it has been provided
+	if binding, ok := binding.SecretFilePath(template); ok {
+		f.Logger.Bodyf("Using custom template: %v", binding)
+		return binding
+	}
+	// Use default config template
+	return filepath.Join(f.TemplatePath, template)
+}
+
+func replaceFile(from, to string) error {
+	if _, err := os.Stat(from); err != nil {
+		return fmt.Errorf("error looking for file '%v': %w", from, err)
+	}
+	if err := os.Remove(to); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("error deleting original file '%v': %w", from, err)
+	}
+	if err := os.Symlink(from, to); err != nil {
+		return fmt.Errorf("error linking file from '%v' to '%v': %w", from, to, err)
+	}
+	return nil
+}
+
+func readServerConfig(configPath string) (ServerConfig, error) {
+	xmlFile, err := os.Open(configPath)
+	if err != nil {
+		return ServerConfig{}, fmt.Errorf("unable to open server.xml '%v': %w", configPath, err)
+	}
+	defer xmlFile.Close()
+
+	bytes, err := ioutil.ReadAll(xmlFile)
+	if err != nil {
+		return ServerConfig{}, fmt.Errorf("unable to read server.xml '%v': %w", configPath, err)
+	}
+
+	var config ServerConfig
+	err = xml.Unmarshal(bytes, &config)
+	if err != nil {
+		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%v': %w", configPath, err)
+	}
+	return config, nil
 }

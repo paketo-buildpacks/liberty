@@ -12,26 +12,36 @@ This buildpack will participate if all the following conditions are met
 The buildpack will do the following:
 
 * Requests that a JRE be installed
-* Contribute an Open Liberty runtime to `wlp.install.dir` and create a server called `defaultServer`
+* Contribute an Open Liberty runtime to `${BPI_OL_RUNTIME_ROOT}` and create a server called `defaultServer`
+* Create a server called `defaultServer`
 * Contributes `web` process type
-* At launch time, symlink `<APPLICATION_ROOT>` to `${wlp.install.dir}/usr/servers/defaultServer/dropins/<APPLICATION_ROOT_BASENAME>`.
+* At launch time, symlink `<APPLICATION_ROOT>` to `${BPI_OL_RUNTIME_ROOT}/usr/servers/defaultServer/apps/<APPLICATION_ROOT_BASENAME>`.
 
 The buildpack will support all available profiles of the two most recent versions of the Open Liberty runtime. Because the Open Liberty versioning scheme is not conformant to semantic versioning, an Open Liberty version like `21.0.0.11` is defined here as `21.0.0`, and should be referenced as such.
 
 ## Configuration
 
-| Environment Variable         | Description                                                                                                                                                                                       |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `$BP_OPENLIBERTY_VERSION`    | The version of Open Liberty to install. Defaults to the latest version of the runtime.                                                                                                            |
-| `$BP_OPENLIBERTY_PROFILE`    | The Open Liberty profile to use. Defaults to `full`.                                                                                                                                              |
-| `$BPL_OPENLIBERTY_APP_NAME`  | If the [server.xml](#bindings) does not specify a context root, Open Liberty will use this value as the context root. Defaults to the value of `$CNB_APP_DIR`, currently `workspace`.             |
-| `$BPL_OPENLIBERTY_LOG_LEVEL` | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO` |
+| Environment Variable            | Description                                                                                                                                                                                                                                     |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$BP_INSTALL_TYPE`              | [Install type](#install-types) of Liberty. Valid options: `ol`, `wlp`, `ol-stack`, `wlp-stack`. Defaults to `ol`.                                                                                                                               |
+| `$BP_OPENLIBERTY_VERSION`       | The version of Open Liberty to install. Defaults to the latest version of the runtime.                                                                                                                                                          |
+| `$BP_OPENLIBERTY_PROFILE`       | The Open Liberty profile to use. Defaults to `full`.                                                                                                                                                                                            |
+| `$BP_OPENLIBERTY_CONTEXT_ROOT`  | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/21.0.0.12/reference/config/application.html) named `app` defined, Open Liberty will use this value as the context root. Defaults to the value of `/`. |
+| `$BPL_OPENLIBERTY_LOG_LEVEL`    | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                               |
 
 ### Default Configurations that Vary from Open Liberty's Default
 
 By default, the Open Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Open Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
 
-All of these defaults can be overriden by setting the appropriate properties found in Open Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
+All of these defaults can be overridden by setting the appropriate properties found in Open Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
+
+## Install Types
+
+There are four different installation types that can be configured:
+* `ol`: This will download an Open Liberty runtime and use it when deploying the container.
+* `wlp`: This will download a WebSphere Liberty runtime and use it when deploying the container.
+* `ol-stack`: This will use an Open Liberty runtime provided in the stack run image. Requires an Open Liberty builder.
+* `wlp-stack`: This will use a WebSphere Liberty runtime provided in the stack run image. Requires a WebSphere Liberty builder.
 
 ## Bindings
 

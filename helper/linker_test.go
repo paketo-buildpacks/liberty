@@ -33,8 +33,9 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 		Expect = NewWithT(t).Expect
 		linker helper.FileLinker
 
-		appDir   string
-		layerDir string
+		appDir       string
+		layerDir     string
+		baseLayerDir string
 	)
 
 	it.Before(func() {
@@ -45,11 +46,15 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 
 		layerDir, err = ioutil.TempDir("", "execd-helper-layers")
 		Expect(err).NotTo(HaveOccurred())
+
+		baseLayerDir, err = ioutil.TempDir("", "base-layer")
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	it.After(func() {
 		Expect(os.RemoveAll(appDir)).To(Succeed())
 		Expect(os.RemoveAll(layerDir)).To(Succeed())
+		Expect(os.RemoveAll(baseLayerDir)).To(Succeed())
 	})
 
 	it("fails with default values because local directories do not exist", func() {
@@ -64,15 +69,25 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 		it.Before(func() {
 			Expect(os.Setenv("BPI_OL_DROPIN_DIR", appDir)).To(Succeed())
 			Expect(os.Setenv("BPI_OL_RUNTIME_ROOT", layerDir)).To(Succeed())
+			Expect(os.Setenv("BPI_OL_BASE_ROOT", baseLayerDir)).To(Succeed())
 
-			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "dropins"), 0755)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps"), 0755)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides"), 0755)).To(Succeed())
+
+			Expect(os.WriteFile(filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+
+			templatesDir := filepath.Join(baseLayerDir, "templates")
+			Expect(os.MkdirAll(templatesDir, 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(templatesDir, "app.tmpl"), []byte{}, 0644)).To(Succeed())
 		})
 
 		it.After(func() {
 			Expect(os.Unsetenv("BPI_OL_DROPIN_DIR")).To(Succeed())
 			Expect(os.Unsetenv("BPI_OL_RUNTIME_ROOT")).To(Succeed())
+			Expect(os.Unsetenv("BPI_OL_BASE_ROOT")).To(Succeed())
 
-			Expect(os.RemoveAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "dropins"))).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps"))).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides"))).To(Succeed())
 		})
 
 		it("works", func() {
@@ -82,10 +97,13 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			resolvedAppDir, err := filepath.EvalSymlinks(appDir)
 			Expect(err).NotTo(HaveOccurred())
 
-			linkName := filepath.Join(layerDir, "usr", "servers", "defaultServer", "dropins", filepath.Base(appDir))
+			linkName := filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps", "app")
 			resolved, err := filepath.EvalSymlinks(linkName)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(resolved).To(Equal(resolvedAppDir))
+
+			appConfigPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml")
+			Expect(appConfigPath).To(BeARegularFile())
 		})
 	})
 }

@@ -105,20 +105,46 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, h)
 	result.BOM.Entries = append(result.BOM.Entries, be)
 
-	distro, bomEntry := NewDistribution(dep, dc, context.Application.Path)
-	distro.Logger = b.Logger
+	var command string
+	var args []string
 
-	result.Layers = append(result.Layers, distro)
-	result.BOM.Entries = append(result.BOM.Entries, bomEntry)
+	installType, _ := cr.Resolve("BP_OPENLIBERTY_INSTALL_TYPE")
+	if installType == "ol" || installType == "wlp" {
+		command = "server"
+		args = []string{"run", "defaultServer"}
 
+		// Provide the OL distribution
+		distro, bomEntry := NewDistribution(dep, dc, context.Application.Path)
+		distro.Logger = b.Logger
+
+		result.Layers = append(result.Layers, distro)
+		result.BOM.Entries = append(result.BOM.Entries, bomEntry)
+	} else if installType == "ol-stack" || installType == "wlp-stack" {
+		runtimeRoot := "/opt/ol"
+		if installType == "wlp-stack" {
+			runtimeRoot = "/opt/ibm"
+		}
+		b.Logger.Debugf("Using OL runtime provided found at %v", runtimeRoot)
+		command = filepath.Join(runtimeRoot, "helpers", "runtime", "docker-server.sh")
+		serverBin := filepath.Join(runtimeRoot, "wlp", "bin", "server")
+		args = []string{serverBin, "run", "defaultServer"}
+	} else {
+		return libcnb.BuildResult{}, fmt.Errorf("invalid BP_INSTALL_TYPE: '%v'", installType)
+	}
+
+	b.Logger.Debugf("Using command '%v' and arguments: '%v'", command, args)
 	result.Processes = []libcnb.Process{
 		{
 			Type:      "web",
-			Command:   "server",
-			Arguments: []string{"run", "defaultServer"},
+			Command:   command,
+			Arguments: args,
 			Default:   true,
 		},
 	}
+
+	base := NewBase(context.Buildpack.Path)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
 
 	return result, nil
 
