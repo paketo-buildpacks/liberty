@@ -4,11 +4,11 @@ go 1.17
 
 require (
 	github.com/BurntSushi/toml v0.4.1
-	github.com/buildpacks/libcnb v1.25.1
+	github.com/buildpacks/libcnb v1.25.2
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/onsi/gomega v1.17.0
 	github.com/paketo-buildpacks/libjvm v1.33.0
-	github.com/paketo-buildpacks/libpak v1.56.1
+	github.com/paketo-buildpacks/libpak v1.56.2
 	github.com/sclevine/spec v1.4.0
 )
 
