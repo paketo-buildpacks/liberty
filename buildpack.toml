@@ -22,7 +22,7 @@ api = "0.6"
 
   [[metadata.configurations]]
     build = true
-    default = "21.0.11"
+    default = "21"
     description = "Which version of the Open Liberty runtime to install. Defaults to latest supported version"
     launch = false
     name = "BP_OPENLIBERTY_VERSION"
@@ -40,6 +40,20 @@ api = "0.6"
     description = "If the package's WEB-INF directory is not located at the root of the package, specify it here."
     launch = false
     name = "BP_OPENLIBERTY_WEBINF_PATH"
+
+  [[metadata.configurations]]
+    build = false
+    default = ""
+    description = "If the [server.xml](#bindings) does not specify a context root, Open Liberty will use this value as the context root. Defaults to the value of `$CNB_APP_DIR`, currently `workspace`."
+    launch = true
+    name = "BPL_OPENLIBERTY_APP_NAME"
+
+  [[metadata.configurations]]
+    build = false
+    default = ""
+    description = "Sets the logging level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`"
+    launch = true
+    name = "BPL_OPENLIBERTY_LOG_LEVEL"
 
   [[metadata.dependencies]]
     id = "open-liberty-runtime"

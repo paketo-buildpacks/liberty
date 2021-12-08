@@ -74,7 +74,7 @@ func (f FileLinker) Execute() (map[string]string, error) {
 }
 
 func (f FileLinker) getLinkName(appDir string) string {
-	name := os.Getenv("BP_OPENLIBERTY_APP_NAME")
+	name := os.Getenv("BPL_OPENLIBERTY_APP_NAME")
 	if name == "" {
 		name = filepath.Base(appDir)
 	}
