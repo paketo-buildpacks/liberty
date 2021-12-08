@@ -35,13 +35,6 @@ api = "0.7"
     name = "BP_OPENLIBERTY_PROFILE"
 
   [[metadata.configurations]]
-    build = true
-    default = ""
-    description = "If the package's WEB-INF directory is not located at the root of the package, specify it here."
-    launch = false
-    name = "BP_OPENLIBERTY_WEBINF_PATH"
-
-  [[metadata.configurations]]
     build = false
     default = ""
     description = "If the [server.xml](#bindings) does not specify a context root, Open Liberty will use this value as the context root. Defaults to the value of `$CNB_APP_DIR`, currently `workspace`."

@@ -1,17 +1,13 @@
 package openliberty
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libjvm"
-	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/bindings"
 )
 
 const (
@@ -26,26 +22,10 @@ type Detect struct {
 	Logger bard.Logger
 }
 
-type detector func(libcnb.DetectContext) (bool, error)
-
 func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
-	result := libcnb.DetectResult{}
-	var err error
-
-	fullDetector := d.and(
-		d.checkManifest,
-		d.or(
-			d.checkRootServerXML,
-			d.checkWebInf,
-		),
-	)
-
-	if result.Pass, err = fullDetector(context); err != nil {
-		return libcnb.DetectResult{}, err
-	}
-
-	if result.Pass {
-		result.Plans = []libcnb.BuildPlan{
+	result := libcnb.DetectResult{
+		Pass: true,
+		Plans: []libcnb.BuildPlan{
 			{
 				Provides: []libcnb.BuildPlanProvide{
 					{Name: PlanEntryOpenLiberty},
@@ -57,81 +37,52 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 					{Name: PlanEntryOpenLiberty},
 				},
 			},
-		}
+		},
+	}
+
+	mainClassPresent, err := d.checkForMainClassInManifest(context)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check manifest\n%w", err)
+	}
+	if mainClassPresent {
+		return libcnb.DetectResult{Pass: false}, nil
+	}
+
+	applicationXMLPresent, err := d.checkForApplicationXML(context)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check application XML\n%w", err)
+	}
+
+	webInfPresent, err := d.checkForWebInf(context)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check WEB-INF\n%w", err)
+	}
+
+	if webInfPresent || applicationXMLPresent {
+		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{Name: PlanEntryJVMApplicationPackage})
+		return result, nil
 	}
 
 	return result, nil
 }
 
-func (d Detect) or(detectors ...detector) detector {
-	return func(context libcnb.DetectContext) (bool, error) {
-		err := errors.New("")
-		var passed bool
-
-		for _, detect := range detectors {
-			var tmpErr error
-			if passed, tmpErr = detect(context); passed {
-				return true, nil
-			}
-
-			if tmpErr != nil {
-				err = fmt.Errorf("%v\n%w", err, tmpErr)
-			}
+// checkForApplicationXML will return true if `META-INF/application.xml` is present, which happens when precompiled bits are provided
+func (d Detect) checkForApplicationXML(context libcnb.DetectContext) (bool, error) {
+	_, err := os.Stat(filepath.Join(context.Application.Path, "META-INF", "application.xml"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
 		}
 
-		if len(err.Error()) > 0 {
-			return false, err
-		}
-
-		return false, nil
+		return false, err
 	}
+
+	return true, nil
 }
 
-func (d Detect) and(detectors ...detector) detector {
-	return func(context libcnb.DetectContext) (bool, error) {
-		for _, detect := range detectors {
-			if passed, err := detect(context); !passed {
-				return false, err
-			}
-		}
-
-		return true, nil
-	}
-}
-
-func (d Detect) checkRootServerXML(context libcnb.DetectContext) (bool, error) {
-	b, ok, err := bindings.ResolveOne(context.Platform.Bindings, bindings.OfType("open-liberty"))
-	if err != nil {
-		return false, fmt.Errorf("error resolving bindings: %w", err)
-	}
-
-	if ok {
-		_, ok = b.SecretFilePath("server.xml")
-	}
-
-	return ok, nil
-}
-
-func (d Detect) checkWebInf(context libcnb.DetectContext) (bool, error) {
-	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &d.Logger)
-	if err != nil {
-		return false, fmt.Errorf("could not create configuration resolver\n%w", err)
-	}
-
-	srcPath, _ := cr.Resolve("BP_OPENLIBERTY_WEBINF_PATH")
-
-	path := filepath.Join(context.Application.Path, srcPath, "WEB-INF")
-	path, err = filepath.Abs(path)
-	if err != nil {
-		return false, fmt.Errorf("could not determine absolute path to WEB-INF directory: %w", err)
-	}
-
-	// make sure we don't try to escape the app path
-	if !strings.HasPrefix(path, context.Application.Path) {
-		return false, fmt.Errorf("setting BP_OPENLIBERTY_WEBINF_PATH must result in a path below %s. Requested path: %s", context.Application.Path, path)
-	}
-
-	info, err := os.Stat(path)
+// checkForWebInf will return true if `WEB-INF/` exists, which happens when precompiled bits are provided
+func (d Detect) checkForWebInf(context libcnb.DetectContext) (bool, error) {
+	info, err := os.Stat(filepath.Join(context.Application.Path, "WEB-INF"))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
@@ -143,15 +94,13 @@ func (d Detect) checkWebInf(context libcnb.DetectContext) (bool, error) {
 	return info.IsDir(), nil
 }
 
-func (d Detect) checkManifest(context libcnb.DetectContext) (bool, error) {
+// checkForMainClassInManifest will return true if Main-Class is present in `META-INF/MANIFEST.MF`
+func (d Detect) checkForMainClassInManifest(context libcnb.DetectContext) (bool, error) {
 	m, err := libjvm.NewManifest(context.Application.Path)
 	if err != nil {
 		return false, fmt.Errorf("unable to read manifest\n%w", err)
 	}
 
-	if _, ok := m.Get("Main-Class"); ok {
-		return false, nil
-	}
-
-	return true, nil
+	_, ok := m.Get("Main-Class")
+	return ok, nil
 }
