@@ -46,7 +46,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		b.Logger.Infof("Choosing default profile %s for Open Liberty runtime", profile)
 	}
 
-	dep, err := dr.Resolve("open-liberty-runtime", fmt.Sprintf("%s-%s", version, profile))
+	dep, err := dr.Resolve(fmt.Sprintf("open-liberty-runtime-%s", profile), version)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("could not resolve dependency: %w", err)
 	}

@@ -33,8 +33,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full"},
 			},
 			"dependencies": []map[string]interface{}{
-				{"id": "open-liberty-runtime", "version": "21.0.11-full"},
-				{"id": "open-liberty-runtime", "version": "21.0.10-microProfile4"},
+				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
+				{"id": "open-liberty-runtime-microProfile4", "version": "21.0.10"},
 			},
 		}
 
