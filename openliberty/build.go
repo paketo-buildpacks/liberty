@@ -2,8 +2,11 @@ package openliberty
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 )
@@ -13,8 +16,48 @@ type Build struct {
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
-	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
+
+	m, err := libjvm.NewManifest(context.Application.Path)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to read manifest\n%w", err)
+	}
+
+	if _, ok := m.Get("Main-Class"); ok {
+		b.Logger.Debug("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build")
+		for _, entry := range context.Plan.Entries {
+			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
+		}
+		return result, nil
+	}
+
+	var webInfMissing bool
+	webInfPath := filepath.Join(context.Application.Path, "WEB-INF")
+	_, err = os.Stat(webInfPath)
+	if err != nil && !os.IsNotExist(err) {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to stat file %s\n%w", webInfPath, err)
+	} else if os.IsNotExist(err) {
+		webInfMissing = true
+	}
+
+	var appXMLMissing bool
+	appXMLPath := filepath.Join(context.Application.Path, "META-INF", "application.xml")
+	_, err = os.Stat(appXMLPath)
+	if err != nil && !os.IsNotExist(err) {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to stat file %s\n%w", appXMLPath, err)
+	} else if os.IsNotExist(err) {
+		appXMLMissing = true
+	}
+
+	if webInfMissing && appXMLMissing {
+		b.Logger.Debug("No `WEB-INF/` or `META-INF/application.xml` found, skipping build")
+		for _, entry := range context.Plan.Entries {
+			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
+		}
+		return result, nil
+	}
+
+	b.Logger.Title(context.Buildpack)
 
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {

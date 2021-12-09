@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/buildpacks/libcnb"
@@ -49,6 +50,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("picks the latest full profile when no arguments are set", func() {
+		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
+
 		buf := &bytes.Buffer{}
 		builder.Logger = bard.NewLogger(buf)
 
@@ -60,18 +63,75 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(output).To(ContainSubstring("Choosing default profile full for Open Liberty runtime"))
 	})
 
-	it("honors user set configuration values", func() {
-		Expect(os.Setenv("BP_OPENLIBERTY_VERSION", "21.0.10")).To(Succeed())
-		Expect(os.Setenv("BP_OPENLIBERTY_PROFILE", "microProfile4")).To(Succeed())
+	context("missing required info", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_DEBUG", "true")).To(Succeed())
+		})
 
-		buf := &bytes.Buffer{}
-		builder.Logger = bard.NewLogger(buf)
+		it.After(func() {
+			Expect(os.Unsetenv("BP_DEBUG")).To(Succeed())
+		})
 
-		_, err := builder.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
+		context("Main-Class in MANIFEST.MF", func() {
+			it.Before(func() {
+				Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
+				Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`Main-Class: org.DoStuff`), 0644)).To(Succeed())
+			})
 
-		output := buf.String()
-		Expect(output).To(ContainSubstring("Choosing user-defined version 21.0.10 for Open Liberty runtime"))
-		Expect(output).To(ContainSubstring("Choosing user-defined profile microProfile4 for Open Liberty runtime"))
+			it("doesn't run", func() {
+				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
+
+				buf := &bytes.Buffer{}
+				builder.Logger = bard.NewLogger(buf)
+
+				result, err := builder.Build(ctx)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(buf.String()).To(Equal("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
+				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
+			})
+		})
+
+		context("missing WEB-INF and application.xml", func() {
+			it("doesn't run", func() {
+				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
+
+				buf := &bytes.Buffer{}
+				builder.Logger = bard.NewLogger(buf)
+
+				result, err := builder.Build(ctx)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(buf.String()).To(Equal("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
+				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
+			})
+		})
 	})
+
+	context("user env config set", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_OPENLIBERTY_VERSION", "21.0.10")).To(Succeed())
+			Expect(os.Setenv("BP_OPENLIBERTY_PROFILE", "microProfile4")).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BP_OPENLIBERTY_VERSION")).To(Succeed())
+			Expect(os.Unsetenv("BP_OPENLIBERTY_PROFILE")).To(Succeed())
+		})
+
+		it("honors user set configuration values", func() {
+			buf := &bytes.Buffer{}
+			builder.Logger = bard.NewLogger(buf)
+
+			_, err := builder.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			output := buf.String()
+			Expect(output).To(ContainSubstring("Choosing user-defined version 21.0.10 for Open Liberty runtime"))
+			Expect(output).To(ContainSubstring("Choosing user-defined profile microProfile4 for Open Liberty runtime"))
+		})
+	})
+
 }
