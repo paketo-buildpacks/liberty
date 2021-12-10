@@ -1,9 +1,28 @@
+/*
+ * Copyright 2018-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package openliberty
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 )
@@ -13,8 +32,48 @@ type Build struct {
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
-	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
+
+	m, err := libjvm.NewManifest(context.Application.Path)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to read manifest\n%w", err)
+	}
+
+	if _, ok := m.Get("Main-Class"); ok {
+		b.Logger.Debug("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build")
+		for _, entry := range context.Plan.Entries {
+			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
+		}
+		return result, nil
+	}
+
+	var webInfMissing bool
+	webInfPath := filepath.Join(context.Application.Path, "WEB-INF")
+	_, err = os.Stat(webInfPath)
+	if err != nil && !os.IsNotExist(err) {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to stat file %s\n%w", webInfPath, err)
+	} else if os.IsNotExist(err) {
+		webInfMissing = true
+	}
+
+	var appXMLMissing bool
+	appXMLPath := filepath.Join(context.Application.Path, "META-INF", "application.xml")
+	_, err = os.Stat(appXMLPath)
+	if err != nil && !os.IsNotExist(err) {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to stat file %s\n%w", appXMLPath, err)
+	} else if os.IsNotExist(err) {
+		appXMLMissing = true
+	}
+
+	if webInfMissing && appXMLMissing {
+		b.Logger.Debug("No `WEB-INF/` or `META-INF/application.xml` found, skipping build")
+		for _, entry := range context.Plan.Entries {
+			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
+		}
+		return result, nil
+	}
+
+	b.Logger.Title(context.Buildpack)
 
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
@@ -46,7 +105,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		b.Logger.Infof("Choosing default profile %s for Open Liberty runtime", profile)
 	}
 
-	dep, err := dr.Resolve("open-liberty-runtime", fmt.Sprintf("%s-%s", version, profile))
+	dep, err := dr.Resolve(fmt.Sprintf("open-liberty-runtime-%s", profile), version)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("could not resolve dependency: %w", err)
 	}
