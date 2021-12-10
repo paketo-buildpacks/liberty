@@ -18,6 +18,7 @@ package openliberty_test
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -68,15 +69,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("picks the latest full profile when no arguments are set", func() {
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
-		buf := &bytes.Buffer{}
-		builder.Logger = bard.NewLogger(buf)
+		builder.Logger = bard.NewLogger(io.Discard)
 
-		_, err := builder.Build(ctx)
+		result, err := builder.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		output := buf.String()
-		Expect(output).To(ContainSubstring("Choosing default version 21.0.11 for Open Liberty runtime"))
-		Expect(output).To(ContainSubstring("Choosing default profile full for Open Liberty runtime"))
+		Expect(result.Layers).To(HaveLen(2))
+		Expect(result.Layers[0].Name()).To(Equal("helper"))
+		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
 	})
 
 	context("missing required info", func() {
@@ -103,8 +103,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				result, err := builder.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(buf.String()).To(Equal("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
+				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
+
+				Expect(buf.String()).To(Equal("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
 			})
 		})
 
@@ -118,8 +120,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				result, err := builder.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(buf.String()).To(Equal("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
+				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
+
+				Expect(buf.String()).To(Equal("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
 			})
 		})
 	})
@@ -138,15 +142,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("honors user set configuration values", func() {
-			buf := &bytes.Buffer{}
-			builder.Logger = bard.NewLogger(buf)
+			builder.Logger = bard.NewLogger(io.Discard)
 
-			_, err := builder.Build(ctx)
+			result, err := builder.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			output := buf.String()
-			Expect(output).To(ContainSubstring("Choosing user-defined version 21.0.10 for Open Liberty runtime"))
-			Expect(output).To(ContainSubstring("Choosing user-defined profile microProfile4 for Open Liberty runtime"))
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-microProfile4"))
 		})
 	})
 

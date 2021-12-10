@@ -91,19 +91,8 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("could not create configuration resolver\n%w", err)
 	}
 
-	version, manuallySet := cr.Resolve("BP_OPENLIBERTY_VERSION")
-	if manuallySet {
-		b.Logger.Infof("Choosing user-defined version %s for Open Liberty runtime", version)
-	} else {
-		b.Logger.Infof("Choosing default version %s for Open Liberty runtime", version)
-	}
-
-	profile, manuallySet := cr.Resolve("BP_OPENLIBERTY_PROFILE")
-	if manuallySet {
-		b.Logger.Infof("Choosing user-defined profile %s for Open Liberty runtime", profile)
-	} else {
-		b.Logger.Infof("Choosing default profile %s for Open Liberty runtime", profile)
-	}
+	version, _ := cr.Resolve("BP_OPENLIBERTY_VERSION")
+	profile, _ := cr.Resolve("BP_OPENLIBERTY_PROFILE")
 
 	dep, err := dr.Resolve(fmt.Sprintf("open-liberty-runtime-%s", profile), version)
 	if err != nil {
