@@ -65,13 +65,13 @@ func (f FileLinker) Execute() (map[string]string, error) {
 	if err = f.Configure(layerDir, appDir); err != nil {
 		return map[string]string{}, fmt.Errorf("unable to configure\n%w", err)
 	}
-	return nil, nil
+	return map[string]string{}, nil
 }
 
 func (f FileLinker) Configure(layerDir, appDir string) error {
 	b, hasBindings, err := bindings.ResolveOne(f.Bindings, bindings.OfType("open-liberty"))
 	if err != nil {
-		return fmt.Errorf("error resolving bindings: %w", err)
+		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
 	configPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml")
@@ -79,14 +79,14 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
 			if err = replaceFile(bindingXML, configPath); err != nil {
-				return fmt.Errorf("error replacing server.xml: %w", err)
+				return fmt.Errorf("unable to replace server.xml\n%w", err)
 			}
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
 			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
 			if err = replaceFile(bootstrapProperties, existingBSP); err != nil {
-				return fmt.Errorf("error replacing bootstrap.properties: %w", err)
+				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
 		}
 	}
@@ -113,7 +113,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	linkPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "apps", "app")
 	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
 	if err := os.Symlink(appPath, linkPath); err != nil {
-		return fmt.Errorf("error symlinking application to '%v':\n%w", linkPath, err)
+		return fmt.Errorf("unable to symlink application to '%v':\n%w", linkPath, err)
 	}
 
 	// Skip contributing app config if already defined in the server.xml
@@ -168,13 +168,13 @@ func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) s
 
 func replaceFile(from, to string) error {
 	if _, err := os.Stat(from); err != nil {
-		return fmt.Errorf("error looking for file '%v': %w", from, err)
+		return fmt.Errorf("unable to find file '%v'\n%w", from, err)
 	}
 	if err := os.Remove(to); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("error deleting original file '%v': %w", from, err)
+		return fmt.Errorf("unable to delete original file '%v'\n%w", from, err)
 	}
 	if err := os.Symlink(from, to); err != nil {
-		return fmt.Errorf("error linking file from '%v' to '%v': %w", from, to, err)
+		return fmt.Errorf("unable to symlink file from '%v' to '%v'\n%w", from, to, err)
 	}
 	return nil
 }
@@ -182,19 +182,19 @@ func replaceFile(from, to string) error {
 func readServerConfig(configPath string) (ServerConfig, error) {
 	xmlFile, err := os.Open(configPath)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to open server.xml '%v': %w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to open server.xml '%v'\n%w", configPath, err)
 	}
 	defer xmlFile.Close()
 
 	bytes, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to read server.xml '%v': %w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to read server.xml '%v'\n%w", configPath, err)
 	}
 
 	var config ServerConfig
 	err = xml.Unmarshal(bytes, &config)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%v': %w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%v'\n%w", configPath, err)
 	}
 	return config, nil
 }

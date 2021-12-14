@@ -32,7 +32,7 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 	return b.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 		if err := b.ContributeConfigTemplates(layer); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to contribute config templates: %w", err)
+			return libcnb.Layer{}, fmt.Errorf("unable to contribute config templates\n%w", err)
 		}
 
 		layer.LaunchEnvironment.Default("BPI_OL_BASE_ROOT", layer.Path)
@@ -46,13 +46,13 @@ func (b Base) ContributeConfigTemplates(layer libcnb.Layer) error {
 	// Create config templates directory
 	templateDir := filepath.Join(layer.Path, "templates")
 	if err := os.MkdirAll(templateDir, 0755); err != nil {
-		return fmt.Errorf("could not create config template directory '%v': %w", templateDir, err)
+		return fmt.Errorf("unable to create config template directory '%v'\n%w", templateDir, err)
 	}
 
 	srcDir := filepath.Join(b.BuildpackPath, "templates")
 	entries, err := ioutil.ReadDir(srcDir)
 	if err != nil {
-		return fmt.Errorf("could not read source directory: %w", err)
+		return fmt.Errorf("unable to read source directory\n%w", err)
 	}
 
 	for _, entry := range entries {
@@ -62,12 +62,12 @@ func (b Base) ContributeConfigTemplates(layer libcnb.Layer) error {
 			destPath := filepath.Join(templateDir, entry.Name())
 			in, err := os.Open(srcPath)
 			if err != nil {
-				return fmt.Errorf("could not open source template file '%v': %w", srcPath, err)
+				return fmt.Errorf("unable to open source template file '%v'\n%w", srcPath, err)
 			}
 			defer in.Close()
 			err = sherpa.CopyFile(in, destPath)
 			if err != nil {
-				return fmt.Errorf("could not copy template from '%v' -> '%v': %w", srcPath, destPath, err)
+				return fmt.Errorf("unable to copy template from '%v' -> '%v'\n%w", srcPath, destPath, err)
 			}
 			return nil
 		}()
