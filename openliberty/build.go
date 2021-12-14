@@ -27,6 +27,15 @@ import (
 	"github.com/paketo-buildpacks/libpak/bard"
 )
 
+const (
+	openLibertyInstall      = "ol"
+	websphereLibertyInstall = "wlp"
+	noneInstall             = "none"
+
+	openLibertyStackRuntimeRoot = "/opt/ol"
+	webSphereLibertyRuntimeRoot = "opt/ibm"
+)
+
 type Build struct {
 	Logger bard.Logger
 }
@@ -105,11 +114,13 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, h)
 	result.BOM.Entries = append(result.BOM.Entries, be)
 
+	var processType string
 	var command string
 	var args []string
 
 	installType, _ := cr.Resolve("BP_OPENLIBERTY_INSTALL_TYPE")
-	if installType == "ol" || installType == "wlp" {
+	if installType == openLibertyInstall {
+		processType = "open-liberty"
 		command = "server"
 		args = []string{"run", "defaultServer"}
 
@@ -119,26 +130,35 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 		result.Layers = append(result.Layers, distro)
 		result.BOM.Entries = append(result.BOM.Entries, bomEntry)
-	} else if installType == "ol-stack" || installType == "wlp-stack" {
-		runtimeRoot := "/opt/ol"
-		if installType == "wlp-stack" {
-			runtimeRoot = "/opt/ibm"
+	} else if installType == noneInstall {
+		var runtimeRoot string
+
+		// Determine the runtime provided in the stack
+		if _, err := os.Stat(openLibertyStackRuntimeRoot); err == nil {
+			runtimeRoot = openLibertyStackRuntimeRoot
+			processType = "open-liberty-stack"
+		} else if _, err := os.Stat(websphereLibertyInstall); err == nil {
+			runtimeRoot = webSphereLibertyRuntimeRoot
+			processType = "websphere-liberty-stack"
+		} else {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to find server in the stack image")
 		}
-		b.Logger.Debugf("Using OL runtime provided found at %v", runtimeRoot)
-		command = filepath.Join(runtimeRoot, "helpers", "runtime", "docker-server.sh")
-		serverBin := filepath.Join(runtimeRoot, "wlp", "bin", "server")
-		args = []string{serverBin, "run", "defaultServer"}
+
+		b.Logger.Debugf("Using Liberty runtime provided found at %v", runtimeRoot)
+		command = "docker-server.sh"
+		args = []string{"server", "run", "defaultServer"}
 	} else {
-		return libcnb.BuildResult{}, fmt.Errorf("invalid BP_INSTALL_TYPE: '%v'", installType)
+		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%v'", installType)
 	}
 
 	b.Logger.Debugf("Using command '%v' and arguments: '%v'", command, args)
 	result.Processes = []libcnb.Process{
 		{
-			Type:      "web",
+			Type:      processType,
 			Command:   command,
 			Arguments: args,
 			Default:   true,
+			Direct:    true,
 		},
 	}
 

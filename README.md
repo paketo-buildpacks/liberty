@@ -22,7 +22,7 @@ The buildpack will support all available profiles of the two most recent version
 
 | Environment Variable            | Description                                                                                                                                                                                                                                                         |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `$BP_OPENLIBERTY_INSTALL_TYPE`  | [Install type](#install-types) of Liberty. Valid options: `ol`, `wlp`, `ol-stack`, `wlp-stack`. Defaults to `ol`.                                                                                                                                                   |
+| `$BP_OPENLIBERTY_INSTALL_TYPE`  | [Install type](#install-types) of Liberty. Valid options: `ol` and `none`. Defaults to `ol`.                                                                                                                                                                        |
 | `$BP_OPENLIBERTY_VERSION`       | The version of Open Liberty to install. Defaults to the latest version of the runtime.                                                                                                                                                                              |
 | `$BP_OPENLIBERTY_PROFILE`       | The Open Liberty profile to use. Defaults to `full`.                                                                                                                                                                                                                |
 | `$BP_OPENLIBERTY_CONTEXT_ROOT`  | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. |
@@ -36,11 +36,9 @@ All of these defaults can be overridden by setting the appropriate properties fo
 
 ## Install Types
 
-There are four different installation types that can be configured:
+The different installation types that can be configured are:
 * `ol`: This will download an Open Liberty runtime and use it when deploying the container.
-* `wlp`: This will download a WebSphere Liberty runtime and use it when deploying the container.
-* `ol-stack`: This will use an Open Liberty runtime provided in the stack run image. Requires an Open Liberty builder.
-* `wlp-stack`: This will use a WebSphere Liberty runtime provided in the stack run image. Requires a WebSphere Liberty builder.
+* `none`: This will use the Liberty runtime provided in the stack run image. Requires a custom builder.
 
 ## Bindings
 

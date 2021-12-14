@@ -33,7 +33,7 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
-    description = "Install type of Liberty. Valid options: 'ol', 'wlp', 'ol-stack', 'wlp-stack'"
+    description = "Install type of Liberty. Valid options: 'ol' and 'none'"
     default = "ol"
     launch = false
     name = "BP_OPENLIBERTY_INSTALL_TYPE"
