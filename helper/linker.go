@@ -63,7 +63,7 @@ func (f FileLinker) Execute() (map[string]string, error) {
 	}
 
 	if err = f.Configure(layerDir, appDir); err != nil {
-		return nil, fmt.Errorf("error during configuration: %w", err)
+		return map[string]string{}, fmt.Errorf("unable to configure\n%w", err)
 	}
 	return nil, nil
 }
