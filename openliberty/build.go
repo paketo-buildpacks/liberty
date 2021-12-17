@@ -27,6 +27,15 @@ import (
 	"github.com/paketo-buildpacks/libpak/bard"
 )
 
+const (
+	openLibertyInstall      = "ol"
+	websphereLibertyInstall = "wlp"
+	noneInstall             = "none"
+
+	openLibertyStackRuntimeRoot = "/opt/ol"
+	webSphereLibertyRuntimeRoot = "opt/ibm"
+)
+
 type Build struct {
 	Logger bard.Logger
 }
@@ -105,20 +114,57 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, h)
 	result.BOM.Entries = append(result.BOM.Entries, be)
 
-	distro, bomEntry := NewDistribution(dep, dc, context.Application.Path)
-	distro.Logger = b.Logger
+	var processType string
+	var command string
+	var args []string
 
-	result.Layers = append(result.Layers, distro)
-	result.BOM.Entries = append(result.BOM.Entries, bomEntry)
+	installType, _ := cr.Resolve("BP_OPENLIBERTY_INSTALL_TYPE")
+	if installType == openLibertyInstall {
+		processType = "open-liberty"
+		command = "server"
+		args = []string{"run", "defaultServer"}
 
+		// Provide the OL distribution
+		distro, bomEntry := NewDistribution(dep, dc, context.Application.Path)
+		distro.Logger = b.Logger
+
+		result.Layers = append(result.Layers, distro)
+		result.BOM.Entries = append(result.BOM.Entries, bomEntry)
+	} else if installType == noneInstall {
+		var runtimeRoot string
+
+		// Determine the runtime provided in the stack
+		if _, err := os.Stat(openLibertyStackRuntimeRoot); err == nil {
+			runtimeRoot = openLibertyStackRuntimeRoot
+			processType = "open-liberty-stack"
+		} else if _, err := os.Stat(websphereLibertyInstall); err == nil {
+			runtimeRoot = webSphereLibertyRuntimeRoot
+			processType = "websphere-liberty-stack"
+		} else {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to find server in the stack image")
+		}
+
+		b.Logger.Debugf("Using Liberty runtime provided found at %v", runtimeRoot)
+		command = "docker-server.sh"
+		args = []string{"server", "run", "defaultServer"}
+	} else {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%v'", installType)
+	}
+
+	b.Logger.Debugf("Using command '%v' and arguments: '%v'", command, args)
 	result.Processes = []libcnb.Process{
 		{
-			Type:      "web",
-			Command:   "server",
-			Arguments: []string{"run", "defaultServer"},
+			Type:      processType,
+			Command:   command,
+			Arguments: args,
 			Default:   true,
+			Direct:    true,
 		},
 	}
+
+	base := NewBase(context.Buildpack.Path)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
 
 	return result, nil
 

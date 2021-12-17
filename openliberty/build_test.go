@@ -49,6 +49,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			"configurations": []map[string]interface{}{
 				{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11"},
 				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full"},
+				{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol"},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
@@ -74,9 +75,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		result, err := builder.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Layers).To(HaveLen(2))
+		Expect(result.Layers).To(HaveLen(3))
 		Expect(result.Layers[0].Name()).To(Equal("helper"))
 		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+		Expect(result.Layers[2].Name()).To(Equal("base"))
 	})
 
 	context("missing required info", func() {
@@ -147,9 +149,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			result, err := builder.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-microProfile4"))
+			Expect(result.Layers[2].Name()).To(Equal("base"))
 		})
 	})
 

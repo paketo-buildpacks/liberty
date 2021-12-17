@@ -33,6 +33,13 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
+    description = "Install type of Liberty. Valid options: 'ol' and 'none'"
+    default = "ol"
+    launch = false
+    name = "BP_OPENLIBERTY_INSTALL_TYPE"
+
+  [[metadata.configurations]]
+    build = true
     default = "21"
     description = "Which version of the Open Liberty runtime to install. Defaults to latest supported version"
     launch = false
@@ -48,9 +55,9 @@ api = "0.7"
   [[metadata.configurations]]
     build = false
     default = ""
-    description = "If the [server.xml](#bindings) does not specify a context root, Open Liberty will use this value as the context root. Defaults to the value of `$CNB_APP_DIR`, currently `workspace`."
+    description = "If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, Open Liberty will use this value as the context root. Defaults to the value of `/`"
     launch = true
-    name = "BPL_OPENLIBERTY_APP_NAME"
+    name = "BP_OPENLIBERTY_CONTEXT_ROOT"
 
   [[metadata.configurations]]
     build = false
