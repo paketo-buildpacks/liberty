@@ -19,6 +19,7 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -30,10 +31,12 @@ import (
 )
 
 type FileLinker struct {
-	Bindings     libcnb.Bindings
-	Logger       bard.Logger
-	Config       ServerConfig
-	TemplatePath string
+	Bindings        libcnb.Bindings
+	Logger          bard.Logger
+	Config          ServerConfig
+	BaseLayerPath   string
+	RuntimeRootPath string
+	ServerRootPath  string
 }
 
 type ApplicationConfig struct {
@@ -61,6 +64,7 @@ func (f FileLinker) Execute() (map[string]string, error) {
 	if !ok {
 		layerDir = "/layers/paketo-buildpacks_open-liberty/open-liberty-runtime"
 	}
+	f.RuntimeRootPath = layerDir
 
 	_, err = os.Stat(layerDir)
 	if err != nil && os.IsNotExist(err) {
@@ -80,7 +84,8 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
-	configPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml")
+	f.ServerRootPath = filepath.Join(layerDir, "usr", "servers", "defaultServer")
+	configPath := filepath.Join(f.ServerRootPath, "server.xml")
 
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
@@ -102,14 +107,17 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to read server config\n%w", err)
 	}
 
-	baseRoot := os.Getenv("BPI_OL_BASE_ROOT")
-	if baseRoot == "" {
-		baseRoot = "/layers/paketo-buildpacks_open-liberty/base"
+	f.BaseLayerPath = os.Getenv("BPI_OL_BASE_ROOT")
+	if f.BaseLayerPath == "" {
+		f.BaseLayerPath = "/layers/paketo-buildpacks_open-liberty/base"
 	}
-	f.TemplatePath = filepath.Join(baseRoot, "templates")
 
 	if err = f.ContributeApp(appDir, layerDir, b); err != nil {
 		return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
+	}
+
+	if err = f.ContributeUserFeatures(b); err != nil {
+		return fmt.Errorf("unable to contribute user features: %w", err)
 	}
 
 	return nil
@@ -168,6 +176,67 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	return nil
 }
 
+func (f FileLinker) ContributeUserFeatures(binding libcnb.Binding) error {
+	confDir := filepath.Join(f.BaseLayerPath, "conf")
+
+	runtimeLibsPath := filepath.Join(f.RuntimeRootPath, "usr", "extension", "lib")
+	runtimeFeaturesPath := filepath.Join(runtimeLibsPath, "features")
+	err := os.MkdirAll(runtimeFeaturesPath, 0755)
+	if err != nil {
+		return err
+	}
+
+	featureDescriptor, err := openliberty.ReadFeatureDescriptor(confDir, f.Logger)
+	if err != nil {
+		return err
+	}
+
+	if len(featureDescriptor.Features) <= 0 {
+		return nil
+	}
+
+	if err = featureDescriptor.ResolveFeatures(); err != nil {
+		return err
+	}
+
+	var featuresToEnable []string
+	for _, feature := range featureDescriptor.Features {
+		// Link the feature into place
+		featureBase := filepath.Base(feature.ResolvedPath)
+		if err := replaceFile(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
+			return fmt.Errorf("unable to link feature '%v':\n%w", feature.Name, err)
+		}
+		if feature.ManifestPath != "" {
+			manifestBase := filepath.Base(feature.ManifestPath)
+			if err := replaceFile(feature.ManifestPath, filepath.Join(runtimeFeaturesPath, manifestBase)); err != nil {
+				return fmt.Errorf("unable to link feature manifest for '%v':\n%w", feature.Name, err)
+			}
+		}
+		featuresToEnable = append(featuresToEnable, "usr:"+feature.Name)
+		if len(feature.Dependencies) > 0 {
+			featuresToEnable = append(featuresToEnable, feature.Dependencies...)
+		}
+	}
+
+	templatePath := f.getConfigTemplate(binding, "features.tmpl")
+	t, err := template.New("features.tmpl").ParseFiles(templatePath)
+	if err != nil {
+		return fmt.Errorf("unable to create features template:\n%w", err)
+	}
+	featuresConfigPath := filepath.Join(f.ServerRootPath, "configDropins", "overrides", "features.xml")
+	file, err := os.Create(featuresConfigPath)
+	if err != nil {
+		return fmt.Errorf("unable to create file '%v':\n%w", featuresConfigPath, err)
+	}
+	defer file.Close()
+	err = t.Execute(file, featuresToEnable)
+	if err != nil {
+		return fmt.Errorf("unable to execute template:\n%w", err)
+	}
+
+	return nil
+}
+
 func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) string {
 	// Get customized template if it has been provided
 	if binding, ok := binding.SecretFilePath(template); ok {
@@ -175,7 +244,7 @@ func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) s
 		return binding
 	}
 	// Use default config template
-	return filepath.Join(f.TemplatePath, template)
+	return filepath.Join(f.BaseLayerPath, "templates", template)
 }
 
 func replaceFile(from, to string) error {

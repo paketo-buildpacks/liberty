@@ -57,6 +57,27 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
+    description = "the SHA256 hash of the external configuration archive"
+    name = "BP_OPENLIBERTY_EXT_CONF_SHA256"
+
+  [[metadata.configurations]]
+    build = true
+    default = "0"
+    description = "the number of directory components to strip from the external configuration archive"
+    name = "BP_OPENLIBERTY_EXT_CONF_STRIP"
+
+  [[metadata.configurations]]
+    build = true
+    description = "the download location of the external configuration"
+    name = "BP_OPENLIBERTY_EXT_CONF_URI"
+
+  [[metadata.configurations]]
+    build = true
+    description = "the version of the Tomcat configuration"
+    name = "BP_OPENLIBERTY_EXT_CONF_VERSION"
+
+  [[metadata.configurations]]
+    build = true
     default = "full"
     description = "The Liberty profile to install. Current options are 'full', 'javaee8', 'webProfile8', 'microProfile4', and 'kernel'"
     launch = false

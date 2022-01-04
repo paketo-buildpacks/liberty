@@ -2,6 +2,8 @@ package openliberty_test
 
 import (
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"github.com/sclevine/spec"
 	"io/ioutil"
@@ -36,9 +38,19 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("contributes configuration", func() {
-		base := openliberty.NewBase(ctx.Buildpack.Path)
+		externalConfigurationDep := libpak.BuildpackDependency{
+			ID:     "open-liberty-external-configuration",
+			URI:    "https://localhost/stub-external-configuration-with-directory.tar.gz",
+			SHA256: "060818cbcdc2008563f0f9e2428ecf4a199a5821c5b8b1dcd11a67666c1e2cd6",
+			PURL:   "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64",
+			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"},
+		}
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		base, entries := openliberty.NewBase(ctx.Buildpack.Path, &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
+		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
+		Expect(entries).To(HaveLen(0))
 
 		layer, err = base.Contribute(layer)
 		Expect(err).ToNot(HaveOccurred())
@@ -47,5 +59,6 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(filepath.Join(layer.Path, "templates")).To(BeADirectory())
 		Expect(filepath.Join(layer.Path, "templates", "app.tmpl")).To(BeARegularFile())
 		Expect(layer.LaunchEnvironment["BPI_OL_BASE_ROOT.default"]).To(Equal(layer.Path))
+		Expect(filepath.Join(layer.Path, "external-configuration", "fixture-marker")).To(BeARegularFile())
 	})
 }

@@ -18,6 +18,8 @@ package openliberty
 
 import (
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/sbom"
 	"os"
 	"path/filepath"
 
@@ -37,7 +39,8 @@ const (
 )
 
 type Build struct {
-	Logger bard.Logger
+	SBOMScanner sbom.SBOMScanner
+	Logger      bard.Logger
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
@@ -114,6 +117,30 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, h)
 	result.BOM.Entries = append(result.BOM.Entries, be)
 
+	var externalConfigurationDependency *libpak.BuildpackDependency
+	if uri, ok := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_URI"); ok {
+		v, _ := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_VERSION")
+		s, _ := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_SHA256")
+
+		externalConfigurationDependency = &libpak.BuildpackDependency{
+			ID:      "open-liberty-external-configuration",
+			Name:    "Open Liberty External Configuration",
+			Version: v,
+			URI:     uri,
+			SHA256:  s,
+			Stacks:  []string{context.StackID},
+			CPEs:    nil,
+			PURL:    "",
+		}
+	}
+
+	base, bomEntries := NewBase(context.Buildpack.Path, externalConfigurationDependency, cr, dc)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
+	if bomEntries != nil {
+		result.BOM.Entries = append(result.BOM.Entries, bomEntries...)
+	}
+
 	var processType string
 	var command string
 	var args []string
@@ -162,9 +189,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		},
 	}
 
-	base := NewBase(context.Buildpack.Path)
-	base.Logger = b.Logger
-	result.Layers = append(result.Layers, base)
+	if b.SBOMScanner == nil {
+		b.SBOMScanner = sbom.NewSyftCLISBOMScanner(context.Layers, effect.NewExecutor(), b.Logger)
+	}
+	if err := b.SBOMScanner.ScanLaunch(context.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create Launch SBoM \n%w", err)
+	}
 
 	return result, nil
 }
