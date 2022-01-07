@@ -72,6 +72,8 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.Setenv("BPI_OL_BASE_ROOT", baseLayerDir)).To(Succeed())
 
 			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps"), 0755)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides"), 0755)).To(Succeed())
+
 			Expect(os.WriteFile(filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
 
 			templatesDir := filepath.Join(baseLayerDir, "templates")
@@ -85,6 +87,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.Unsetenv("BPI_OL_BASE_ROOT")).To(Succeed())
 
 			Expect(os.RemoveAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps"))).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides"))).To(Succeed())
 		})
 
 		it("works", func() {

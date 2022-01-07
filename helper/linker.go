@@ -62,11 +62,11 @@ func (f FileLinker) Execute() (map[string]string, error) {
 		layerDir = "/layers/paketo-buildpacks_open-liberty/open-liberty-runtime"
 	}
 
-        _, err := os.Stat(layerDir)
+	_, err := os.Stat(layerDir)
 	if err != nil && os.IsNotExist(err) {
 		return map[string]string{}, fmt.Errorf("unable to find '%s', folder does not exist", layerDir)
 	} else if err != nil {
-	        return map[string]string{}, fmt.Errorf("unable to check %s\n%w", layerDir, err)
+		return map[string]string{}, fmt.Errorf("unable to check %s\n%w", layerDir, err)
 	}
 	if err = f.Configure(layerDir, appDir); err != nil {
 		return map[string]string{}, fmt.Errorf("unable to configure\n%w", err)
