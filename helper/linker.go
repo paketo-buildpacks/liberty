@@ -99,7 +99,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 
 	f.Config, err = readServerConfig(configPath)
 	if err != nil {
-		return fmt.Errorf("unable to read server config: %w", err)
+		return fmt.Errorf("unable to read server config\n%w", err)
 	}
 
 	baseRoot := os.Getenv("BPI_OL_BASE_ROOT")
@@ -109,7 +109,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 	f.TemplatePath = filepath.Join(baseRoot, "templates")
 
 	if err = f.ContributeApp(appDir, layerDir, b); err != nil {
-		return fmt.Errorf("unable to contribute app and config to runtime root: %w", err)
+		return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
 	}
 
 	return nil
@@ -119,7 +119,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	linkPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "apps", "app")
 	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
 	if err := os.Symlink(appPath, linkPath); err != nil {
-		return fmt.Errorf("unable to symlink application to '%v':\n%w", linkPath, err)
+		return fmt.Errorf("unable to symlink application to '%s'\n%w", linkPath, err)
 	}
 
 	// Skip contributing app config if already defined in the server.xml
@@ -147,23 +147,23 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	templatePath := f.getConfigTemplate(binding, "app.tmpl")
 	t, err := template.New("app.tmpl").ParseFiles(templatePath)
 	if err != nil {
-		return fmt.Errorf("unable to create app template:\n%w", err)
+		return fmt.Errorf("unable to create app template\n%w", err)
 	}
 
 	configOverridesPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "overrides")
 	if err := os.MkdirAll(configOverridesPath, 0755); err != nil {
-		return fmt.Errorf("unable to make config overrides directory:\n%w", err)
+		return fmt.Errorf("unable to make config overrides directory\n%w", err)
 	}
 
 	appConfigPath := filepath.Join(configOverridesPath, "app.xml")
 	file, err := os.Create(appConfigPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file '%v':\n%w", appConfigPath, err)
+		return fmt.Errorf("unable to create file '%v'\n%w", appConfig, err)
 	}
 	defer file.Close()
 	err = t.Execute(file, appConfig)
 	if err != nil {
-		return fmt.Errorf("unable to execute template:\n%w", err)
+		return fmt.Errorf("unable to execute template\n%w", err)
 	}
 	return nil
 }
@@ -171,7 +171,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) string {
 	// Get customized template if it has been provided
 	if binding, ok := binding.SecretFilePath(template); ok {
-		f.Logger.Bodyf("Using custom template: %v", binding)
+		f.Logger.Bodyf("Using custom template: %s", binding)
 		return binding
 	}
 	// Use default config template
@@ -180,13 +180,13 @@ func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) s
 
 func replaceFile(from, to string) error {
 	if _, err := os.Stat(from); err != nil {
-		return fmt.Errorf("unable to find file '%v'\n%w", from, err)
+		return fmt.Errorf("unable to find file '%s'\n%w", from, err)
 	}
 	if err := os.Remove(to); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("unable to delete original file '%v'\n%w", from, err)
+		return fmt.Errorf("unable to delete original file '%s'\n%w", from, err)
 	}
 	if err := os.Symlink(from, to); err != nil {
-		return fmt.Errorf("unable to symlink file from '%v' to '%v'\n%w", from, to, err)
+		return fmt.Errorf("unable to symlink file from '%s' to '%s'\n%w", from, to, err)
 	}
 	return nil
 }
@@ -194,19 +194,19 @@ func replaceFile(from, to string) error {
 func readServerConfig(configPath string) (ServerConfig, error) {
 	xmlFile, err := os.Open(configPath)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to open server.xml '%v'\n%w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to open server.xml '%s'\n%w", configPath, err)
 	}
 	defer xmlFile.Close()
 
 	bytes, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to read server.xml '%v'\n%w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to read server.xml '%s'\n%w", configPath, err)
 	}
 
 	var config ServerConfig
 	err = xml.Unmarshal(bytes, &config)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%v'\n%w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%s'\n%w", configPath, err)
 	}
 	return config, nil
 }

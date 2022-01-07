@@ -17,6 +17,7 @@
 package openliberty_test
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -24,6 +25,7 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"github.com/sclevine/spec"
 
@@ -57,6 +59,7 @@ func testDistribution(t *testing.T, context spec.G, it spec.S) {
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 
 		distro, be := openliberty.NewDistribution(dep, dc, ctx.Application.Path)
+		distro.Logger = bard.NewLogger(io.Discard)
 		Expect(be.Name).To(Equal("open-liberty-runtime"))
 		Expect(be.Launch).To(BeTrue())
 
