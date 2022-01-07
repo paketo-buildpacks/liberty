@@ -19,7 +19,6 @@ package openliberty_test
 import (
 	"bytes"
 	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/libpak/sbom/mocks"
 	"io"
 	"io/ioutil"
 	"os"
@@ -36,7 +35,6 @@ import (
 func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect      = NewWithT(t).Expect
-		sbomScanner mocks.SBOMScanner
 		ctx         libcnb.BuildContext
 	)
 
@@ -60,8 +58,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
 		Expect(err).NotTo(HaveOccurred())
-		sbomScanner = mocks.SBOMScanner{}
-		sbomScanner.On("ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON).Return(nil)
 	})
 
 	it.After(func() {
@@ -72,7 +68,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("picks the latest full profile when no arguments are set", func() {
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
-		result, err := openliberty.Build{SBOMScanner: &sbomScanner, Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+		result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(3))
@@ -100,7 +96,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				result, err := openliberty.Build{SBOMScanner: &sbomScanner, Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -115,7 +111,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				result, err := openliberty.Build{SBOMScanner: &sbomScanner, Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -140,7 +136,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("honors user set configuration values", func() {
-			result, err := openliberty.Build{SBOMScanner: &sbomScanner, Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
@@ -185,7 +181,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}
 			ctx.StackID = "test-stack-id"
 
-			result, err := openliberty.Build{SBOMScanner: &sbomScanner}.Build(ctx)
+			result, err := openliberty.Build{}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
@@ -200,7 +196,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				SHA256:  "test-sha256",
 				Stacks:  []string{ctx.StackID},
 			}))
-			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 	})
 }

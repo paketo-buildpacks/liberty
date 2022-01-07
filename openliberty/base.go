@@ -7,7 +7,6 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/crush"
-	"github.com/paketo-buildpacks/libpak/sbom"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/ioutil"
 	"net/url"
@@ -61,7 +60,6 @@ func NewBase(
 
 func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	b.LayerContributor.Logger = b.Logger
-	var syftArtifacts []sbom.SyftArtifact
 
 	return b.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 		if err := b.ContributeConfigTemplates(layer); err != nil {
@@ -72,11 +70,6 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			if err := b.ContributeExternalConfiguration(layer); err != nil {
 				return libcnb.Layer{}, fmt.Errorf("unable to contribute external configuration:\n%w", err)
 			}
-			if syftArtifact, err := b.ExternalConfigurationDependency.AsSyftArtifact(); err != nil {
-				return libcnb.Layer{}, fmt.Errorf("unable to get Syft Artifact for dependency %v\n%w", b.ExternalConfigurationDependency.Name, err)
-			} else {
-				syftArtifacts = append(syftArtifacts, syftArtifact)
-			}
 		}
 
 		if err := b.ContributeUserFeatures(layer); err != nil {
@@ -85,10 +78,6 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		b.Logger.Headerf("Contributing environment variables")
 		layer.LaunchEnvironment.Default("BPI_OL_BASE_ROOT", layer.Path)
-
-		if err := b.writeDependencySBOM(layer, syftArtifacts); err != nil {
-			return libcnb.Layer{}, err
-		}
 
 		return layer, nil
 	})
@@ -103,7 +92,12 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 	}
 	defer artifact.Close()
 
-	b.Logger.Bodyf("Expanding to %s", layer.Path)
+	confPath := filepath.Join(layer.Path, "conf")
+	if err := os.MkdirAll(confPath, 0755); err != nil {
+		return fmt.Errorf("unable to make external config directory:\n%w", err)
+	}
+
+	b.Logger.Bodyf("Expanding to %s", confPath)
 
 	c := 0
 	if s, ok := b.ConfigurationResolver.Resolve("BP_OPENLIBERTY_EXT_CONF_STRIP"); ok {
@@ -112,7 +106,7 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 		}
 	}
 
-	if err := crush.ExtractTarGz(artifact, layer.Path, c); err != nil {
+	if err := crush.ExtractTarGz(artifact, confPath, c); err != nil {
 		return fmt.Errorf("unable to expand external configuration\n%w", err)
 	}
 
@@ -172,16 +166,6 @@ func (b Base) ContributeUserFeatures(layer libcnb.Layer) error {
 		return err
 	}
 
-	return nil
-}
-
-func (b Base) writeDependencySBOM(layer libcnb.Layer, syftArtifacts []sbom.SyftArtifact) error {
-	sbomPath := layer.SBOMPath(libcnb.SyftJSON)
-	dep := sbom.NewSyftDependency(layer.Path, syftArtifacts)
-	b.Logger.Debugf("Writing Syft SBOM at %s: %+v", sbomPath, dep)
-	if err := dep.WriteTo(sbomPath); err != nil {
-		return fmt.Errorf("unable to write SBOM\n%w", err)
-	}
 	return nil
 }
 

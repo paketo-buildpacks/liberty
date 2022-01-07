@@ -18,8 +18,6 @@ package openliberty
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/libpak/effect"
-	"github.com/paketo-buildpacks/libpak/sbom"
 	"os"
 	"path/filepath"
 
@@ -39,7 +37,6 @@ const (
 )
 
 type Build struct {
-	SBOMScanner sbom.SBOMScanner
 	Logger      bard.Logger
 }
 
@@ -187,13 +184,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			Default:   true,
 			Direct:    true,
 		},
-	}
-
-	if b.SBOMScanner == nil {
-		b.SBOMScanner = sbom.NewSyftCLISBOMScanner(context.Layers, effect.NewExecutor(), b.Logger)
-	}
-	if err := b.SBOMScanner.ScanLaunch(context.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON); err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create Launch SBoM \n%w", err)
 	}
 
 	return result, nil
