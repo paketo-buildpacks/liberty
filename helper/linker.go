@@ -62,6 +62,10 @@ func (f FileLinker) Execute() (map[string]string, error) {
 		layerDir = "/layers/paketo-buildpacks_open-liberty/open-liberty-runtime"
 	}
 
+	if _, err := os.Stat(layerDir); os.IsNotExist(err) {
+		return map[string]string{}, fmt.Errorf("runtime root '%v' does not exist", layerDir)
+	}
+
 	if err = f.Configure(layerDir, appDir); err != nil {
 		return map[string]string{}, fmt.Errorf("unable to configure\n%w", err)
 	}
@@ -143,10 +147,16 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	if err != nil {
 		return fmt.Errorf("unable to create app template:\n%w", err)
 	}
-	appConfigPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml")
+
+	configOverridesPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "overrides")
+	if err := os.MkdirAll(configOverridesPath, 0755); err != nil {
+		return fmt.Errorf("unable to make config overrides directory:\n%w", err)
+	}
+
+	appConfigPath := filepath.Join(configOverridesPath, "app.xml")
 	file, err := os.Create(appConfigPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file '%v':\n%w", appConfig, err)
+		return fmt.Errorf("unable to create file '%v':\n%w", appConfigPath, err)
 	}
 	defer file.Close()
 	err = t.Execute(file, appConfig)
