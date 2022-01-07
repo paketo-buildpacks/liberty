@@ -18,7 +18,6 @@ package openliberty
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -57,18 +56,13 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("unable to expand Liberty Runtime\n%w", err)
 		}
 
-		outErrWriter := d.Logger.InfoWriter()
-		if outErrWriter == nil {
-			outErrWriter = ioutil.Discard
-		}
-
 		executor := effect.NewExecutor()
 		if err := executor.Execute(effect.Execution{
 			Command: filepath.Join(layer.Path, "bin", "server"),
 			Args:    []string{"create", "defaultServer"},
 			Dir:     layer.Path,
-			Stdout:  outErrWriter,
-			Stderr:  outErrWriter,
+			Stdout:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
+			Stderr:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
 		}); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("could not create default server: %w", err)
 		}

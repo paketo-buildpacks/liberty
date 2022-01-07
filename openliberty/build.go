@@ -167,5 +167,4 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, base)
 
 	return result, nil
-
 }

@@ -66,7 +66,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
+						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							"launch": true,
+							"build":  true,
+							"cache":  true,
+						}},
 						{Name: openliberty.PlanEntryJVMApplicationPackage},
 						{Name: openliberty.PlanEntryOpenLiberty},
 					},
@@ -90,7 +94,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
+						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							"launch": true,
+							"build":  true,
+							"cache":  true,
+						}},
 						{Name: openliberty.PlanEntryJVMApplicationPackage},
 						{Name: openliberty.PlanEntryOpenLiberty},
 					},
@@ -115,7 +123,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
+						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							"launch": true,
+							"build":  true,
+							"cache":  true,
+						}},
 						{Name: openliberty.PlanEntryJVMApplicationPackage},
 						{Name: openliberty.PlanEntryOpenLiberty},
 					},
@@ -141,7 +153,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
+						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							"launch": true,
+							"build":  true,
+							"cache":  true,
+						}},
 						{Name: openliberty.PlanEntryJVMApplicationPackage},
 						{Name: openliberty.PlanEntryOpenLiberty},
 					},

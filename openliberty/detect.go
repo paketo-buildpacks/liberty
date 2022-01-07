@@ -48,7 +48,11 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 				},
 
 				Requires: []libcnb.BuildPlanRequire{
-					{Name: PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
+					{Name: PlanEntryJRE, Metadata: map[string]interface{}{
+						"launch": true,
+						"build":  true,
+						"cache":  true},
+					},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryOpenLiberty},
 				},
