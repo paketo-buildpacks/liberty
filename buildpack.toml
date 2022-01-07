@@ -58,23 +58,23 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
-    description = "the SHA256 hash of the external configuration archive"
+    description = "The SHA256 hash of the external configuration archive"
     name = "BP_OPENLIBERTY_EXT_CONF_SHA256"
 
   [[metadata.configurations]]
     build = true
     default = "0"
-    description = "the number of directory components to strip from the external configuration archive"
+    description = "The number of directory components to strip from the external configuration archive. Defaults to 0"
     name = "BP_OPENLIBERTY_EXT_CONF_STRIP"
 
   [[metadata.configurations]]
     build = true
-    description = "the download location of the external configuration"
+    description = "The download location of the external configuration"
     name = "BP_OPENLIBERTY_EXT_CONF_URI"
 
   [[metadata.configurations]]
     build = true
-    description = "the version of the Tomcat configuration"
+    description = "The version of the Liberty configuration"
     name = "BP_OPENLIBERTY_EXT_CONF_VERSION"
 
   [[metadata.configurations]]
