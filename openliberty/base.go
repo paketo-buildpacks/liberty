@@ -207,7 +207,7 @@ type FeatureDescriptor struct {
 func ReadFeatureDescriptor(baseRoot string, logger bard.Logger) (*FeatureDescriptor, error) {
 	featuresTOML := filepath.Join(baseRoot, "features.toml")
 	if _, err := os.Stat(featuresTOML); err != nil {
-		logger.Infof("No features.toml found -- skipping")
+		logger.Debugf("No features descriptor found. Skipping.")
 		return &FeatureDescriptor{}, nil
 	}
 
