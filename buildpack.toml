@@ -37,7 +37,8 @@ api = "0.7"
     "bin/main",
     "bin/helper",
     "buildpack.toml",
-    "templates/app.tmpl"
+    "templates/app.tmpl",
+    "templates/features.tmpl"
   ]
   pre-package = "scripts/build.sh"
 
