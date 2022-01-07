@@ -61,6 +61,61 @@ The buildpack accepts the following bindings:
 | --------------------- | ------- | ------------------------------------------------------------------------------------------------- |
 | `<dependency-digest>` | `<uri>` | If needed, the buildpack will fetch the dependency with digest `<dependency-digest>` from `<uri>` |
 
+## Using Custom Features
+
+Custom features can be configured on the server by supplying an external configuration package containing the feature
+JAR and manifest along with a feature descriptor.
+
+### Feature Manifest
+
+The feature manifest is a TOML file called `features.toml` containing a list of `features` that should be installed on
+the server.
+
+A feature has the properties:
+
+* `name`: Name of the feature to enable. Use the symbolic name of the feature that you would use when enabling the feature in the `server.xml`.
+* `uri`: URI of where to find the feature. The `file` scheme is the only supported scheme at the moment.
+* `version`: Version of the feature.
+* `dependencies`: List of features that the custom feature depends on, if any.
+
+### Example Feature Manifest
+
+This example shows how to configure a feature called `dummyCache` that has a dependency on the `distributedMap-1.0`
+feature.
+
+First create the feature descriptor `features.toml` with the following content:
+
+```toml
+[[features]]
+  name = "dummyCache"
+  uri = "file:/features/cache.dummy_1.0.0.jar"
+  version = "1.0.0"
+  dependencies = ["distributedMap-1.0"]
+```
+
+Using this feature description, the Open Liberty buildpack will look for the feature JAR in the external configuration
+package at the path `features/cache.dummy_1.0.0.jar`. The buildpack also assumes that the feature manifest file will be
+at the path `features/cache.dummy_1.0.0.mf`.
+
+After creating the feature descriptor, tar and gzip the `feature.toml` and `features` directory so that it tar has the
+contents similar to the following, and upload it somewhere it can be served via HTTP.
+
+```console
+$ tar tzf liberty-conf.tar.gz
+./
+./features/
+./features.toml
+./features/cache.dummy_1.0.0.mf
+./features/cache.dummy_1.0.0.jar
+```
+
+The external configuration package can then be provided to the build by providing the `BP_OPENLIBERTY_EXT_CONF_*`
+environment variables to the build. For example:
+
+```console
+pack build --path myapp --env BP_OPENLIBERTY_EXT_CONF_URI=http://example.com/liberty-conf.tar.gz --env BP_OPENLIBERTY_EXT_CONF_VERSION=1.0.0 myapp
+```
+
 ## License
 
 This buildpack is released under version 2.0 of the [Apache License][a].
