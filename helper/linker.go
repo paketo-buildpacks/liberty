@@ -223,7 +223,13 @@ func (f FileLinker) ContributeUserFeatures(binding libcnb.Binding) error {
 	if err != nil {
 		return fmt.Errorf("unable to create features template:\n%w", err)
 	}
-	featuresConfigPath := filepath.Join(f.ServerRootPath, "configDropins", "overrides", "features.xml")
+
+	configDefaultsPath := filepath.Join(f.ServerRootPath, "configDropins", "defaults")
+	if err := os.MkdirAll(configDefaultsPath, 0755); err != nil {
+		return fmt.Errorf("unable to make config defaults directory:\n%w", err)
+	}
+
+	featuresConfigPath := filepath.Join(configDefaultsPath, "features.xml.xml")
 	file, err := os.Create(featuresConfigPath)
 	if err != nil {
 		return fmt.Errorf("unable to create file '%v':\n%w", featuresConfigPath, err)
