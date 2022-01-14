@@ -131,12 +131,9 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
-	base, bomEntries := NewBase(context.Buildpack.Path, externalConfigurationDependency, cr, dc)
+	base := NewBase(context.Buildpack.Path, externalConfigurationDependency, cr, dc)
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)
-	if bomEntries != nil {
-		result.BOM.Entries = append(result.BOM.Entries, bomEntries...)
-	}
 
 	var processType string
 	var command string

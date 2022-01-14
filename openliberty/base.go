@@ -30,7 +30,7 @@ func NewBase(
 	externalConfigurationDependency *libpak.BuildpackDependency,
 	configurationResolver libpak.ConfigurationResolver,
 	cache libpak.DependencyCache,
-) (Base, []libcnb.BOMEntry) {
+) Base {
 	contributor := libpak.NewLayerContributor(
 		"config",
 		map[string]interface{}{},
@@ -46,16 +46,7 @@ func NewBase(
 		ExternalConfigurationDependency: externalConfigurationDependency,
 	}
 
-	var bomEntries []libcnb.BOMEntry
-	if externalConfigurationDependency != nil {
-		if externalConfigurationDependency.PURL == "" && len(externalConfigurationDependency.CPEs) == 0 {
-			entry := externalConfigurationDependency.AsBOMEntry()
-			entry.Metadata["layer"] = b.Name()
-			bomEntries = append(bomEntries, entry)
-		}
-	}
-
-	return b, bomEntries
+	return b
 }
 
 func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {

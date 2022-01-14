@@ -46,11 +46,10 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"},
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base, entries := openliberty.NewBase(ctx.Buildpack.Path, &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
+		base := openliberty.NewBase(ctx.Buildpack.Path, &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
-		Expect(entries).To(HaveLen(0))
 
 		layer, err = base.Contribute(layer)
 		Expect(err).ToNot(HaveOccurred())
