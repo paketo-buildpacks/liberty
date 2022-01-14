@@ -178,14 +178,6 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 
 func (f FileLinker) ContributeUserFeatures(binding libcnb.Binding) error {
 	confDir := filepath.Join(f.BaseLayerPath, "conf")
-
-	runtimeLibsPath := filepath.Join(f.RuntimeRootPath, "usr", "extension", "lib")
-	runtimeFeaturesPath := filepath.Join(runtimeLibsPath, "features")
-	err := os.MkdirAll(runtimeFeaturesPath, 0755)
-	if err != nil {
-		return err
-	}
-
 	featureDescriptor, err := openliberty.ReadFeatureDescriptor(confDir, f.Logger)
 	if err != nil {
 		return err
@@ -193,6 +185,12 @@ func (f FileLinker) ContributeUserFeatures(binding libcnb.Binding) error {
 
 	if len(featureDescriptor.Features) <= 0 {
 		return nil
+	}
+
+	runtimeLibsPath := filepath.Join(f.RuntimeRootPath, "usr", "extension", "lib")
+	runtimeFeaturesPath := filepath.Join(runtimeLibsPath, "features")
+	if err := os.MkdirAll(runtimeFeaturesPath, 0755); err != nil {
+		return err
 	}
 
 	if err = featureDescriptor.ResolveFeatures(); err != nil {
