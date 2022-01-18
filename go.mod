@@ -3,7 +3,7 @@ module github.com/paketo-buildpacks/open-liberty
 go 1.16
 
 require (
-	github.com/BurntSushi/toml v0.4.1
+	github.com/BurntSushi/toml v1.0.0
 	github.com/buildpacks/libcnb v1.25.4
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/onsi/gomega v1.17.0
