@@ -19,6 +19,7 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
 	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"io/ioutil"
 	"os"
@@ -89,14 +90,14 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
-			if err = replaceFile(bindingXML, configPath); err != nil {
+			if err = util.LinkPath(bindingXML, configPath); err != nil {
 				return fmt.Errorf("unable to replace server.xml\n%w", err)
 			}
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
 			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
-			if err = replaceFile(bootstrapProperties, existingBSP); err != nil {
+			if err = util.LinkPath(bootstrapProperties, existingBSP); err != nil {
 				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
 		}
@@ -116,7 +117,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
 	}
 
-	if err = f.ContributeUserFeatures(b); err != nil {
+	if err = f.ContributeUserFeatures(f.getConfigTemplate(b, "features.tmpl")); err != nil {
 		return fmt.Errorf("unable to contribute user features: %w", err)
 	}
 
@@ -176,7 +177,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	return nil
 }
 
-func (f FileLinker) ContributeUserFeatures(binding libcnb.Binding) error {
+func (f FileLinker) ContributeUserFeatures(configTemplatePath string) error {
 	confDir := filepath.Join(f.BaseLayerPath, "conf")
 	featureDescriptor, err := openliberty.ReadFeatureDescriptor(confDir, f.Logger)
 	if err != nil {
@@ -197,45 +198,16 @@ func (f FileLinker) ContributeUserFeatures(binding libcnb.Binding) error {
 		return err
 	}
 
-	var featuresToEnable []string
-	for _, feature := range featureDescriptor.Features {
-		// Link the feature into place
-		featureBase := filepath.Base(feature.ResolvedPath)
-		if err := replaceFile(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
-			return fmt.Errorf("unable to link feature '%v':\n%w", feature.Name, err)
-		}
-		if feature.ManifestPath != "" {
-			manifestBase := filepath.Base(feature.ManifestPath)
-			if err := replaceFile(feature.ManifestPath, filepath.Join(runtimeFeaturesPath, manifestBase)); err != nil {
-				return fmt.Errorf("unable to link feature manifest for '%v':\n%w", feature.Name, err)
-			}
-		}
-		featuresToEnable = append(featuresToEnable, "usr:"+feature.Name)
-		if len(feature.Dependencies) > 0 {
-			featuresToEnable = append(featuresToEnable, feature.Dependencies...)
-		}
-	}
+	featureInstaller := openliberty.NewFeatureInstaller(
+		f.RuntimeRootPath,
+		configTemplatePath,
+		featureDescriptor.Features)
 
-	templatePath := f.getConfigTemplate(binding, "features.tmpl")
-	t, err := template.New("features.tmpl").ParseFiles(templatePath)
-	if err != nil {
-		return fmt.Errorf("unable to create features template:\n%w", err)
+	if err := featureInstaller.Install(); err != nil {
+		return err
 	}
-
-	configDefaultsPath := filepath.Join(f.ServerRootPath, "configDropins", "defaults")
-	if err := os.MkdirAll(configDefaultsPath, 0755); err != nil {
-		return fmt.Errorf("unable to make config defaults directory:\n%w", err)
-	}
-
-	featuresConfigPath := filepath.Join(configDefaultsPath, "features.xml.xml")
-	file, err := os.Create(featuresConfigPath)
-	if err != nil {
-		return fmt.Errorf("unable to create file '%v':\n%w", featuresConfigPath, err)
-	}
-	defer file.Close()
-	err = t.Execute(file, featuresToEnable)
-	if err != nil {
-		return fmt.Errorf("unable to execute template:\n%w", err)
+	if err := featureInstaller.Enable(); err != nil {
+		return err
 	}
 
 	return nil
@@ -249,19 +221,6 @@ func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) s
 	}
 	// Use default config template
 	return filepath.Join(f.BaseLayerPath, "templates", template)
-}
-
-func replaceFile(from, to string) error {
-	if _, err := os.Stat(from); err != nil {
-		return fmt.Errorf("unable to find file '%s'\n%w", from, err)
-	}
-	if err := os.Remove(to); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("unable to delete original file '%s'\n%w", from, err)
-	}
-	if err := os.Symlink(from, to); err != nil {
-		return fmt.Errorf("unable to symlink file from '%s' to '%s'\n%w", from, to, err)
-	}
-	return nil
 }
 
 func readServerConfig(configPath string) (ServerConfig, error) {

@@ -2,18 +2,15 @@ package openliberty
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/crush"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 type Base struct {
@@ -162,97 +159,4 @@ func (b Base) ContributeUserFeatures(layer libcnb.Layer) error {
 
 func (Base) Name() string {
 	return "base"
-}
-
-type Feature struct {
-	Name         string   `toml:"name"`
-	Version      string   `toml:"version"`
-	URI          string   `toml:"uri"`
-	Dependencies []string `toml:"dependencies"`
-	ResolvedPath string   `toml:"-"`
-	ManifestPath string   `toml:"-"`
-}
-
-type FeatureDescriptor struct {
-	Path     string
-	Features []*Feature
-	Logger   bard.Logger
-}
-
-func ReadFeatureDescriptor(baseRoot string, logger bard.Logger) (*FeatureDescriptor, error) {
-	featuresTOML := filepath.Join(baseRoot, "features.toml")
-	if _, err := os.Stat(featuresTOML); err != nil {
-		logger.Debugf("No features descriptor found. Skipping.")
-		return &FeatureDescriptor{}, nil
-	}
-
-	var featureDescriptor struct {
-		Features []*Feature `toml:"features"`
-	}
-
-	if _, err := toml.DecodeFile(featuresTOML, &featureDescriptor); err != nil {
-		return &FeatureDescriptor{}, fmt.Errorf("unable to decode features.toml:\n %w", err)
-	}
-
-	return &FeatureDescriptor{
-		Path:     baseRoot,
-		Features: featureDescriptor.Features,
-		Logger:   logger,
-	}, nil
-}
-
-func (d *FeatureDescriptor) ResolveFeatures() error {
-	for i, feature := range d.Features {
-		featureUrl, err := url.Parse(feature.URI)
-		if err != nil {
-			return fmt.Errorf("unable to parse URI for feature %v:\n%w", feature.Name, err)
-		}
-		if featureUrl.Scheme == "file" {
-			if err := d.resolveFileFeature(d.Features[i]); err != nil {
-				return err
-			}
-		} else {
-			return fmt.Errorf("unable to resolve feature %v: %v scheme unsupported", feature.Name, featureUrl.Scheme)
-		}
-	}
-	return nil
-}
-
-func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
-	featureUrl, err := url.Parse(feature.URI)
-	if err != nil {
-		return fmt.Errorf("unable to parse URI for feature %v:\n%w", feature.Name, err)
-	}
-
-	featurePath := featureUrl.Path[1:]   // Strip leading '/' required by file URLs
-	ext := filepath.Ext(featurePath)[1:] // Strip '.' from extension
-	var manifestPath string
-
-	if ext != "jar" && ext != "esa" {
-		return fmt.Errorf("unsupported feature packaging type for feature '%v': '%v'", feature.Name, ext)
-	}
-
-	if ext == "jar" {
-		baseName := strings.TrimSuffix(featurePath, "."+ext)
-		manifestPath = baseName + ".mf"
-	}
-
-	// Verify the necessary files are found
-	resolvedFeaturePath := filepath.Join(d.Path, featurePath)
-	if _, err := os.Stat(resolvedFeaturePath); err != nil {
-		return fmt.Errorf("unable to find feature at '%v'", resolvedFeaturePath)
-	}
-	feature.ResolvedPath = resolvedFeaturePath
-
-	if manifestPath == "" {
-		return nil
-	}
-
-	resolvedManifestPath := filepath.Join(d.Path, manifestPath)
-	if _, err := os.Stat(resolvedManifestPath); err != nil {
-		return fmt.Errorf("unable to find manifest for feature '%v': %v", feature.Name, resolvedManifestPath)
-	}
-	feature.ManifestPath = resolvedManifestPath
-
-	return nil
 }

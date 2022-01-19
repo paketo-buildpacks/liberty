@@ -34,8 +34,8 @@ import (
 
 func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
-		Expect      = NewWithT(t).Expect
-		ctx         libcnb.BuildContext
+		Expect = NewWithT(t).Expect
+		ctx    libcnb.BuildContext
 	)
 
 	it.Before(func() {

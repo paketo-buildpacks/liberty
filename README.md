@@ -97,8 +97,8 @@ Using this feature description, the Open Liberty buildpack will look for the fea
 package at the path `features/cache.dummy_1.0.0.jar`. The buildpack also assumes that the feature manifest file will be
 at the path `features/cache.dummy_1.0.0.mf`.
 
-After creating the feature descriptor, tar and gzip the `feature.toml` and `features` directory so that it tar has the
-contents similar to the following, and upload it somewhere it can be served via HTTP.
+After creating the feature descriptor, tar and gzip the `feature.toml` and `features` directory so that it has the
+contents similar to the following:
 
 ```console
 $ tar tzf liberty-conf.tar.gz
@@ -109,11 +109,18 @@ $ tar tzf liberty-conf.tar.gz
 ./features/cache.dummy_1.0.0.jar
 ```
 
-The external configuration package can then be provided to the build by providing the `BP_OPENLIBERTY_EXT_CONF_*`
-environment variables to the build. For example:
+The external configuration package can be provided to the build by providing the `BP_OPENLIBERTY_EXT_CONF_*`
+environment variables to the build. For example, if the external configuration is hosted on a web server, you can use:
 
 ```console
-pack build --path myapp --env BP_OPENLIBERTY_EXT_CONF_URI=http://example.com/liberty-conf.tar.gz --env BP_OPENLIBERTY_EXT_CONF_VERSION=1.0.0 myapp
+pack build --path myapp --env BP_OPENLIBERTY_EXT_CONF_URI=https://example.com/liberty-conf.tar.gz --env BP_OPENLIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_OPENLIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
+```
+
+If you'd like to provide the configuration as a file, you can do so by mounting the external configuration in the
+container and then providing the path to the external configuration like so:
+
+```console
+pack build --path myapp --env BP_OPENLIBERTY_EXT_CONF_URI=file:///path/to/conf/liberty-conf.tar.gz --env BP_OPENLIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_OPENLIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
 ```
 
 ## License

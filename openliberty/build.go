@@ -37,7 +37,7 @@ const (
 )
 
 type Build struct {
-	Logger      bard.Logger
+	Logger bard.Logger
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
