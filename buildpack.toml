@@ -200,14 +200,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
-    purl = "pkg:generic/ibm-open-libery-runtime-kernel@21.0.0?arch=amd64"
-    sha256 = "f5448f4fceb6c22dcd44a7be3b3be3af579ff72ac1aa0e6c7f2a4f84a8e14e33"
+    purl = "pkg:generic/ibm-open-libery-runtime-kernel@22.0.0?arch=amd64"
+    sha256 = "80a4c8ed62a61f0d9be3723be5cee9ca886100ba75742532e0dc1435397cc368"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-kernel-21.0.0.11.zip"
-    version = "21.0.0"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/22.0.0.1/openliberty-kernel-22.0.0.1.zip"
+    version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
