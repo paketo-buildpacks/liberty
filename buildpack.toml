@@ -28,24 +28,13 @@ api = "0.7"
     uri = "https://github.com/paketo-buildpacks/open-liberty/blob/main/LICENSE"
 
 [metadata]
-  include-files = [
-    "LICENSE",
-    "NOTICE",
-    "README.md",
-    "bin/build",
-    "bin/detect",
-    "bin/main",
-    "bin/helper",
-    "buildpack.toml",
-    "templates/app.tmpl",
-    "templates/features.tmpl"
-  ]
+  include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "bin/helper", "buildpack.toml", "templates/app.tmpl", "templates/features.tmpl"]
   pre-package = "scripts/build.sh"
 
   [[metadata.configurations]]
     build = true
-    description = "Install type of Liberty. Valid options: 'ol' and 'none'"
     default = "ol"
+    description = "Install type of Liberty. Valid options: 'ol' and 'none'"
     launch = false
     name = "BP_OPENLIBERTY_INSTALL_TYPE"
 
@@ -140,7 +129,6 @@ api = "0.7"
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
-
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile9"
@@ -184,14 +172,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
-    purl = "pkg:generic/ibm-open-libery-runtime-microProfile4@21.0.0?arch=amd64"
-    sha256 = "9da317fe28f8cf66009075ab5d114de362a170f2fcef911b2434d5192f50f264"
+    purl = "pkg:generic/ibm-open-libery-runtime-microProfile4@22.0.0?arch=amd64"
+    sha256 = "404d196fc4523ed19c4d2336f8e3ec8dcf1f49cd8f7de7199721a5e3f2a2883c"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-microProfile4-21.0.0.11.zip"
-    version = "21.0.0"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/22.0.0.1/openliberty-microProfile4-22.0.0.1.zip"
+    version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
