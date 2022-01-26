@@ -19,6 +19,8 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -30,10 +32,12 @@ import (
 )
 
 type FileLinker struct {
-	Bindings     libcnb.Bindings
-	Logger       bard.Logger
-	Config       ServerConfig
-	TemplatePath string
+	Bindings        libcnb.Bindings
+	Logger          bard.Logger
+	Config          ServerConfig
+	BaseLayerPath   string
+	RuntimeRootPath string
+	ServerRootPath  string
 }
 
 type ApplicationConfig struct {
@@ -61,6 +65,7 @@ func (f FileLinker) Execute() (map[string]string, error) {
 	if !ok {
 		layerDir = "/layers/paketo-buildpacks_open-liberty/open-liberty-runtime"
 	}
+	f.RuntimeRootPath = layerDir
 
 	_, err = os.Stat(layerDir)
 	if err != nil && os.IsNotExist(err) {
@@ -80,18 +85,19 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
-	configPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml")
+	f.ServerRootPath = filepath.Join(layerDir, "usr", "servers", "defaultServer")
+	configPath := filepath.Join(f.ServerRootPath, "server.xml")
 
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
-			if err = replaceFile(bindingXML, configPath); err != nil {
+			if err = util.LinkPath(bindingXML, configPath); err != nil {
 				return fmt.Errorf("unable to replace server.xml\n%w", err)
 			}
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
 			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
-			if err = replaceFile(bootstrapProperties, existingBSP); err != nil {
+			if err = util.LinkPath(bootstrapProperties, existingBSP); err != nil {
 				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
 		}
@@ -102,14 +108,17 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to read server config\n%w", err)
 	}
 
-	baseRoot := os.Getenv("BPI_OL_BASE_ROOT")
-	if baseRoot == "" {
-		baseRoot = "/layers/paketo-buildpacks_open-liberty/base"
+	f.BaseLayerPath = os.Getenv("BPI_OL_BASE_ROOT")
+	if f.BaseLayerPath == "" {
+		f.BaseLayerPath = "/layers/paketo-buildpacks_open-liberty/base"
 	}
-	f.TemplatePath = filepath.Join(baseRoot, "templates")
 
 	if err = f.ContributeApp(appDir, layerDir, b); err != nil {
 		return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
+	}
+
+	if err = f.ContributeUserFeatures(f.getConfigTemplate(b, "features.tmpl")); err != nil {
+		return fmt.Errorf("unable to contribute user features: %w", err)
 	}
 
 	return nil
@@ -168,6 +177,42 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	return nil
 }
 
+func (f FileLinker) ContributeUserFeatures(configTemplatePath string) error {
+	confDir := filepath.Join(f.BaseLayerPath, "conf")
+	featureDescriptor, err := openliberty.ReadFeatureDescriptor(confDir, f.Logger)
+	if err != nil {
+		return err
+	}
+
+	if len(featureDescriptor.Features) <= 0 {
+		return nil
+	}
+
+	runtimeLibsPath := filepath.Join(f.RuntimeRootPath, "usr", "extension", "lib")
+	runtimeFeaturesPath := filepath.Join(runtimeLibsPath, "features")
+	if err := os.MkdirAll(runtimeFeaturesPath, 0755); err != nil {
+		return err
+	}
+
+	if err = featureDescriptor.ResolveFeatures(); err != nil {
+		return err
+	}
+
+	featureInstaller := openliberty.NewFeatureInstaller(
+		f.RuntimeRootPath,
+		configTemplatePath,
+		featureDescriptor.Features)
+
+	if err := featureInstaller.Install(); err != nil {
+		return err
+	}
+	if err := featureInstaller.Enable(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) string {
 	// Get customized template if it has been provided
 	if binding, ok := binding.SecretFilePath(template); ok {
@@ -175,20 +220,7 @@ func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) s
 		return binding
 	}
 	// Use default config template
-	return filepath.Join(f.TemplatePath, template)
-}
-
-func replaceFile(from, to string) error {
-	if _, err := os.Stat(from); err != nil {
-		return fmt.Errorf("unable to find file '%s'\n%w", from, err)
-	}
-	if err := os.Remove(to); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("unable to delete original file '%s'\n%w", from, err)
-	}
-	if err := os.Symlink(from, to); err != nil {
-		return fmt.Errorf("unable to symlink file from '%s' to '%s'\n%w", from, to, err)
-	}
-	return nil
+	return filepath.Join(f.BaseLayerPath, "templates", template)
 }
 
 func readServerConfig(configPath string) (ServerConfig, error) {

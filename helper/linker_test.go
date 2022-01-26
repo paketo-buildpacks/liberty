@@ -34,6 +34,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 		linker helper.FileLinker
 
 		appDir       string
+		configDir    string
 		layerDir     string
 		baseLayerDir string
 	)
@@ -49,6 +50,9 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 
 		baseLayerDir, err = ioutil.TempDir("", "base-layer")
 		Expect(err).NotTo(HaveOccurred())
+
+		configDir = filepath.Join(baseLayerDir, "conf")
+		Expect(os.MkdirAll(configDir, 0755)).To(Succeed())
 	})
 
 	it.After(func() {
@@ -104,6 +108,48 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 
 			appConfigPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml")
 			Expect(appConfigPath).To(BeARegularFile())
+		})
+	})
+
+	context("when contributing user features", func() {
+		it.Before(func() {
+			Expect(os.MkdirAll(filepath.Join(baseLayerDir, "usr", "servers", "defaultServer", "configDropins", "defaults"), 0755)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(baseLayerDir, "usr", "extension", "lib", "features"), 0755)).To(Succeed())
+			features := `[[features]]
+                               name = "testFeature"
+                               uri = "file:///test.feature_1.0.0.jar"
+                               version = "1.0.0"
+                               dependencies = ["test-1.0"]`
+			Expect(os.WriteFile(filepath.Join(configDir, "features.toml"), []byte(features), 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(configDir, "test.feature_1.0.0.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(configDir, "test.feature_1.0.0.mf"), []byte{}, 0644)).To(Succeed())
+			template := `<?xml version="1.0" encoding="UTF-8"?>
+                         <server>
+                           <!-- Enable user features -->
+                           <featureManager>
+                             {{ range $val := . }}
+                                 <feature>{{ $val }}</feature>
+                             {{ end }}
+                           </featureManager>
+                         </server>`
+			Expect(os.WriteFile(filepath.Join(configDir, "features.tmpl"), []byte(template), 0644)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(filepath.Join(baseLayerDir, "usr", "servers", "defaultServer", "configDropins", "defaults"))).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(baseLayerDir, "usr", "extension"))).To(Succeed())
+		})
+
+		it("installs the features and creates the feature config", func() {
+			featureLinker := helper.FileLinker{
+				BaseLayerPath:   baseLayerDir,
+				RuntimeRootPath: layerDir,
+			}
+			err := featureLinker.ContributeUserFeatures(filepath.Join(configDir, "features.tmpl"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(filepath.Join(layerDir, "usr", "extension", "lib", "test.feature_1.0.0.jar")).To(BeARegularFile())
+			Expect(filepath.Join(layerDir, "usr", "extension", "lib", "features", "test.feature_1.0.0.mf")).To(BeARegularFile())
+			Expect(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "defaults", "features.xml")).To(BeARegularFile())
 		})
 	})
 }

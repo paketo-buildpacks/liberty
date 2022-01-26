@@ -37,7 +37,8 @@ api = "0.7"
     "bin/main",
     "bin/helper",
     "buildpack.toml",
-    "templates/app.tmpl"
+    "templates/app.tmpl",
+    "templates/features.tmpl"
   ]
   pre-package = "scripts/build.sh"
 
@@ -54,6 +55,27 @@ api = "0.7"
     description = "Which version of the Open Liberty runtime to install. Defaults to latest supported version"
     launch = false
     name = "BP_OPENLIBERTY_VERSION"
+
+  [[metadata.configurations]]
+    build = true
+    description = "The SHA256 hash of the external configuration archive"
+    name = "BP_OPENLIBERTY_EXT_CONF_SHA256"
+
+  [[metadata.configurations]]
+    build = true
+    default = "0"
+    description = "The number of directory components to strip from the external configuration archive. Defaults to 0"
+    name = "BP_OPENLIBERTY_EXT_CONF_STRIP"
+
+  [[metadata.configurations]]
+    build = true
+    description = "The download location of the external configuration"
+    name = "BP_OPENLIBERTY_EXT_CONF_URI"
+
+  [[metadata.configurations]]
+    build = true
+    description = "The version of the Liberty configuration"
+    name = "BP_OPENLIBERTY_EXT_CONF_VERSION"
 
   [[metadata.configurations]]
     build = true

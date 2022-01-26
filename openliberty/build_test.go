@@ -18,6 +18,7 @@ package openliberty_test
 
 import (
 	"bytes"
+	"github.com/paketo-buildpacks/libpak"
 	"io"
 	"io/ioutil"
 	"os"
@@ -34,9 +35,7 @@ import (
 func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
-
-		ctx     libcnb.BuildContext
-		builder openliberty.Build
+		ctx    libcnb.BuildContext
 	)
 
 	it.Before(func() {
@@ -59,7 +58,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
 		Expect(err).NotTo(HaveOccurred())
-		builder = openliberty.Build{}
 	})
 
 	it.After(func() {
@@ -70,15 +68,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("picks the latest full profile when no arguments are set", func() {
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
-		builder.Logger = bard.NewLogger(io.Discard)
-
-		result, err := builder.Build(ctx)
+		result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(3))
 		Expect(result.Layers[0].Name()).To(Equal("helper"))
-		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
-		Expect(result.Layers[2].Name()).To(Equal("base"))
+		Expect(result.Layers[1].Name()).To(Equal("base"))
+		Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 	})
 
 	context("missing required info", func() {
@@ -100,9 +96,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				builder.Logger = bard.NewLogger(buf)
-
-				result, err := builder.Build(ctx)
+				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -117,9 +111,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				builder.Logger = bard.NewLogger(buf)
-
-				result, err := builder.Build(ctx)
+				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -144,16 +136,66 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("honors user set configuration values", func() {
-			builder.Logger = bard.NewLogger(io.Discard)
-
-			result, err := builder.Build(ctx)
+			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-microProfile4"))
-			Expect(result.Layers[2].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-microProfile4"))
 		})
 	})
 
+	context("$BP_OPENLIBERTY_EXT_CONF_URI", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_SHA256", "test-sha256")).To(Succeed())
+			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_URI", "test-uri")).To(Succeed())
+			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_VERSION", "test-version")).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_SHA256")).To(Succeed())
+			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_URI")).To(Succeed())
+			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_VERSION")).To(Succeed())
+		})
+
+		it("contributes external configuration when $BP_OPENLIBERTY_EXT_CONF_URI is set", func() {
+			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
+
+			ctx.Buildpack.Metadata = map[string]interface{}{
+				"configurations": []map[string]interface{}{
+					{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11"},
+					{"name": "BP_OPENLIBERTY_PROFILE", "default": "full"},
+					{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol"},
+				},
+				"dependencies": []map[string]interface{}{
+					{
+						"cpes":    "cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*",
+						"id":      "open-liberty-runtime-full",
+						"name":    "Open Liberty (All Features)",
+						"purl":    "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64",
+						"stacks":  []interface{}{"test-stack-id"},
+						"version": "21.0.11",
+					},
+				},
+			}
+			ctx.StackID = "test-stack-id"
+
+			result, err := openliberty.Build{}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[1].(openliberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
+				ID:      "open-liberty-external-configuration",
+				Name:    "Open Liberty External Configuration",
+				Version: "test-version",
+				URI:     "test-uri",
+				SHA256:  "test-sha256",
+				Stacks:  []string{ctx.StackID},
+			}))
+		})
+	})
 }

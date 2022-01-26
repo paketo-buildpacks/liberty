@@ -114,6 +114,27 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, h)
 	result.BOM.Entries = append(result.BOM.Entries, be)
 
+	var externalConfigurationDependency *libpak.BuildpackDependency
+	if uri, ok := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_URI"); ok {
+		v, _ := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_VERSION")
+		s, _ := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_SHA256")
+
+		externalConfigurationDependency = &libpak.BuildpackDependency{
+			ID:      "open-liberty-external-configuration",
+			Name:    "Open Liberty External Configuration",
+			Version: v,
+			URI:     uri,
+			SHA256:  s,
+			Stacks:  []string{context.StackID},
+			CPEs:    nil,
+			PURL:    "",
+		}
+	}
+
+	base := NewBase(context.Buildpack.Path, externalConfigurationDependency, cr, dc)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
+
 	var processType string
 	var command string
 	var args []string
@@ -161,10 +182,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			Direct:    true,
 		},
 	}
-
-	base := NewBase(context.Buildpack.Path)
-	base.Logger = b.Logger
-	result.Layers = append(result.Layers, base)
 
 	return result, nil
 }
