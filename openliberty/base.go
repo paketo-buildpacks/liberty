@@ -3,6 +3,7 @@ package openliberty
 import (
 	"fmt"
 	"github.com/buildpacks/libcnb"
+	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/crush"
@@ -29,7 +30,7 @@ func NewBase(
 	cache libpak.DependencyCache,
 ) Base {
 	contributor := libpak.NewLayerContributor(
-		"config",
+		"Open Liberty Config",
 		map[string]interface{}{},
 		libcnb.LayerTypes{
 			Launch: true,
@@ -64,7 +65,6 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features: %w", err)
 		}
 
-		b.Logger.Headerf("Contributing environment variables")
 		layer.LaunchEnvironment.Default("BPI_OL_BASE_ROOT", layer.Path)
 
 		return layer, nil
@@ -72,7 +72,7 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 }
 
 func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
-	b.Logger.Headerf("%s %s", b.ExternalConfigurationDependency.Name, b.ExternalConfigurationDependency.Version)
+	b.Logger.Headerf(color.BlueString("%s %s", b.ExternalConfigurationDependency.Name, b.ExternalConfigurationDependency.Version))
 
 	artifact, err := b.DependencyCache.Artifact(*b.ExternalConfigurationDependency)
 	if err != nil {
@@ -102,7 +102,6 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 }
 
 func (b Base) ContributeConfigTemplates(layer libcnb.Layer) error {
-	b.Logger.Header("Contributing config templates")
 	// Create config templates directory
 	templateDir := filepath.Join(layer.Path, "templates")
 	if err := os.MkdirAll(templateDir, 0755); err != nil {
