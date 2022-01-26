@@ -99,24 +99,38 @@ api = "0.7"
     name = "BPL_OPENLIBERTY_LOG_LEVEL"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64"
-    sha256 = "27c2c2f8844279fef0e10b361a04ebfbdf15f46843eab58bd9f8039decbcd010"
+    purl = "pkg:generic/ibm-open-libery-runtime-full@22.0.0?arch=amd64"
+    sha256 = "4f883fe12da6e253a97b374d86eb3de5721596a40389ae2ef2e8460186c06a35"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-21.0.0.11.zip"
-    version = "21.0.0"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/22.0.0.1/openliberty-runtime-22.0.0.1.zip"
+    version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-jakartaee9"
+    name = "Open Liberty (Jakarta EE9)"
+    purl = "pkg:generic/ibm-open-libery-runtime-jakartaee9@22.0.0?arch=amd64"
+    sha256 = "f8d8dcf0298c8db11d6df8c060db058f0757c1bd43983ee089f7534383702234"
+    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/22.0.0.1/openliberty-jakartaee9-22.0.0.1.zip"
+    version = "22.0.0"
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-javaee8"
     name = "Open Liberty (Java EE8)"
-    purl = "pkg:generic/ibm-open-libery-runtime-javaee8@21.0.0.11?arch=amd64"
+    purl = "pkg:generic/ibm-open-libery-runtime-javaee8@21.0.0?arch=amd64"
     sha256 = "1365a0fc00e1ac2d28ecea382b03535dd40ed4449d6ccb3c88617f4cb3c40051"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-javaee8-21.0.0.11.zip"
@@ -126,11 +140,26 @@ api = "0.7"
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
+
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-webProfile9"
+    name = "Open Liberty (Web Profile 9)"
+    purl = "pkg:generic/ibm-open-libery-runtime-webProfile9@22.0.0?arch=amd64"
+    sha256 = "a17c68294ae10341fd8035874ca03fe0700afa4173491be75a677b253f90d140"
+    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/22.0.0.1/openliberty-webProfile9-22.0.0.1.zip"
+    version = "22.0.0"
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile8"
     name = "Open Liberty (Web Profile 8)"
-    purl = "pkg:generic/ibm-open-libery-runtime-webProfile8@21.0.0.11?arch=amd64"
+    purl = "pkg:generic/ibm-open-libery-runtime-webProfile8@21.0.0?arch=amd64"
     sha256 = "1bb90d605ecd464b1cddb72ff788fda74d5c5a7cca2e6728021fb19bf2cfa231"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-webProfile8-21.0.0.11.zip"
@@ -141,10 +170,24 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-microProfile5"
+    name = "Open Liberty (Micro Profile 5)"
+    purl = "pkg:generic/ibm-open-libery-runtime-microProfile5@22.0.0?arch=amd64"
+    sha256 = "52d4d059cc43ece2f5712358ae8aac1fe8958f613364f0d1a08f53d45492113b"
+    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile5/22.0.0.1/openliberty-microProfile5-22.0.0.1.zip"
+    version = "22.0.0"
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
-    purl = "pkg:generic/ibm-open-libery-runtime-microProfile4@21.0.0.11?arch=amd64"
+    purl = "pkg:generic/ibm-open-libery-runtime-microProfile4@21.0.0?arch=amd64"
     sha256 = "9da317fe28f8cf66009075ab5d114de362a170f2fcef911b2434d5192f50f264"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-microProfile4-21.0.0.11.zip"
@@ -155,10 +198,24 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-microProfile3"
+    name = "Open Liberty (Micro Profile 3)"
+    purl = "pkg:generic/ibm-open-libery-runtime-microProfile3@22.0.0?arch=amd64"
+    sha256 = "0945661bb2492057a86b7e57c37d812e0e57df155a4b9d52b3b560c17778d470"
+    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile3/21.0.0.2/openliberty-microProfile3-21.0.0.2.zip"
+    version = "22.0.0"
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-1.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+
+  [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:ibm:liberty:21.0.0:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
-    purl = "pkg:generic/ibm-open-libery-runtime-kernel@21.0.0.11?arch=amd64"
+    purl = "pkg:generic/ibm-open-libery-runtime-kernel@21.0.0?arch=amd64"
     sha256 = "f5448f4fceb6c22dcd44a7be3b3be3af579ff72ac1aa0e6c7f2a4f84a8e14e33"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-10-19_1900/openliberty-kernel-21.0.0.11.zip"
