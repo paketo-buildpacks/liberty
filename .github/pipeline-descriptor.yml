@@ -15,3 +15,68 @@ docker_credentials:
 - registry: gcr.io
   username: _json_key
   password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
+
+dependencies:
+- id:   open-liberty-runtime-full
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-runtime
+    packaging:   zip
+- id:   open-liberty-runtime-jakartaee9
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-jakartaee9
+    packaging:   zip
+- id:   open-liberty-runtime-javaee8
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-javaee8
+    packaging:   zip
+- id:   open-liberty-runtime-webProfile9
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-webProfile9
+    packaging:   zip
+- id:   open-liberty-runtime-webProfile8
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-webProfile8
+    packaging:   zip
+- id:   open-liberty-runtime-microProfile5
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-microProfile5
+    packaging:   zip
+- id:   open-liberty-runtime-microProfile4
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-microProfile4
+    packaging:   zip
+- id:   open-liberty-runtime-microProfile3
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-microProfile3
+    packaging:   zip
+- id:   open-liberty-runtime-kernel
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    io.openliberty
+    artifact_id: openliberty-kernel
+    packaging:   zip
