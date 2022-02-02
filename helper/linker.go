@@ -19,6 +19,7 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/paketo-buildpacks/open-liberty/internal/server"
 	"github.com/paketo-buildpacks/open-liberty/internal/util"
 	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"io/ioutil"
@@ -113,12 +114,26 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		f.BaseLayerPath = "/layers/paketo-buildpacks_open-liberty/base"
 	}
 
-	if err = f.ContributeApp(appDir, layerDir, b); err != nil {
-		return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
-	}
+	// Check if we are contributing a packaged server
+	userDir := filepath.Join(appDir, "wlp", "usr")
+	if isPackagedServer, err := util.DirExists(userDir); err != nil {
+		return fmt.Errorf("unable to check package server directory:\n%w", err)
+	} else if isPackagedServer {
+		libertyServer := server.LibertyServer{
+			InstallRoot: f.RuntimeRootPath,
+			ServerName:  "defaultServer",
+		}
+		if err := libertyServer.SetUserDirectory(userDir); err != nil {
+			return fmt.Errorf("unable to contribute packaged server:\n%w", err)
+		}
+	} else {
+		if err = f.ContributeApp(appDir, layerDir, b); err != nil {
+			return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
+		}
 
-	if err = f.ContributeUserFeatures(f.getConfigTemplate(b, "features.tmpl")); err != nil {
-		return fmt.Errorf("unable to contribute user features: %w", err)
+		if err = f.ContributeUserFeatures(f.getConfigTemplate(b, "features.tmpl")); err != nil {
+			return fmt.Errorf("unable to contribute user features: %w", err)
+		}
 	}
 
 	return nil
@@ -127,6 +142,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Binding) error {
 	linkPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "apps", "app")
 	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
+
 	if err := os.Symlink(appPath, linkPath); err != nil {
 		return fmt.Errorf("unable to symlink application to '%s'\n%w", linkPath, err)
 	}

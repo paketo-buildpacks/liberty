@@ -198,4 +198,36 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}))
 		})
 	})
+
+	context("when building a packaged server", func() {
+		it.Before(func() {
+			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "open-liberty", Metadata: map[string]interface{}{
+				"packaged-server": true,
+			}}}
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "wlp"))).To(Succeed())
+		})
+
+		it("should discover the app", func() {
+			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Unmet).To(HaveLen(0))
+		})
+
+		it("should not run if no apps are installed", func() {
+			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "apps", "test.war"))).To(Succeed())
+			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Unmet).To(HaveLen(1))
+			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "open-liberty"}))
+		})
+	})
 }

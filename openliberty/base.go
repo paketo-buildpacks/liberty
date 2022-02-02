@@ -6,8 +6,8 @@ import (
 	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/crush"
 	"github.com/paketo-buildpacks/libpak/sherpa"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -94,7 +94,7 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 		}
 	}
 
-	if err := crush.ExtractTarGz(artifact, confPath, c); err != nil {
+	if err := util.Extract(artifact, confPath, c); err != nil {
 		return fmt.Errorf("unable to expand external configuration\n%w", err)
 	}
 

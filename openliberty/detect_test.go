@@ -173,4 +173,71 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result).To(Equal(libcnb.DetectResult{Pass: false}))
 	})
+
+	context("when building a packaged server", func() {
+		it.Before(func() {
+			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "usr"))).To(Succeed())
+		})
+
+		it("works", func() {
+			result, err := detect.Detect(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(libcnb.DetectResult{
+				Pass: true,
+				Plans: []libcnb.BuildPlan{
+					{
+						Provides: []libcnb.BuildPlanProvide{
+							{Name: openliberty.PlanEntryOpenLiberty},
+							{Name: openliberty.PlanEntryJVMApplicationPackage},
+						},
+
+						Requires: []libcnb.BuildPlanRequire{
+							{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+								"launch": true,
+								"build":  true,
+								"cache":  true,
+							}},
+							{Name: openliberty.PlanEntryJVMApplicationPackage},
+							{Name: openliberty.PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+								"packaged-server": true,
+							}},
+						},
+					},
+				},
+			}))
+		})
+
+		it("does not provide jvm-application-package if packaged server has no apps", func() {
+			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "apps", "test.war"))).To(Succeed())
+			result, err := detect.Detect(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(libcnb.DetectResult{
+				Pass: true,
+				Plans: []libcnb.BuildPlan{
+					{
+						Provides: []libcnb.BuildPlanProvide{
+							{Name: openliberty.PlanEntryOpenLiberty},
+						},
+
+						Requires: []libcnb.BuildPlanRequire{
+							{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+								"launch": true,
+								"build":  true,
+								"cache":  true,
+							}},
+							{Name: openliberty.PlanEntryJVMApplicationPackage},
+							{Name: openliberty.PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+								"packaged-server": true,
+							}},
+						},
+					},
+				},
+			}))
+		})
+	})
 }
