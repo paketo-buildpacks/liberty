@@ -40,7 +40,7 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
-    default = "21"
+    default = "*"
     description = "Which version of the Open Liberty runtime to install. Defaults to latest supported version"
     launch = false
     name = "BP_OPENLIBERTY_VERSION"
