@@ -204,9 +204,9 @@ api = "0.7"
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
     purl = "pkg:generic/ibm-open-libery-runtime-kernel@22.0.0?arch=amd64"
-    sha256 = "80a4c8ed62a61f0d9be3723be5cee9ca886100ba75742532e0dc1435397cc368"
+    sha256 = "e7c39600e0d5751588761fd0cc4dbe74d64b5a8e56f0707614e528139c7ec583"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/22.0.0.1/openliberty-kernel-22.0.0.1.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/22.0.0.2/openliberty-kernel-22.0.0.2.zip"
     version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
