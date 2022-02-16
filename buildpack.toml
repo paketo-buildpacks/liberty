@@ -120,9 +120,9 @@ api = "0.7"
     id = "open-liberty-runtime-javaee8"
     name = "Open Liberty (Java EE8)"
     purl = "pkg:generic/ibm-open-libery-runtime-javaee8@22.0.0?arch=amd64"
-    sha256 = "7279ea2ac23646954e8eed6ffc907ba145457c8456d884b0b6daaf2133e2dcc3"
+    sha256 = "71cecb2356f6dbb97631b207990f5e7ddc136a199ecb149fee0286807ea8cb0c"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-javaee8/22.0.0.1/openliberty-javaee8-22.0.0.1.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-javaee8/22.0.0.2/openliberty-javaee8-22.0.0.2.zip"
     version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
