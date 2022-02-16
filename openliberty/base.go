@@ -57,12 +57,12 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		if b.ExternalConfigurationDependency != nil {
 			if err := b.ContributeExternalConfiguration(layer); err != nil {
-				return libcnb.Layer{}, fmt.Errorf("unable to contribute external configuration:\n%w", err)
+				return libcnb.Layer{}, fmt.Errorf("unable to contribute external configuration\n%w", err)
 			}
 		}
 
 		if err := b.ContributeUserFeatures(layer); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features: %w", err)
+			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features\n%w", err)
 		}
 
 		layer.LaunchEnvironment.Default("BPI_OL_BASE_ROOT", layer.Path)
@@ -82,7 +82,7 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 
 	confPath := filepath.Join(layer.Path, "conf")
 	if err := os.MkdirAll(confPath, 0755); err != nil {
-		return fmt.Errorf("unable to make external config directory:\n%w", err)
+		return fmt.Errorf("unable to make external config directory\n%w", err)
 	}
 
 	b.Logger.Bodyf("Expanding to %s", confPath)

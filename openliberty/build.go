@@ -73,7 +73,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	dep, err := dr.Resolve(fmt.Sprintf("open-liberty-runtime-%s", profile), version)
 	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("could not resolve dependency: %w", err)
+		return libcnb.BuildResult{}, fmt.Errorf("could not resolve dependency\n%w", err)
 	}
 
 	h, be := libpak.NewHelperLayer(context.Buildpack, "linker")
@@ -135,12 +135,12 @@ func (b Build) createProcesses(installType string) ([]libcnb.Process, error) {
 
 		// Determine the runtime provided in the stack
 		if olExists, err := util.DirExists(openLibertyStackRuntimeRoot); err != nil {
-			return []libcnb.Process{}, fmt.Errorf("unable to check Open Liberty stack runtime root exists:\n%w", err)
+			return []libcnb.Process{}, fmt.Errorf("unable to check Open Liberty stack runtime root exists\n%w", err)
 		} else if olExists {
 			runtimeRoot = openLibertyStackRuntimeRoot
 			processType = "open-liberty-stack"
 		} else if wlpExists, err := util.DirExists(webSphereLibertyRuntimeRoot); err != nil {
-			return []libcnb.Process{}, fmt.Errorf("unable to check WebSphere Liberty stack runtime root exists:\n%w", err)
+			return []libcnb.Process{}, fmt.Errorf("unable to check WebSphere Liberty stack runtime root exists\n%w", err)
 		} else if wlpExists {
 			runtimeRoot = webSphereLibertyRuntimeRoot
 			processType = "websphere-liberty-stack"
@@ -184,7 +184,7 @@ func (b Build) validatePackagedServer(serverRoot, serverName string) (bool, erro
 	}
 
 	if serverConfigFound, err := util.FileExists(libertyServer.GetServerConfigPath()); err != nil {
-		return false, fmt.Errorf("unable to read server.xml:\n%w", err)
+		return false, fmt.Errorf("unable to read server.xml\n%w", err)
 	} else if !serverConfigFound {
 		b.Logger.Debug("Server config not found, skipping build")
 		return false, nil

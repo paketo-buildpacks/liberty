@@ -91,14 +91,14 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
-			if err = util.LinkPath(bindingXML, configPath); err != nil {
+			if err = util.DeleteAndLinkPath(bindingXML, configPath); err != nil {
 				return fmt.Errorf("unable to replace server.xml\n%w", err)
 			}
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
 			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
-			if err = util.LinkPath(bootstrapProperties, existingBSP); err != nil {
+			if err = util.DeleteAndLinkPath(bootstrapProperties, existingBSP); err != nil {
 				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
 		}
@@ -117,14 +117,14 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 	// Check if we are contributing a packaged server
 	userDir := filepath.Join(appDir, "wlp", "usr")
 	if isPackagedServer, err := util.DirExists(userDir); err != nil {
-		return fmt.Errorf("unable to check package server directory:\n%w", err)
+		return fmt.Errorf("unable to check package server directory\n%w", err)
 	} else if isPackagedServer {
 		libertyServer := server.LibertyServer{
 			InstallRoot: f.RuntimeRootPath,
 			ServerName:  "defaultServer",
 		}
 		if err := libertyServer.SetUserDirectory(userDir); err != nil {
-			return fmt.Errorf("unable to contribute packaged server:\n%w", err)
+			return fmt.Errorf("unable to contribute packaged server\n%w", err)
 		}
 	} else {
 		if err = f.ContributeApp(appDir, layerDir, b); err != nil {
@@ -132,7 +132,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		}
 
 		if err = f.ContributeUserFeatures(f.getConfigTemplate(b, "features.tmpl")); err != nil {
-			return fmt.Errorf("unable to contribute user features: %w", err)
+			return fmt.Errorf("unable to contribute user features\n%w", err)
 		}
 	}
 

@@ -64,12 +64,12 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			Stdout:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
 			Stderr:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
 		}); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("could not create default server: %w", err)
+			return libcnb.Layer{}, fmt.Errorf("could not create default server\n%w", err)
 		}
 
 		libertyClasses, err := count.Classes(layer.Path)
 		if err != nil {
-			return libcnb.Layer{}, fmt.Errorf("could not count liberty classes: %w", err)
+			return libcnb.Layer{}, fmt.Errorf("could not count liberty classes\n%w", err)
 		}
 
 		layer.LaunchEnvironment.Default("BPL_JVM_CLASS_ADJUSTMENT", strconv.Itoa(libertyClasses))

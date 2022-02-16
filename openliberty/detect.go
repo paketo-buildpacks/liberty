@@ -41,7 +41,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 	isPackagedServer, err :=
 		util.FileExists(filepath.Join(context.Application.Path, "wlp", "usr", "servers", DefaultServerName, "server.xml"))
 	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to read packaged server.xml:\n%w", err)
+		return libcnb.DetectResult{}, fmt.Errorf("unable to read packaged server.xml\n%w", err)
 	}
 
 	if isPackagedServer {
@@ -56,7 +56,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 // requirement as being met.
 func (d Detect) detectApplication(context libcnb.DetectContext) (libcnb.DetectResult, error) {
 	if mainClassDefined, err := util.ManifestHasMainClassDefined(context.Application.Path); err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to check manifest:\n%w", err)
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check manifest\n%w", err)
 	} else if mainClassDefined {
 		return libcnb.DetectResult{Pass: false}, nil
 	}
@@ -101,12 +101,12 @@ func (d Detect) detectApplication(context libcnb.DetectContext) (libcnb.DetectRe
 // detectPackagedServer handles detection of a packaged Liberty server.
 func (d Detect) detectPackagedServer(context libcnb.DetectContext) (libcnb.DetectResult, error) {
 	libertyServer := server.LibertyServer{
-		InstallRoot: context.Application.Path,
+		InstallRoot: filepath.Join(context.Application.Path, "wlp"),
 		ServerName:  "defaultServer",
 	}
 	hasApps, err := libertyServer.HasInstalledApps()
 	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to check if packaged server has apps:\n%w", err)
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check if packaged server has apps\n%w", err)
 	}
 
 	result := libcnb.DetectResult{

@@ -10,13 +10,13 @@ import (
 // compiled artifact is supplied.
 func IsJvmApplicationPackage(appPath string) (bool, error) {
 	if appXMLPresent, err := FileExists(filepath.Join(appPath, "META-INF", "application.xml")); err != nil {
-		return false, fmt.Errorf("unable to check application.xml:\n%w", err)
+		return false, fmt.Errorf("unable to check application.xml\n%w", err)
 	} else if appXMLPresent {
 		return true, nil
 	}
 
 	if webInfPresent, err := DirExists(filepath.Join(appPath, "WEB-INF")); err != nil {
-		return false, fmt.Errorf("unable to check WEB-INF:\n%w", err)
+		return false, fmt.Errorf("unable to check WEB-INF\n%w", err)
 	} else if webInfPresent {
 		return true, nil
 	}

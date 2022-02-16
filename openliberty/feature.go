@@ -39,7 +39,7 @@ func ReadFeatureDescriptor(configRoot string, logger bard.Logger) (*FeatureDescr
 	}
 
 	if _, err := toml.DecodeFile(featuresTOML, &featureDescriptor); err != nil {
-		return &FeatureDescriptor{}, fmt.Errorf("unable to decode features.toml:\n %w", err)
+		return &FeatureDescriptor{}, fmt.Errorf("unable to decode features.toml\n %w", err)
 	}
 
 	return &FeatureDescriptor{
@@ -53,7 +53,7 @@ func (d *FeatureDescriptor) ResolveFeatures() error {
 	for i, feature := range d.Features {
 		featureUrl, err := url.Parse(feature.URI)
 		if err != nil {
-			return fmt.Errorf("unable to parse URI for feature %v:\n%w", feature.Name, err)
+			return fmt.Errorf("unable to parse URI for feature %v\n%w", feature.Name, err)
 		}
 		if featureUrl.Scheme == "file" {
 			if err := d.resolveFileFeature(d.Features[i]); err != nil {
@@ -69,7 +69,7 @@ func (d *FeatureDescriptor) ResolveFeatures() error {
 func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 	featureUrl, err := url.Parse(feature.URI)
 	if err != nil {
-		return fmt.Errorf("unable to parse URI for feature %v:\n%w", feature.Name, err)
+		return fmt.Errorf("unable to parse URI for feature %v\n%w", feature.Name, err)
 	}
 
 	featurePath := featureUrl.Path[1:]   // Strip leading '/' required by file URLs
@@ -136,8 +136,8 @@ func (i FeatureInstaller) Install() error {
 func (i FeatureInstaller) installJar(feature Feature) error {
 	runtimeLibsPath := filepath.Join(i.RuntimeRootPath, "usr", "extension", "lib")
 	featureBase := filepath.Base(feature.ResolvedPath)
-	if err := util.LinkPath(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
-		return fmt.Errorf("unable to link feature '%v':\n%w", feature.Name, err)
+	if err := util.DeleteAndLinkPath(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
+		return fmt.Errorf("unable to link feature '%v'\n%w", feature.Name, err)
 	}
 
 	if feature.ManifestPath == "" {
@@ -145,8 +145,8 @@ func (i FeatureInstaller) installJar(feature Feature) error {
 	}
 
 	manifestBase := filepath.Base(feature.ManifestPath)
-	if err := util.LinkPath(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
-		return fmt.Errorf("unable to link feature manifest for '%v':\n%w", feature.Name, err)
+	if err := util.DeleteAndLinkPath(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
+		return fmt.Errorf("unable to link feature manifest for '%v'\n%w", feature.Name, err)
 	}
 
 	return nil
@@ -164,23 +164,23 @@ func (i FeatureInstaller) Enable() error {
 
 	t, err := template.New("features.tmpl").ParseFiles(i.TemplatePath)
 	if err != nil {
-		return fmt.Errorf("unable to create features template:\n%w", err)
+		return fmt.Errorf("unable to create features template\n%w", err)
 	}
 
 	configDefaultsPath := filepath.Join(i.RuntimeRootPath, "usr", "servers", "defaultServer", "configDropins", "defaults")
 	if err := os.MkdirAll(configDefaultsPath, 0755); err != nil {
-		return fmt.Errorf("unable to make config defaults directory:\n%w", err)
+		return fmt.Errorf("unable to make config defaults directory\n%w", err)
 	}
 
 	featuresConfigPath := filepath.Join(configDefaultsPath, "features.xml")
 	file, err := os.Create(featuresConfigPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file '%v':\n%w", featuresConfigPath, err)
+		return fmt.Errorf("unable to create file '%v'\n%w", featuresConfigPath, err)
 	}
 	defer file.Close()
 	err = t.Execute(file, featuresToEnable)
 	if err != nil {
-		return fmt.Errorf("unable to execute template:\n%w", err)
+		return fmt.Errorf("unable to execute template\n%w", err)
 	}
 
 	return nil

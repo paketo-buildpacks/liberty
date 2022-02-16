@@ -8,21 +8,22 @@ import (
 	"path/filepath"
 )
 
-// LinkPath removes the destination path (if it exists) and creates a symlink from the source to the destination path.
-func LinkPath(from, to string) error {
-	if _, err := os.Stat(from); err != nil {
-		return fmt.Errorf("unable to find file '%s'\n%w", from, err)
+// DeleteAndLinkPath removes the destination path (if it exists) and creates a symlink from the source to the
+// destination path.
+func DeleteAndLinkPath(src, dest string) error {
+	if _, err := os.Stat(src); err != nil {
+		return fmt.Errorf("unable to find src path '%s'\n%w", src, err)
 	}
-	if err := os.RemoveAll(to); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("unable to delete original file '%s'\n%w", from, err)
+	if err := os.RemoveAll(dest); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("unable to delete original destination path '%s'\n%w", dest, err)
 	}
-	if err := os.Symlink(from, to); err != nil {
-		return fmt.Errorf("unable to symlink file from '%s' to '%s'\n%w", from, to, err)
+	if err := os.Symlink(src, dest); err != nil {
+		return fmt.Errorf("unable to symlink file from '%s' to '%s'\n%w", src, dest, err)
 	}
 	return nil
 }
 
-// FileExists returns true if file exists.
+// FileExists returns true if the path exists.
 func FileExists(path string) (bool, error) {
 	if _, err := os.Stat(filepath.Join(path)); err == nil {
 		return true, nil
@@ -44,7 +45,8 @@ func DirExists(path string) (bool, error) {
 	}
 }
 
-func Copy(src, dest string) error {
+// CopyDir copies a directory and all of its contents from the source path to the destination.
+func CopyDir(src, dest string) error {
 	entries, err := ioutil.ReadDir(src)
 	if err != nil {
 		return err
@@ -64,7 +66,7 @@ func Copy(src, dest string) error {
 			if err := os.MkdirAll(destPath, 0755); err != nil {
 				return err
 			}
-			if err := Copy(srcPath, destPath); err != nil {
+			if err := CopyDir(srcPath, destPath); err != nil {
 				return err
 			}
 		default:
@@ -76,6 +78,7 @@ func Copy(src, dest string) error {
 	return nil
 }
 
+// CopyFile copies a file from the source path to the destination path.
 func CopyFile(src, dest string) error {
 	srcFile, err := os.Open(src)
 	defer srcFile.Close()

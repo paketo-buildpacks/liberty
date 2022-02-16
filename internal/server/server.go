@@ -14,7 +14,7 @@ type LibertyServer struct {
 }
 
 func (s LibertyServer) GetServerConfigPath() string {
-	return filepath.Join(s.InstallRoot, "wlp", "usr", "servers", s.ServerName, "server.xml")
+	return filepath.Join(s.InstallRoot, "usr", "servers", s.ServerName, "server.xml")
 }
 
 // SetUserDirectory sets the server's user directory to the specified directory.
@@ -23,15 +23,15 @@ func (s LibertyServer) SetUserDirectory(path string) error {
 	// stack run image
 	configDropinsDir := filepath.Join(s.InstallRoot, "usr", "servers", "defaultServer", "configDropins")
 	if configDropinsFound, err := util.DirExists(configDropinsDir); err != nil {
-		return fmt.Errorf("unable to read configDropins directory:\n%w", err)
+		return fmt.Errorf("unable to read configDropins directory\n%w", err)
 	} else if configDropinsFound {
 		newConfigDropinsDir := filepath.Join(path, "servers", s.ServerName, "configDropins")
-		if err := util.Copy(configDropinsDir, newConfigDropinsDir); err != nil {
-			return fmt.Errorf("unable to copy configDropins to new user directory:\n%w", err)
+		if err := util.CopyDir(configDropinsDir, newConfigDropinsDir); err != nil {
+			return fmt.Errorf("unable to copy configDropins to new user directory\n%w", err)
 		}
 	}
-	if err := util.LinkPath(path, filepath.Join(s.InstallRoot, "usr")); err != nil {
-		return fmt.Errorf("unable to set new user directory:\n%w", err)
+	if err := util.DeleteAndLinkPath(path, filepath.Join(s.InstallRoot, "usr")); err != nil {
+		return fmt.Errorf("unable to set new user directory\n%w", err)
 	}
 	return nil
 }
@@ -39,15 +39,15 @@ func (s LibertyServer) SetUserDirectory(path string) error {
 // HasInstalledApps checks the directories `<server-path>/apps` and `<server-path>/dropins` for any web or enterprise
 // archives. Returns true if it finds at least one compiled artifact.
 func (s LibertyServer) HasInstalledApps() (bool, error) {
-	serverPath := filepath.Join(s.InstallRoot, "wlp", "usr", "servers", s.ServerName)
+	serverPath := filepath.Join(s.InstallRoot, "usr", "servers", s.ServerName)
 	if hasApps, err := dirHasCompiledArtifacts(filepath.Join(serverPath, "apps")); err != nil {
-		return false, fmt.Errorf("unable to check apps directory for app archives:\n%w", err)
+		return false, fmt.Errorf("unable to check apps directory for app archives\n%w", err)
 	} else if hasApps {
 		return true, nil
 	}
 
 	if hasDropins, err := dirHasCompiledArtifacts(filepath.Join(serverPath, "dropins")); err != nil {
-		return false, fmt.Errorf("unable to check dropins directory for app archives:\n%w", err)
+		return false, fmt.Errorf("unable to check dropins directory for app archives\n%w", err)
 	} else if hasDropins {
 		return true, nil
 	}
