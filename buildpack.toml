@@ -176,9 +176,9 @@ api = "0.7"
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
     purl = "pkg:generic/ibm-open-libery-runtime-microProfile4@22.0.0?arch=amd64"
-    sha256 = "404d196fc4523ed19c4d2336f8e3ec8dcf1f49cd8f7de7199721a5e3f2a2883c"
+    sha256 = "ce66fd2dd4729dce0e5b6a35355220005b74a11b62c959e958497cd59cd278fe"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/22.0.0.1/openliberty-microProfile4-22.0.0.1.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/22.0.0.2/openliberty-microProfile4-22.0.0.2.zip"
     version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
