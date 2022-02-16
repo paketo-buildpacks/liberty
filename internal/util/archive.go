@@ -24,7 +24,7 @@ func Extract(artifact *os.File, destination string, stripComponents int) error {
 	} else if strings.HasSuffix(artifactName, ".tar.xz") {
 		err = crush.ExtractTarXz(artifact, destination, stripComponents)
 	} else {
-		return fmt.Errorf("unsupported archive type: %v", artifactName)
+		return fmt.Errorf("unsupported archive type: %s", artifactName)
 	}
 
 	return err

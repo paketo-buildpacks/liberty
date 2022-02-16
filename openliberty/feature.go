@@ -53,14 +53,14 @@ func (d *FeatureDescriptor) ResolveFeatures() error {
 	for i, feature := range d.Features {
 		featureUrl, err := url.Parse(feature.URI)
 		if err != nil {
-			return fmt.Errorf("unable to parse URI for feature %v\n%w", feature.Name, err)
+			return fmt.Errorf("unable to parse URI for feature %s\n%w", feature.Name, err)
 		}
 		if featureUrl.Scheme == "file" {
 			if err := d.resolveFileFeature(d.Features[i]); err != nil {
 				return err
 			}
 		} else {
-			return fmt.Errorf("unable to resolve feature %v: %v scheme unsupported", feature.Name, featureUrl.Scheme)
+			return fmt.Errorf("unable to resolve feature '%s': %s scheme unsupported", feature.Name, featureUrl.Scheme)
 		}
 	}
 	return nil
@@ -69,7 +69,7 @@ func (d *FeatureDescriptor) ResolveFeatures() error {
 func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 	featureUrl, err := url.Parse(feature.URI)
 	if err != nil {
-		return fmt.Errorf("unable to parse URI for feature %v\n%w", feature.Name, err)
+		return fmt.Errorf("unable to parse URI for feature %s\n%w", feature.Name, err)
 	}
 
 	featurePath := featureUrl.Path[1:]   // Strip leading '/' required by file URLs
@@ -77,7 +77,7 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 	var manifestPath string
 
 	if ext != "jar" && ext != "esa" {
-		return fmt.Errorf("unsupported feature packaging type for feature '%v': '%v'", feature.Name, ext)
+		return fmt.Errorf("unsupported feature packaging type for feature '%s': '%s'", feature.Name, ext)
 	}
 
 	if ext == "jar" {
@@ -88,7 +88,7 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 	// Verify the necessary files are found
 	resolvedFeaturePath := filepath.Join(d.Path, featurePath)
 	if _, err := os.Stat(resolvedFeaturePath); err != nil {
-		return fmt.Errorf("unable to find feature at '%v'", resolvedFeaturePath)
+		return fmt.Errorf("unable to find feature at '%s'", resolvedFeaturePath)
 	}
 	feature.ResolvedPath = resolvedFeaturePath
 
@@ -98,7 +98,7 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 
 	resolvedManifestPath := filepath.Join(d.Path, manifestPath)
 	if _, err := os.Stat(resolvedManifestPath); err != nil {
-		return fmt.Errorf("unable to find manifest for feature '%v': %v", feature.Name, resolvedManifestPath)
+		return fmt.Errorf("unable to find manifest for feature '%s': %s", feature.Name, resolvedManifestPath)
 	}
 	feature.ManifestPath = resolvedManifestPath
 
@@ -127,7 +127,7 @@ func (i FeatureInstaller) Install() error {
 				return err
 			}
 		} else {
-			return fmt.Errorf("unable to install feature '%v' at '%v'", feature.Name, feature.ResolvedPath)
+			return fmt.Errorf("unable to install feature '%s' at '%s'", feature.Name, feature.ResolvedPath)
 		}
 	}
 	return nil
@@ -137,7 +137,7 @@ func (i FeatureInstaller) installJar(feature Feature) error {
 	runtimeLibsPath := filepath.Join(i.RuntimeRootPath, "usr", "extension", "lib")
 	featureBase := filepath.Base(feature.ResolvedPath)
 	if err := util.DeleteAndLinkPath(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
-		return fmt.Errorf("unable to link feature '%v'\n%w", feature.Name, err)
+		return fmt.Errorf("unable to link feature '%s'\n%w", feature.Name, err)
 	}
 
 	if feature.ManifestPath == "" {
@@ -146,7 +146,7 @@ func (i FeatureInstaller) installJar(feature Feature) error {
 
 	manifestBase := filepath.Base(feature.ManifestPath)
 	if err := util.DeleteAndLinkPath(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
-		return fmt.Errorf("unable to link feature manifest for '%v'\n%w", feature.Name, err)
+		return fmt.Errorf("unable to link feature manifest for '%s'\n%w", feature.Name, err)
 	}
 
 	return nil
@@ -175,7 +175,7 @@ func (i FeatureInstaller) Enable() error {
 	featuresConfigPath := filepath.Join(configDefaultsPath, "features.xml")
 	file, err := os.Create(featuresConfigPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file '%v'\n%w", featuresConfigPath, err)
+		return fmt.Errorf("unable to create file '%s'\n%w", featuresConfigPath, err)
 	}
 	defer file.Close()
 	err = t.Execute(file, featuresToEnable)

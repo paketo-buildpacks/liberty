@@ -76,7 +76,7 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 
 	artifact, err := b.DependencyCache.Artifact(*b.ExternalConfigurationDependency)
 	if err != nil {
-		return fmt.Errorf("unable to get dependency %v\n%w", b.ExternalConfigurationDependency.ID, err)
+		return fmt.Errorf("unable to get dependency %s\n%w", b.ExternalConfigurationDependency.ID, err)
 	}
 	defer artifact.Close()
 
@@ -90,7 +90,7 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 	c := 0
 	if s, ok := b.ConfigurationResolver.Resolve("BP_OPENLIBERTY_EXT_CONF_STRIP"); ok {
 		if c, err = strconv.Atoi(s); err != nil {
-			return fmt.Errorf("unable to parse %v to integer\n%w", s, err)
+			return fmt.Errorf("unable to parse %s to integer\n%w", s, err)
 		}
 	}
 
@@ -105,7 +105,7 @@ func (b Base) ContributeConfigTemplates(layer libcnb.Layer) error {
 	// Create config templates directory
 	templateDir := filepath.Join(layer.Path, "templates")
 	if err := os.MkdirAll(templateDir, 0755); err != nil {
-		return fmt.Errorf("unable to create config template directory '%v'\n%w", templateDir, err)
+		return fmt.Errorf("unable to create config template directory '%s'\n%w", templateDir, err)
 	}
 
 	srcDir := filepath.Join(b.BuildpackPath, "templates")
@@ -121,12 +121,12 @@ func (b Base) ContributeConfigTemplates(layer libcnb.Layer) error {
 			destPath := filepath.Join(templateDir, entry.Name())
 			in, err := os.Open(srcPath)
 			if err != nil {
-				return fmt.Errorf("unable to open source template file '%v'\n%w", srcPath, err)
+				return fmt.Errorf("unable to open source template file '%s'\n%w", srcPath, err)
 			}
 			defer in.Close()
 			err = sherpa.CopyFile(in, destPath)
 			if err != nil {
-				return fmt.Errorf("unable to copy template from '%v' -> '%v'\n%w", srcPath, destPath, err)
+				return fmt.Errorf("unable to copy template from '%s' -> '%s'\n%w", srcPath, destPath, err)
 			}
 			return nil
 		}()

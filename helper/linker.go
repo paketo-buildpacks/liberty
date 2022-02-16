@@ -183,7 +183,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	appConfigPath := filepath.Join(configOverridesPath, "app.xml")
 	file, err := os.Create(appConfigPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file '%v'\n%w", appConfig, err)
+		return fmt.Errorf("unable to create file '%s'\n%w", appConfig, err)
 	}
 	defer file.Close()
 	err = t.Execute(file, appConfig)

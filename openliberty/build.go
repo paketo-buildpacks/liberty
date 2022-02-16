@@ -148,14 +148,14 @@ func (b Build) createProcesses(installType string) ([]libcnb.Process, error) {
 			return []libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
 		}
 
-		b.Logger.Debugf("Using Liberty runtime provided found at %v", runtimeRoot)
+		b.Logger.Debugf("Using Liberty runtime provided found at %s", runtimeRoot)
 		command = "docker-server.sh"
 		args = []string{"server", "run", "defaultServer"}
 	} else {
-		return []libcnb.Process{}, fmt.Errorf("unable to process install type: '%v'", installType)
+		return []libcnb.Process{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
 
-	b.Logger.Debugf("Using command '%v' and arguments: '%v'", command, args)
+	b.Logger.Debugf("Using command '%s' and arguments: '%s'", command, args)
 
 	process := libcnb.Process{
 		Type:      processType,
