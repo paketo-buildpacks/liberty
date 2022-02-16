@@ -134,9 +134,9 @@ api = "0.7"
     id = "open-liberty-runtime-webProfile9"
     name = "Open Liberty (Web Profile 9)"
     purl = "pkg:generic/ibm-open-libery-runtime-webProfile9@22.0.0?arch=amd64"
-    sha256 = "a17c68294ae10341fd8035874ca03fe0700afa4173491be75a677b253f90d140"
+    sha256 = "ec52c60fac7b2ade706b5c173c93348836c6a925d4f5d901790466125b66205a"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/22.0.0.1/openliberty-webProfile9-22.0.0.1.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/22.0.0.2/openliberty-webProfile9-22.0.0.2.zip"
     version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
