@@ -148,9 +148,9 @@ api = "0.7"
     id = "open-liberty-runtime-webProfile8"
     name = "Open Liberty (Web Profile 8)"
     purl = "pkg:generic/ibm-open-libery-runtime-webProfile8@22.0.0?arch=amd64"
-    sha256 = "158d2928ad10cbf8feb0549a25b5bfcadc4945e3d199b971e39eb458de3f09da"
+    sha256 = "51cc61b340a81b3cddb5fc34291b980cd5e5aa9cc83b9f7674e6f27e98fd67dc"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile8/22.0.0.1/openliberty-webProfile8-22.0.0.1.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile8/22.0.0.2/openliberty-webProfile8-22.0.0.2.zip"
     version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
