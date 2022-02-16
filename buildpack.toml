@@ -162,9 +162,9 @@ api = "0.7"
     id = "open-liberty-runtime-microProfile5"
     name = "Open Liberty (Micro Profile 5)"
     purl = "pkg:generic/ibm-open-libery-runtime-microProfile5@22.0.0?arch=amd64"
-    sha256 = "52d4d059cc43ece2f5712358ae8aac1fe8958f613364f0d1a08f53d45492113b"
+    sha256 = "4c2a8f92fda366a3d15aa76884ead21e6a135a0dee9b249e7ef40e4258834d03"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile5/22.0.0.1/openliberty-microProfile5-22.0.0.1.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile5/22.0.0.2/openliberty-microProfile5-22.0.0.2.zip"
     version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
