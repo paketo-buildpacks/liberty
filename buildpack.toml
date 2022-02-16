@@ -106,9 +106,9 @@ api = "0.7"
     id = "open-liberty-runtime-jakartaee9"
     name = "Open Liberty (Jakarta EE9)"
     purl = "pkg:generic/ibm-open-libery-runtime-jakartaee9@22.0.0?arch=amd64"
-    sha256 = "f8d8dcf0298c8db11d6df8c060db058f0757c1bd43983ee089f7534383702234"
+    sha256 = "f8b3dbc7101ef7a6b746c4daa372d69d3ae608e6cd2a6a21b7627840da80e48e"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/22.0.0.1/openliberty-jakartaee9-22.0.0.1.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/22.0.0.2/openliberty-jakartaee9-22.0.0.2.zip"
     version = "22.0.0"
 
     [[metadata.dependencies.licenses]]
