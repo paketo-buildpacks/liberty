@@ -86,7 +86,11 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
-	f.ServerRootPath = filepath.Join(layerDir, "usr", "servers", "defaultServer")
+	serverName := os.Getenv("BP_OPENLIBERTY_SERVER_NAME")
+	if serverName == "" {
+		serverName = "defaultServer"
+	}
+	f.ServerRootPath = filepath.Join(layerDir, "usr", "servers", serverName)
 	configPath := filepath.Join(f.ServerRootPath, "server.xml")
 
 	if hasBindings {
@@ -97,7 +101,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
-			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
+			existingBSP := filepath.Join(layerDir, "usr", "servers", serverName, "bootstrap.properties")
 			if err = util.DeleteAndLinkPath(bootstrapProperties, existingBSP); err != nil {
 				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
@@ -121,17 +125,17 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 	} else if isPackagedServer {
 		libertyServer := server.LibertyServer{
 			InstallRoot: f.RuntimeRootPath,
-			ServerName:  "defaultServer",
+			ServerName:  serverName,
 		}
 		if err := libertyServer.SetUserDirectory(userDir); err != nil {
 			return fmt.Errorf("unable to contribute packaged server\n%w", err)
 		}
 	} else {
-		if err = f.ContributeApp(appDir, layerDir, b); err != nil {
+		if err = f.ContributeApp(appDir, layerDir, serverName, b); err != nil {
 			return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
 		}
 
-		if err = f.ContributeUserFeatures(f.getConfigTemplate(b, "features.tmpl")); err != nil {
+		if err = f.ContributeUserFeatures(serverName, f.getConfigTemplate(b, "features.tmpl")); err != nil {
 			return fmt.Errorf("unable to contribute user features\n%w", err)
 		}
 	}
@@ -139,8 +143,8 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 	return nil
 }
 
-func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Binding) error {
-	linkPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "apps", "app")
+func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, binding libcnb.Binding) error {
+	linkPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "apps", "app")
 	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
 
 	if err := os.Symlink(appPath, linkPath); err != nil {
@@ -175,7 +179,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 		return fmt.Errorf("unable to create app template\n%w", err)
 	}
 
-	configOverridesPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "overrides")
+	configOverridesPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "configDropins", "overrides")
 	if err := os.MkdirAll(configOverridesPath, 0755); err != nil {
 		return fmt.Errorf("unable to make config overrides directory\n%w", err)
 	}
@@ -193,7 +197,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	return nil
 }
 
-func (f FileLinker) ContributeUserFeatures(configTemplatePath string) error {
+func (f FileLinker) ContributeUserFeatures(serverName, configTemplatePath string) error {
 	confDir := filepath.Join(f.BaseLayerPath, "conf")
 	featureDescriptor, err := openliberty.ReadFeatureDescriptor(confDir, f.Logger)
 	if err != nil {
@@ -216,6 +220,7 @@ func (f FileLinker) ContributeUserFeatures(configTemplatePath string) error {
 
 	featureInstaller := openliberty.NewFeatureInstaller(
 		f.RuntimeRootPath,
+		serverName,
 		configTemplatePath,
 		featureDescriptor.Features)
 

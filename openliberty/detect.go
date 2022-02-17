@@ -19,6 +19,7 @@ package openliberty
 import (
 	"fmt"
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/open-liberty/internal/server"
 	"github.com/paketo-buildpacks/open-liberty/internal/util"
@@ -29,8 +30,6 @@ const (
 	PlanEntryOpenLiberty           = "open-liberty"
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
-
-	DefaultServerName = "defaultServer"
 )
 
 type Detect struct {
@@ -38,14 +37,19 @@ type Detect struct {
 }
 
 func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &d.Logger)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("could not create configuration resolver\n%w", err)
+	}
+	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
 	isPackagedServer, err :=
-		util.FileExists(filepath.Join(context.Application.Path, "wlp", "usr", "servers", DefaultServerName, "server.xml"))
+		util.FileExists(filepath.Join(context.Application.Path, "wlp", "usr", "servers", serverName, "server.xml"))
 	if err != nil {
 		return libcnb.DetectResult{}, fmt.Errorf("unable to read packaged server.xml\n%w", err)
 	}
 
 	if isPackagedServer {
-		return d.detectPackagedServer(context)
+		return d.detectPackagedServer(context, serverName)
 	}
 
 	return d.detectApplication(context)
@@ -99,10 +103,10 @@ func (d Detect) detectApplication(context libcnb.DetectContext) (libcnb.DetectRe
 }
 
 // detectPackagedServer handles detection of a packaged Liberty server.
-func (d Detect) detectPackagedServer(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+func (d Detect) detectPackagedServer(context libcnb.DetectContext, serverName string) (libcnb.DetectResult, error) {
 	libertyServer := server.LibertyServer{
 		InstallRoot: filepath.Join(context.Application.Path, "wlp"),
-		ServerName:  "defaultServer",
+		ServerName:  serverName,
 	}
 	hasApps, err := libertyServer.HasInstalledApps()
 	if err != nil {

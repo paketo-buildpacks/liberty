@@ -74,6 +74,13 @@ api = "0.7"
     name = "BP_OPENLIBERTY_PROFILE"
 
   [[metadata.configurations]]
+    build = true
+    default = "defaultServer"
+    description = "Name of the server to use. Defaults to defaultServer"
+    launch = true
+    name = "BP_OPENLIBERTY_SERVER_NAME"
+
+  [[metadata.configurations]]
     build = false
     default = ""
     description = "If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, Open Liberty will use this value as the context root. Defaults to the value of `/`"
@@ -83,7 +90,7 @@ api = "0.7"
   [[metadata.configurations]]
     build = false
     default = ""
-    description = "Sets the logging level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`"
+    description = "Sets the logging level. If not set, attempts to get the buildpack's log level. If it is unable to, it defaults to `INFO`"
     launch = true
     name = "BPL_OPENLIBERTY_LOG_LEVEL"
 

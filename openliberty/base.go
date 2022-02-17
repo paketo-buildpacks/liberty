@@ -16,6 +16,7 @@ import (
 
 type Base struct {
 	BuildpackPath                   string
+	ServerName                      string
 	LayerContributor                libpak.LayerContributor
 	ConfigurationResolver           libpak.ConfigurationResolver
 	DependencyCache                 libpak.DependencyCache
@@ -25,6 +26,7 @@ type Base struct {
 
 func NewBase(
 	buildpackPath string,
+	serverName string,
 	externalConfigurationDependency *libpak.BuildpackDependency,
 	configurationResolver libpak.ConfigurationResolver,
 	cache libpak.DependencyCache,
@@ -38,6 +40,7 @@ func NewBase(
 
 	b := Base{
 		BuildpackPath:                   buildpackPath,
+		ServerName:                      serverName,
 		LayerContributor:                contributor,
 		ConfigurationResolver:           configurationResolver,
 		DependencyCache:                 cache,

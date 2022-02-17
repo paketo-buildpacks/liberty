@@ -107,13 +107,15 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 
 type FeatureInstaller struct {
 	RuntimeRootPath string
+	ServerName      string
 	TemplatePath    string
 	Features        []*Feature
 }
 
-func NewFeatureInstaller(runtimeRootPath, templatePath string, features []*Feature) FeatureInstaller {
+func NewFeatureInstaller(runtimeRootPath, serverName, templatePath string, features []*Feature) FeatureInstaller {
 	return FeatureInstaller{
 		RuntimeRootPath: runtimeRootPath,
+		ServerName:      serverName,
 		TemplatePath:    templatePath,
 		Features:        features,
 	}
@@ -167,7 +169,7 @@ func (i FeatureInstaller) Enable() error {
 		return fmt.Errorf("unable to create features template\n%w", err)
 	}
 
-	configDefaultsPath := filepath.Join(i.RuntimeRootPath, "usr", "servers", "defaultServer", "configDropins", "defaults")
+	configDefaultsPath := filepath.Join(i.RuntimeRootPath, "usr", "servers", i.ServerName, "configDropins", "defaults")
 	if err := os.MkdirAll(configDefaultsPath, 0755); err != nil {
 		return fmt.Errorf("unable to make config defaults directory\n%w", err)
 	}

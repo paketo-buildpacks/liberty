@@ -58,7 +58,7 @@ func testDistribution(t *testing.T, context spec.G, it spec.S) {
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 
-		distro, be := openliberty.NewDistribution(dep, dc, ctx.Application.Path)
+		distro, be := openliberty.NewDistribution(dep, dc, "defaultPath", ctx.Application.Path)
 		distro.Logger = bard.NewLogger(io.Discard)
 		Expect(be.Name).To(Equal("open-liberty-runtime"))
 		Expect(be.Launch).To(BeTrue())

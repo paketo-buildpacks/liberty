@@ -74,6 +74,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.Setenv("BPI_OL_DROPIN_DIR", appDir)).To(Succeed())
 			Expect(os.Setenv("BPI_OL_RUNTIME_ROOT", layerDir)).To(Succeed())
 			Expect(os.Setenv("BPI_OL_BASE_ROOT", baseLayerDir)).To(Succeed())
+			Expect(os.Setenv("BP_OPENLIBERTY_SERVER_NAME", "defaultServer")).To(Succeed())
 
 			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps"), 0755)).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides"), 0755)).To(Succeed())
@@ -89,6 +90,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.Unsetenv("BPI_OL_DROPIN_DIR")).To(Succeed())
 			Expect(os.Unsetenv("BPI_OL_RUNTIME_ROOT")).To(Succeed())
 			Expect(os.Unsetenv("BPI_OL_BASE_ROOT")).To(Succeed())
+			Expect(os.Unsetenv("BP_OPENLIBERTY_SERVER_NAME")).To(Succeed())
 
 			Expect(os.RemoveAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps"))).To(Succeed())
 			Expect(os.RemoveAll(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides"))).To(Succeed())
@@ -181,7 +183,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 				BaseLayerPath:   baseLayerDir,
 				RuntimeRootPath: layerDir,
 			}
-			err := featureLinker.ContributeUserFeatures(filepath.Join(configDir, "features.tmpl"))
+			err := featureLinker.ContributeUserFeatures("defaultServer", filepath.Join(configDir, "features.tmpl"))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(filepath.Join(layerDir, "usr", "extension", "lib", "test.feature_1.0.0.jar")).To(BeARegularFile())
 			Expect(filepath.Join(layerDir, "usr", "extension", "lib", "features", "test.feature_1.0.0.mf")).To(BeARegularFile())

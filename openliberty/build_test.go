@@ -46,9 +46,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11"},
-				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full"},
-				{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol"},
+				{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
+				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
+				{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
@@ -102,7 +103,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
 
-				Expect(buf.String()).To(Equal("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
+				Expect(buf.String()).To(ContainSubstring("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
 			})
 		})
 
@@ -117,7 +118,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
 
-				Expect(buf.String()).To(Equal("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
+				Expect(buf.String()).To(ContainSubstring("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
 			})
 		})
 	})
@@ -164,9 +165,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			ctx.Buildpack.Metadata = map[string]interface{}{
 				"configurations": []map[string]interface{}{
-					{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11"},
-					{"name": "BP_OPENLIBERTY_PROFILE", "default": "full"},
-					{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol"},
+					{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
+					{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
+					{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+					{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 				},
 				"dependencies": []map[string]interface{}{
 					{

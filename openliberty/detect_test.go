@@ -46,6 +46,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		ctx.Platform.Path, err = ioutil.TempDir("", "open-liberty-test-platform")
 		Expect(err).NotTo(HaveOccurred())
 
+		ctx.Buildpack.Metadata = map[string]interface{}{
+			"configurations": []map[string]interface{}{
+				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer"},
+			},
+		}
+
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte{}, 0644)).To(Succeed())
 	})

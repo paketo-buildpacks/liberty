@@ -31,17 +31,19 @@ import (
 )
 
 type Distribution struct {
+	ServerName       string
 	ApplicationPath  string
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
 }
 
-func NewDistribution(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, applicationPath string) (Distribution, libcnb.BOMEntry) {
+func NewDistribution(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, serverName, applicationPath string) (Distribution, libcnb.BOMEntry) {
 	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
 		Cache:  true,
 		Launch: true,
 	})
 	return Distribution{
+		ServerName:       serverName,
 		ApplicationPath:  applicationPath,
 		LayerContributor: contributor,
 	}, entry
@@ -59,7 +61,7 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		executor := effect.NewExecutor()
 		if err := executor.Execute(effect.Execution{
 			Command: filepath.Join(layer.Path, "bin", "server"),
-			Args:    []string{"create", "defaultServer"},
+			Args:    []string{"create", d.ServerName},
 			Dir:     layer.Path,
 			Stdout:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
 			Stderr:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),

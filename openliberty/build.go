@@ -39,18 +39,9 @@ type Build struct {
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
-	result := libcnb.NewBuildResult()
-
-	if hasApp, err := b.checkJvmApplicationProvided(context); err != nil {
-		return libcnb.BuildResult{}, err
-	} else if !hasApp {
-		for _, entry := range context.Plan.Entries {
-			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
-		}
-		return result, nil
-	}
-
 	b.Logger.Title(context.Buildpack)
+
+	result := libcnb.NewBuildResult()
 
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
@@ -66,6 +57,17 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("could not create configuration resolver\n%w", err)
+	}
+
+	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
+
+	if hasApp, err := b.checkJvmApplicationProvided(context, serverName); err != nil {
+		return libcnb.BuildResult{}, err
+	} else if !hasApp {
+		for _, entry := range context.Plan.Entries {
+			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
+		}
+		return result, nil
 	}
 
 	version, _ := cr.Resolve("BP_OPENLIBERTY_VERSION")
@@ -99,21 +101,21 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
-	base := NewBase(context.Buildpack.Path, externalConfigurationDependency, cr, dc)
+	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)
 
 	installType, _ := cr.Resolve("BP_OPENLIBERTY_INSTALL_TYPE")
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
-		distro, bomEntry := NewDistribution(dep, dc, context.Application.Path)
+		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path)
 		distro.Logger = b.Logger
 
 		result.Layers = append(result.Layers, distro)
 		result.BOM.Entries = append(result.BOM.Entries, bomEntry)
 	}
 
-	result.Processes, err = b.createProcesses(installType)
+	result.Processes, err = b.createProcesses(installType, serverName)
 	if err != nil {
 		return libcnb.BuildResult{}, err
 	}
@@ -121,7 +123,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	return result, nil
 }
 
-func (b Build) createProcesses(installType string) ([]libcnb.Process, error) {
+func (b Build) createProcesses(installType, serverName string) ([]libcnb.Process, error) {
 	var processType string
 	var command string
 	var args []string
@@ -129,7 +131,7 @@ func (b Build) createProcesses(installType string) ([]libcnb.Process, error) {
 	if installType == openLibertyInstall {
 		processType = "open-liberty"
 		command = "server"
-		args = []string{"run", "defaultServer"}
+		args = []string{"run", serverName}
 	} else if installType == noneInstall {
 		var runtimeRoot string
 
@@ -150,7 +152,7 @@ func (b Build) createProcesses(installType string) ([]libcnb.Process, error) {
 
 		b.Logger.Debugf("Using Liberty runtime provided found at %s", runtimeRoot)
 		command = "docker-server.sh"
-		args = []string{"server", "run", "defaultServer"}
+		args = []string{"server", "run", serverName}
 	} else {
 		return []libcnb.Process{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
@@ -168,10 +170,10 @@ func (b Build) createProcesses(installType string) ([]libcnb.Process, error) {
 	return []libcnb.Process{process}, nil
 }
 
-func (b Build) checkJvmApplicationProvided(context libcnb.BuildContext) (bool, error) {
+func (b Build) checkJvmApplicationProvided(context libcnb.BuildContext, serverName string) (bool, error) {
 	isPackagedServer := isPackagedServerPlan(context.Plan.Entries)
 	if isPackagedServer {
-		return b.validatePackagedServer(context.Application.Path, DefaultServerName)
+		return b.validatePackagedServer(context.Application.Path, serverName)
 	}
 	return b.validateApplication(context.Application.Path)
 }
