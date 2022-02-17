@@ -113,61 +113,61 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 		result.Layers = append(result.Layers, distro)
 		result.BOM.Entries = append(result.BOM.Entries, bomEntry)
-	}
 
-	result.Processes, err = b.createProcesses(installType, serverName)
-	if err != nil {
-		return libcnb.BuildResult{}, err
+		process, err := createOpenLibertyRuntimeProcess(serverName)
+		if err != nil {
+			return libcnb.BuildResult{}, err
+		}
+		result.Processes = []libcnb.Process{process}
+	} else if installType == noneInstall {
+		process, err := createStackRuntimeProcess(serverName)
+		if err != nil {
+			return libcnb.BuildResult{}, err
+		}
+		result.Processes = []libcnb.Process{process}
+	} else {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
 
 	return result, nil
 }
 
-func (b Build) createProcesses(installType, serverName string) ([]libcnb.Process, error) {
-	var processType string
-	var command string
-	var args []string
-
-	if installType == openLibertyInstall {
-		processType = "open-liberty"
-		command = "server"
-		args = []string{"run", serverName}
-	} else if installType == noneInstall {
-		var runtimeRoot string
-
-		// Determine the runtime provided in the stack
-		if olExists, err := util.DirExists(openLibertyStackRuntimeRoot); err != nil {
-			return []libcnb.Process{}, fmt.Errorf("unable to check Open Liberty stack runtime root exists\n%w", err)
-		} else if olExists {
-			runtimeRoot = openLibertyStackRuntimeRoot
-			processType = "open-liberty-stack"
-		} else if wlpExists, err := util.DirExists(webSphereLibertyRuntimeRoot); err != nil {
-			return []libcnb.Process{}, fmt.Errorf("unable to check WebSphere Liberty stack runtime root exists\n%w", err)
-		} else if wlpExists {
-			runtimeRoot = webSphereLibertyRuntimeRoot
-			processType = "websphere-liberty-stack"
-		} else {
-			return []libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
-		}
-
-		b.Logger.Debugf("Using Liberty runtime provided found at %s", runtimeRoot)
-		command = "docker-server.sh"
-		args = []string{"server", "run", serverName}
-	} else {
-		return []libcnb.Process{}, fmt.Errorf("unable to process install type: '%s'", installType)
-	}
-
-	b.Logger.Debugf("Using command '%s' and arguments: '%s'", command, args)
-
-	process := libcnb.Process{
-		Type:      processType,
-		Command:   command,
-		Arguments: args,
+func createOpenLibertyRuntimeProcess(serverName string) (libcnb.Process, error) {
+	return libcnb.Process{
+		Type:      "open-liberty",
+		Command:   "server",
+		Arguments: []string{"run", serverName},
 		Default:   true,
 		Direct:    true,
+	}, nil
+}
+
+func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
+	if olExists, err := util.DirExists(openLibertyStackRuntimeRoot); err != nil {
+		return libcnb.Process{}, fmt.Errorf("unable to check Open Liberty stack runtime root exists\n%w", err)
+	} else if olExists {
+		return libcnb.Process{
+			Type:      "open-liberty-stack",
+			Command:   "docker-server.sh",
+			Arguments: []string{"server", "run", serverName},
+			Default:   true,
+			Direct:    true,
+		}, nil
 	}
 
-	return []libcnb.Process{process}, nil
+	if wlpExists, err := util.DirExists(webSphereLibertyRuntimeRoot); err != nil {
+		return libcnb.Process{}, fmt.Errorf("unable to WebSphere Open Liberty stack runtime root exists\n%w", err)
+	} else if wlpExists {
+		return libcnb.Process{
+			Type:      "websphere-liberty-stack",
+			Command:   "docker-server.sh",
+			Arguments: []string{"server", "run", serverName},
+			Default:   true,
+			Direct:    true,
+		}, nil
+	}
+
+	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
 }
 
 func (b Build) checkJvmApplicationProvided(context libcnb.BuildContext, serverName string) (bool, error) {
