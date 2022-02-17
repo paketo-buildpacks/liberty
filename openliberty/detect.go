@@ -49,9 +49,11 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 	}
 
 	if isPackagedServer {
+		d.Logger.Debug("Detected packaged server")
 		return d.detectPackagedServer(context, serverName)
 	}
 
+	d.Logger.Debugf("Detected application")
 	return d.detectApplication(context)
 }
 
