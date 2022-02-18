@@ -203,11 +203,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("when building a packaged server", func() {
 		it.Before(func() {
-			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
-			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+			usrPath := filepath.Join(ctx.Application.Path, "usr")
+			Expect(os.MkdirAll(filepath.Join(usrPath, "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(usrPath, "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
 			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "open-liberty", Metadata: map[string]interface{}{
-				"packaged-server": true,
+				"packaged-server":          true,
+				"packaged-server-usr-path": usrPath,
 			}}}
+			Expect(os.Setenv("BP_DEBUG", "true"))
 		})
 
 		it.After(func() {

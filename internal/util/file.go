@@ -25,7 +25,7 @@ func DeleteAndLinkPath(src, dest string) error {
 
 // FileExists returns true if the path exists.
 func FileExists(path string) (bool, error) {
-	if _, err := os.Stat(filepath.Join(path)); err == nil {
+	if _, err := os.Stat(path); err == nil {
 		return true, nil
 	} else if os.IsNotExist(err) {
 		return false, nil

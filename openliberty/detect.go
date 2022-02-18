@@ -41,27 +41,34 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 	if err != nil {
 		return libcnb.DetectResult{}, fmt.Errorf("could not create configuration resolver\n%w", err)
 	}
+
 	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
-	isPackagedServer, err :=
-		util.FileExists(filepath.Join(context.Application.Path, "wlp", "usr", "servers", serverName, "server.xml"))
-	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to read packaged server.xml\n%w", err)
+	packagedServerDirs := []string{
+		filepath.Join("wlp", "usr"),
+		"usr",
 	}
 
-	if isPackagedServer {
-		d.Logger.Debug("Detected packaged server")
-		return d.detectPackagedServer(context, serverName)
+	for _, dir := range packagedServerDirs {
+		serverUserPath := filepath.Join(context.Application.Path, dir)
+		isPackagedServer, err := util.FileExists(filepath.Join(serverUserPath, "servers", serverName, "server.xml"))
+		if err != nil {
+			return libcnb.DetectResult{}, fmt.Errorf("unable to read packaged server.xml\n%w", err)
+		}
+		if isPackagedServer {
+			d.Logger.Debug("Detected packaged server")
+			return d.detectPackagedServer(serverUserPath, serverName)
+		}
 	}
 
 	d.Logger.Debugf("Detected application")
-	return d.detectApplication(context)
+	return d.detectApplication(context.Application.Path)
 }
 
 // detectApplication will handle detection of applications. It will pass detection iff `Main-Class` is not defined in
 // the manifest. If a compiled artifact was pushed, detectApplication will mark the `jvm-application-package`
 // requirement as being met.
-func (d Detect) detectApplication(context libcnb.DetectContext) (libcnb.DetectResult, error) {
-	if mainClassDefined, err := util.ManifestHasMainClassDefined(context.Application.Path); err != nil {
+func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
+	if mainClassDefined, err := util.ManifestHasMainClassDefined(appPath); err != nil {
 		return libcnb.DetectResult{}, fmt.Errorf("unable to check manifest\n%w", err)
 	} else if mainClassDefined {
 		return libcnb.DetectResult{Pass: false}, nil
@@ -69,7 +76,7 @@ func (d Detect) detectApplication(context libcnb.DetectContext) (libcnb.DetectRe
 
 	// When a compiled artifact is pushed, mark that a JVM application package has been provided so that the build
 	// plan requirement is satisfied.
-	isJvmAppPackage, err := util.IsJvmApplicationPackage(context.Application.Path)
+	isJvmAppPackage, err := util.IsJvmApplicationPackage(appPath)
 	if err != nil {
 		return libcnb.DetectResult{}, err
 	}
@@ -105,10 +112,10 @@ func (d Detect) detectApplication(context libcnb.DetectContext) (libcnb.DetectRe
 }
 
 // detectPackagedServer handles detection of a packaged Liberty server.
-func (d Detect) detectPackagedServer(context libcnb.DetectContext, serverName string) (libcnb.DetectResult, error) {
+func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.DetectResult, error) {
 	libertyServer := server.LibertyServer{
-		InstallRoot: filepath.Join(context.Application.Path, "wlp"),
-		ServerName:  serverName,
+		ServerUserPath: serverUserPath,
+		ServerName:     serverName,
 	}
 	hasApps, err := libertyServer.HasInstalledApps()
 	if err != nil {
@@ -131,7 +138,8 @@ func (d Detect) detectPackagedServer(context libcnb.DetectContext, serverName st
 					},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryOpenLiberty, Metadata: map[string]interface{}{
-						"packaged-server": true,
+						"packaged-server":          true,
+						"packaged-server-usr-path": serverUserPath,
 					}},
 				},
 			},

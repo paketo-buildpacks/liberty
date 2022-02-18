@@ -28,17 +28,17 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 
 		svr = server.LibertyServer{
-			InstallRoot: filepath.Join(testPath, "wlp"),
-			ServerName:  "defaultServer",
+			ServerUserPath: filepath.Join(testPath, "wlp"),
+			ServerName:     "defaultServer",
 		}
-		Expect(os.MkdirAll(filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "apps"), 0755)).To(Succeed())
-		Expect(os.MkdirAll(filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "dropins"), 0755)).To(Succeed())
+		Expect(os.MkdirAll(filepath.Join(svr.ServerUserPath, "usr", "servers", "defaultServer", "apps"), 0755)).To(Succeed())
+		Expect(os.MkdirAll(filepath.Join(svr.ServerUserPath, "usr", "servers", "defaultServer", "dropins"), 0755)).To(Succeed())
 	})
 
 	it.After(func() {
 		Expect(os.RemoveAll(testPath)).To(Succeed())
-		Expect(os.RemoveAll(filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "apps"))).To(Succeed())
-		Expect(os.RemoveAll(filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "dropins"))).To(Succeed())
+		Expect(os.RemoveAll(filepath.Join(svr.ServerUserPath, "usr", "servers", "defaultServer", "apps"))).To(Succeed())
+		Expect(os.RemoveAll(filepath.Join(svr.ServerUserPath, "usr", "servers", "defaultServer", "dropins"))).To(Succeed())
 	})
 
 	when("changing the server user directory", func() {
@@ -65,42 +65,42 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.WriteFile(filepath.Join(newServerDir, "server.xml"), []byte{}, 0644)).To(Succeed())
 
 			// Create configDropins in original directory
-			configDropinsDir := filepath.Join(svr.InstallRoot, "usr", "servers", svr.ServerName, "configDropins", "overrides")
+			configDropinsDir := filepath.Join(svr.ServerUserPath, "servers", svr.ServerName, "configDropins", "overrides")
 			Expect(os.MkdirAll(configDropinsDir, 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(configDropinsDir, "test-config.xml"), []byte{}, 0644)).To(Succeed())
 
 			Expect(svr.SetUserDirectory(newUserDir)).To(Succeed())
 			Expect(filepath.Join(configDropinsDir, "test-config.xml")).To(BeARegularFile())
 
-			Expect(os.RemoveAll(filepath.Join(svr.InstallRoot, "usr"))).To(Succeed())
+			Expect(os.RemoveAll(svr.ServerUserPath)).To(Succeed())
 			Expect(os.RemoveAll(newUserDir)).To(Succeed())
 		})
 	})
 
 	when("checking if a server has installed apps", func() {
 		it("finds war in apps directory", func() {
-			appPath := filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "apps", "test.war")
+			appPath := filepath.Join(svr.ServerUserPath, "servers", "defaultServer", "apps", "test.war")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(svr.HasInstalledApps()).To(BeTrue())
 			Expect(os.RemoveAll(appPath)).To(Succeed())
 		})
 
 		it("finds ear in apps directory", func() {
-			appPath := filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "apps", "test.ear")
+			appPath := filepath.Join(svr.ServerUserPath, "servers", "defaultServer", "apps", "test.ear")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(svr.HasInstalledApps()).To(BeTrue())
 			Expect(os.RemoveAll(appPath)).To(Succeed())
 		})
 
 		it("finds war in dropins directory", func() {
-			appPath := filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "dropins", "test.war")
+			appPath := filepath.Join(svr.ServerUserPath, "servers", "defaultServer", "dropins", "test.war")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(svr.HasInstalledApps()).To(BeTrue())
 			Expect(os.RemoveAll(appPath)).To(Succeed())
 		})
 
 		it("finds ear in dropins directory", func() {
-			appPath := filepath.Join(svr.InstallRoot, "usr", "servers", "defaultServer", "dropins", "test.ear")
+			appPath := filepath.Join(svr.ServerUserPath, "servers", "defaultServer", "dropins", "test.ear")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(svr.HasInstalledApps()).To(BeTrue())
 			Expect(os.RemoveAll(appPath)).To(Succeed())

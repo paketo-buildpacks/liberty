@@ -113,7 +113,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
-	context("when building a packaged server", func() {
+	context("when building a packaged server containing a wlp directory", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BPI_OL_DROPIN_DIR", appDir)).To(Succeed())
 			Expect(os.Setenv("BPI_OL_RUNTIME_ROOT", layerDir)).To(Succeed())
@@ -135,7 +135,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(filepath.Join(appDir, "wlp"))).To(Succeed())
 		})
 
-		it("replaces the runtime's user directory with app's user directory", func() {
+		it("replaces the runtime's user directory with app's wlp directory", func() {
 			_, err := linker.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
@@ -144,6 +144,40 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 
 			linkName := filepath.Join(layerDir, "usr")
 			resolved, err := filepath.EvalSymlinks(linkName)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resolved).To(Equal(resolvedAppDir))
+		})
+	})
+
+	context("when building a packaged server containing a usr directory", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BPI_OL_DROPIN_DIR", appDir)).To(Succeed())
+			Expect(os.Setenv("BPI_OL_RUNTIME_ROOT", layerDir)).To(Succeed())
+			Expect(os.Setenv("BPI_OL_BASE_ROOT", baseLayerDir)).To(Succeed())
+
+			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+
+			packagedServerDir := filepath.Join(appDir, "usr", "servers", "defaultServer")
+			Expect(os.MkdirAll(packagedServerDir, 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(packagedServerDir, "server.xml"), []byte{}, 0644)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BPI_OL_DROPIN_DIR")).To(Succeed())
+			Expect(os.Unsetenv("BPI_OL_RUNTIME_ROOT")).To(Succeed())
+			Expect(os.Unsetenv("BPI_OL_BASE_ROOT")).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(layerDir, "usr"))).To(Succeed())
+		})
+
+		it("replaces the runtime's user directory with app's usr directory", func() {
+			_, err := linker.Execute()
+			Expect(err).NotTo(HaveOccurred())
+
+			resolvedAppDir, err := filepath.EvalSymlinks(filepath.Join(appDir, "usr"))
+			Expect(err).NotTo(HaveOccurred())
+
+			resolved, err := filepath.EvalSymlinks(filepath.Join(layerDir, "usr"))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(resolved).To(Equal(resolvedAppDir))
 		})

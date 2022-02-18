@@ -172,17 +172,22 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 
 func (b Build) checkJvmApplicationProvided(context libcnb.BuildContext, serverName string) (bool, error) {
 	isPackagedServer := isPackagedServerPlan(context.Plan.Entries)
+
 	if isPackagedServer {
-		return b.validatePackagedServer(context.Application.Path, serverName)
+		serverUserPath, err := getPackagedServerUserPath(context.Plan.Entries)
+		if err != nil {
+			return false, err
+		}
+		return b.validatePackagedServer(serverUserPath, serverName)
 	}
 	return b.validateApplication(context.Application.Path)
 }
 
 // validatePackagedServer returns true if a server.xml is found and at least one app is installed.
-func (b Build) validatePackagedServer(serverRoot, serverName string) (bool, error) {
+func (b Build) validatePackagedServer(userPath, serverName string) (bool, error) {
 	libertyServer := server.LibertyServer{
-		InstallRoot: serverRoot,
-		ServerName:  serverName,
+		ServerUserPath: userPath,
+		ServerName:     serverName,
 	}
 
 	if serverConfigFound, err := util.FileExists(libertyServer.GetServerConfigPath()); err != nil {
@@ -235,4 +240,20 @@ func isPackagedServerPlan(plans []libcnb.BuildpackPlanEntry) bool {
 		}
 	}
 	return value
+}
+
+func getPackagedServerUserPath(plans []libcnb.BuildpackPlanEntry) (string, error) {
+	for _, entry := range plans {
+		if entry.Name == PlanEntryOpenLiberty {
+			if userPath, found := entry.Metadata["packaged-server-usr-path"]; found {
+				val, ok := userPath.(string)
+				if !ok {
+					return "", fmt.Errorf("unable to parse packaged-server-usr-path: '%v'", userPath)
+				}
+				return val, nil
+			}
+			break
+		}
+	}
+	return "", fmt.Errorf("unable to find packaged-server-usr-path")
 }

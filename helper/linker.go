@@ -119,15 +119,16 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 	}
 
 	// Check if we are contributing a packaged server
-	userDir := filepath.Join(appDir, "wlp", "usr")
-	if isPackagedServer, err := util.DirExists(userDir); err != nil {
+	isPackagedServer, usrPath, err := checkPackagedServer(appDir)
+	if err != nil {
 		return fmt.Errorf("unable to check package server directory\n%w", err)
-	} else if isPackagedServer {
+	}
+	if isPackagedServer {
 		libertyServer := server.LibertyServer{
-			InstallRoot: f.RuntimeRootPath,
-			ServerName:  serverName,
+			ServerUserPath: filepath.Join(f.RuntimeRootPath, "usr"),
+			ServerName:     serverName,
 		}
-		if err := libertyServer.SetUserDirectory(userDir); err != nil {
+		if err := libertyServer.SetUserDirectory(usrPath); err != nil {
 			return fmt.Errorf("unable to contribute packaged server\n%w", err)
 		}
 	} else {
@@ -262,4 +263,25 @@ func readServerConfig(configPath string) (ServerConfig, error) {
 		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%s'\n%w", configPath, err)
 	}
 	return config, nil
+}
+
+// checkPackagedServer returns true if a packaged server is detected. If true, it also returns the detected usr path.
+func checkPackagedServer(appPath string) (bool, string, error) {
+	dirs := []string{
+		filepath.Join("wlp", "usr"),
+		"usr",
+	}
+
+	for _, dir := range dirs {
+		userPath := filepath.Join(appPath, dir)
+		isPackagedServer, err := util.DirExists(userPath)
+		if err != nil {
+			return false, "", fmt.Errorf("unable to check user directory\n%w", err)
+		}
+		if isPackagedServer {
+			return true, userPath, nil
+		}
+	}
+
+	return false, "", nil
 }
