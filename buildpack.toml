@@ -69,7 +69,7 @@ api = "0.7"
   [[metadata.configurations]]
     build = true
     default = "full"
-    description = "The Liberty profile to install. Current options are 'full', 'javaee8', 'webProfile8', 'microProfile4', and 'kernel'"
+    description = "The Liberty profile to install. Current options are 'full', 'jakartaee9', 'javaee8', 'webProfile9', 'webProfile8', 'microProfile5', 'microProfile4', 'microProfile3', and 'kernel'"
     launch = false
     name = "BP_OPENLIBERTY_PROFILE"
 
@@ -83,7 +83,7 @@ api = "0.7"
   [[metadata.configurations]]
     build = false
     default = ""
-    description = "If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, Open Liberty will use this value as the context root. Defaults to the value of `/`"
+    description = "If the server.xml does not have an application named `app` defined, Open Liberty will use this value as the context root. Defaults to the value of `/`."
     launch = true
     name = "BP_OPENLIBERTY_CONTEXT_ROOT"
 
