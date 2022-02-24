@@ -6,8 +6,8 @@ import (
 	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/crush"
 	"github.com/paketo-buildpacks/libpak/sherpa"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,6 +16,7 @@ import (
 
 type Base struct {
 	BuildpackPath                   string
+	ServerName                      string
 	LayerContributor                libpak.LayerContributor
 	ConfigurationResolver           libpak.ConfigurationResolver
 	DependencyCache                 libpak.DependencyCache
@@ -25,6 +26,7 @@ type Base struct {
 
 func NewBase(
 	buildpackPath string,
+	serverName string,
 	externalConfigurationDependency *libpak.BuildpackDependency,
 	configurationResolver libpak.ConfigurationResolver,
 	cache libpak.DependencyCache,
@@ -38,6 +40,7 @@ func NewBase(
 
 	b := Base{
 		BuildpackPath:                   buildpackPath,
+		ServerName:                      serverName,
 		LayerContributor:                contributor,
 		ConfigurationResolver:           configurationResolver,
 		DependencyCache:                 cache,
@@ -57,12 +60,12 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		if b.ExternalConfigurationDependency != nil {
 			if err := b.ContributeExternalConfiguration(layer); err != nil {
-				return libcnb.Layer{}, fmt.Errorf("unable to contribute external configuration:\n%w", err)
+				return libcnb.Layer{}, fmt.Errorf("unable to contribute external configuration\n%w", err)
 			}
 		}
 
 		if err := b.ContributeUserFeatures(layer); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features: %w", err)
+			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features\n%w", err)
 		}
 
 		layer.LaunchEnvironment.Default("BPI_OL_BASE_ROOT", layer.Path)
@@ -76,13 +79,13 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 
 	artifact, err := b.DependencyCache.Artifact(*b.ExternalConfigurationDependency)
 	if err != nil {
-		return fmt.Errorf("unable to get dependency %v\n%w", b.ExternalConfigurationDependency.ID, err)
+		return fmt.Errorf("unable to get dependency %s\n%w", b.ExternalConfigurationDependency.ID, err)
 	}
 	defer artifact.Close()
 
 	confPath := filepath.Join(layer.Path, "conf")
 	if err := os.MkdirAll(confPath, 0755); err != nil {
-		return fmt.Errorf("unable to make external config directory:\n%w", err)
+		return fmt.Errorf("unable to make external config directory\n%w", err)
 	}
 
 	b.Logger.Bodyf("Expanding to %s", confPath)
@@ -90,11 +93,11 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 	c := 0
 	if s, ok := b.ConfigurationResolver.Resolve("BP_OPENLIBERTY_EXT_CONF_STRIP"); ok {
 		if c, err = strconv.Atoi(s); err != nil {
-			return fmt.Errorf("unable to parse %v to integer\n%w", s, err)
+			return fmt.Errorf("unable to parse %s to integer\n%w", s, err)
 		}
 	}
 
-	if err := crush.ExtractTarGz(artifact, confPath, c); err != nil {
+	if err := util.Extract(artifact, confPath, c); err != nil {
 		return fmt.Errorf("unable to expand external configuration\n%w", err)
 	}
 
@@ -105,7 +108,7 @@ func (b Base) ContributeConfigTemplates(layer libcnb.Layer) error {
 	// Create config templates directory
 	templateDir := filepath.Join(layer.Path, "templates")
 	if err := os.MkdirAll(templateDir, 0755); err != nil {
-		return fmt.Errorf("unable to create config template directory '%v'\n%w", templateDir, err)
+		return fmt.Errorf("unable to create config template directory '%s'\n%w", templateDir, err)
 	}
 
 	srcDir := filepath.Join(b.BuildpackPath, "templates")
@@ -121,12 +124,12 @@ func (b Base) ContributeConfigTemplates(layer libcnb.Layer) error {
 			destPath := filepath.Join(templateDir, entry.Name())
 			in, err := os.Open(srcPath)
 			if err != nil {
-				return fmt.Errorf("unable to open source template file '%v'\n%w", srcPath, err)
+				return fmt.Errorf("unable to open source template file '%s'\n%w", srcPath, err)
 			}
 			defer in.Close()
 			err = sherpa.CopyFile(in, destPath)
 			if err != nil {
-				return fmt.Errorf("unable to copy template from '%v' -> '%v'\n%w", srcPath, destPath, err)
+				return fmt.Errorf("unable to copy template from '%s' -> '%s'\n%w", srcPath, destPath, err)
 			}
 			return nil
 		}()

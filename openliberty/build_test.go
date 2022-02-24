@@ -46,9 +46,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11"},
-				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full"},
-				{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol"},
+				{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
+				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
+				{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
@@ -102,7 +103,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
 
-				Expect(buf.String()).To(Equal("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
+				Expect(buf.String()).To(ContainSubstring("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
 			})
 		})
 
@@ -117,7 +118,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
 
-				Expect(buf.String()).To(Equal("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
+				Expect(buf.String()).To(ContainSubstring("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
 			})
 		})
 	})
@@ -164,9 +165,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			ctx.Buildpack.Metadata = map[string]interface{}{
 				"configurations": []map[string]interface{}{
-					{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11"},
-					{"name": "BP_OPENLIBERTY_PROFILE", "default": "full"},
-					{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol"},
+					{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
+					{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
+					{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+					{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 				},
 				"dependencies": []map[string]interface{}{
 					{
@@ -196,6 +198,41 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				SHA256:  "test-sha256",
 				Stacks:  []string{ctx.StackID},
 			}))
+		})
+	})
+
+	context("when building a packaged server", func() {
+		it.Before(func() {
+			usrPath := filepath.Join(ctx.Application.Path, "usr")
+			Expect(os.MkdirAll(filepath.Join(usrPath, "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(usrPath, "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "open-liberty", Metadata: map[string]interface{}{
+				"packaged-server":          true,
+				"packaged-server-usr-path": usrPath,
+			}}}
+			Expect(os.Setenv("BP_DEBUG", "true"))
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "usr"))).To(Succeed())
+		})
+
+		it("should discover the app", func() {
+			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Unmet).To(HaveLen(0))
+		})
+
+		it("should not run if no apps are installed", func() {
+			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "apps", "test.war"))).To(Succeed())
+			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Unmet).To(HaveLen(1))
+			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "open-liberty"}))
 		})
 	})
 }

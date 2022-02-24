@@ -18,20 +18,18 @@ package openliberty
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/libjvm"
+	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/open-liberty/internal/server"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"path/filepath"
 )
 
 const (
 	PlanEntryOpenLiberty           = "open-liberty"
-	PlanEntryJDK                   = "jdk"
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
-	PlanEntryJVMApplication        = "jvm-application"
 )
 
 type Detect struct {
@@ -39,6 +37,50 @@ type Detect struct {
 }
 
 func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &d.Logger)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("could not create configuration resolver\n%w", err)
+	}
+
+	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
+	packagedServerDirs := []string{
+		filepath.Join("wlp", "usr"),
+		"usr",
+	}
+
+	for _, dir := range packagedServerDirs {
+		serverUserPath := filepath.Join(context.Application.Path, dir)
+		isPackagedServer, err := util.FileExists(filepath.Join(serverUserPath, "servers", serverName, "server.xml"))
+		if err != nil {
+			return libcnb.DetectResult{}, fmt.Errorf("unable to read packaged server.xml\n%w", err)
+		}
+		if isPackagedServer {
+			d.Logger.Debug("Detected packaged server")
+			return d.detectPackagedServer(serverUserPath, serverName)
+		}
+	}
+
+	d.Logger.Debugf("Detected application")
+	return d.detectApplication(context.Application.Path)
+}
+
+// detectApplication will handle detection of applications. It will pass detection iff `Main-Class` is not defined in
+// the manifest. If a compiled artifact was pushed, detectApplication will mark the `jvm-application-package`
+// requirement as being met.
+func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
+	if mainClassDefined, err := util.ManifestHasMainClassDefined(appPath); err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check manifest\n%w", err)
+	} else if mainClassDefined {
+		return libcnb.DetectResult{Pass: false}, nil
+	}
+
+	// When a compiled artifact is pushed, mark that a JVM application package has been provided so that the build
+	// plan requirement is satisfied.
+	isJvmAppPackage, err := util.IsJvmApplicationPackage(appPath)
+	if err != nil {
+		return libcnb.DetectResult{}, err
+	}
+
 	result := libcnb.DetectResult{
 		Pass: true,
 		Plans: []libcnb.BuildPlan{
@@ -60,67 +102,55 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 		},
 	}
 
-	mainClassPresent, err := d.checkForMainClassInManifest(context)
-	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to check manifest\n%w", err)
-	}
-	if mainClassPresent {
-		return libcnb.DetectResult{Pass: false}, nil
-	}
-
-	applicationXMLPresent, err := d.checkForApplicationXML(context)
-	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to check application XML\n%w", err)
-	}
-
-	webInfPresent, err := d.checkForWebInf(context)
-	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to check WEB-INF\n%w", err)
-	}
-
-	if webInfPresent || applicationXMLPresent {
-		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{Name: PlanEntryJVMApplicationPackage})
-		return result, nil
+	if isJvmAppPackage {
+		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{
+			Name: PlanEntryJVMApplicationPackage,
+		})
 	}
 
 	return result, nil
 }
 
-// checkForApplicationXML will return true if `META-INF/application.xml` is present, which happens when precompiled bits are provided
-func (d Detect) checkForApplicationXML(context libcnb.DetectContext) (bool, error) {
-	_, err := os.Stat(filepath.Join(context.Application.Path, "META-INF", "application.xml"))
+// detectPackagedServer handles detection of a packaged Liberty server.
+func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.DetectResult, error) {
+	libertyServer := server.LibertyServer{
+		ServerUserPath: serverUserPath,
+		ServerName:     serverName,
+	}
+	hasApps, err := libertyServer.HasInstalledApps()
 	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-
-		return false, err
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check if packaged server has apps\n%w", err)
 	}
 
-	return true, nil
-}
+	result := libcnb.DetectResult{
+		Pass: true,
+		Plans: []libcnb.BuildPlan{
+			{
+				Provides: []libcnb.BuildPlanProvide{
+					{Name: PlanEntryOpenLiberty},
+				},
 
-// checkForWebInf will return true if `WEB-INF/` exists, which happens when precompiled bits are provided
-func (d Detect) checkForWebInf(context libcnb.DetectContext) (bool, error) {
-	info, err := os.Stat(filepath.Join(context.Application.Path, "WEB-INF"))
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-
-		return false, err
+				Requires: []libcnb.BuildPlanRequire{
+					{Name: PlanEntryJRE, Metadata: map[string]interface{}{
+						"launch": true,
+						"build":  true,
+						"cache":  true},
+					},
+					{Name: PlanEntryJVMApplicationPackage},
+					{Name: PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+						"packaged-server":          true,
+						"packaged-server-usr-path": serverUserPath,
+					}},
+				},
+			},
+		},
 	}
 
-	return info.IsDir(), nil
-}
-
-// checkForMainClassInManifest will return true if Main-Class is present in `META-INF/MANIFEST.MF`
-func (d Detect) checkForMainClassInManifest(context libcnb.DetectContext) (bool, error) {
-	m, err := libjvm.NewManifest(context.Application.Path)
-	if err != nil {
-		return false, fmt.Errorf("unable to read manifest\n%w", err)
+	if hasApps {
+		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{
+			Name: PlanEntryJVMApplicationPackage,
+		})
 	}
 
-	_, ok := m.Get("Main-Class")
-	return ok, nil
+	return result, nil
 }
