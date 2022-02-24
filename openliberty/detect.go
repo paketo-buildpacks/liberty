@@ -18,12 +18,13 @@ package openliberty
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/open-liberty/internal/server"
 	"github.com/paketo-buildpacks/open-liberty/internal/util"
-	"path/filepath"
 )
 
 const (
@@ -37,9 +38,9 @@ type Detect struct {
 }
 
 func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
-	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &d.Logger)
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil)
 	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("could not create configuration resolver\n%w", err)
+		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
 	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
@@ -60,7 +61,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 		}
 	}
 
-	d.Logger.Debugf("Detected application")
+	d.Logger.Debug("Detected application")
 	return d.detectApplication(context.Application.Path)
 }
 
@@ -106,6 +107,8 @@ func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
 		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{
 			Name: PlanEntryJVMApplicationPackage,
 		})
+	} else {
+		d.Logger.Debug("Not a JVM application package")
 	}
 
 	return result, nil
@@ -150,6 +153,8 @@ func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.
 		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{
 			Name: PlanEntryJVMApplicationPackage,
 		})
+	} else {
+		d.Logger.Debug("No applications detected in server bundle")
 	}
 
 	return result, nil

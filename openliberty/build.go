@@ -18,6 +18,7 @@ package openliberty
 
 import (
 	"fmt"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -45,18 +46,18 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("could not create dependency resolver\n%w", err)
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
 	}
 
 	dc, err := libpak.NewDependencyCache(context)
 	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("could not create dependency cache\n%w", err)
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
 	}
 	dc.Logger = b.Logger
 
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
 	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("could not create configuration resolver\n%w", err)
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
 	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
@@ -75,7 +76,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	dep, err := dr.Resolve(fmt.Sprintf("open-liberty-runtime-%s", profile), version)
 	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("could not resolve dependency\n%w", err)
+		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve dependency\n%w", err)
 	}
 
 	h, be := libpak.NewHelperLayer(context.Buildpack, "linker")

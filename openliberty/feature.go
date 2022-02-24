@@ -2,14 +2,15 @@ package openliberty
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/BurntSushi/toml"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
 )
 
 type Feature struct {
@@ -39,7 +40,7 @@ func ReadFeatureDescriptor(configRoot string, logger bard.Logger) (*FeatureDescr
 	}
 
 	if _, err := toml.DecodeFile(featuresTOML, &featureDescriptor); err != nil {
-		return &FeatureDescriptor{}, fmt.Errorf("unable to decode features.toml\n %w", err)
+		return &FeatureDescriptor{}, fmt.Errorf("unable to decode features.toml\n%w", err)
 	}
 
 	return &FeatureDescriptor{

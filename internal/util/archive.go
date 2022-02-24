@@ -2,9 +2,10 @@ package util
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/libpak/crush"
 	"os"
 	"strings"
+
+	"github.com/paketo-buildpacks/libpak/crush"
 )
 
 func Extract(artifact *os.File, destination string, stripComponents int) error {
@@ -24,7 +25,7 @@ func Extract(artifact *os.File, destination string, stripComponents int) error {
 	} else if strings.HasSuffix(artifactName, ".tar.xz") {
 		err = crush.ExtractTarXz(artifact, destination, stripComponents)
 	} else {
-		return fmt.Errorf("unsupported archive type: %s", artifactName)
+		return fmt.Errorf("unable to read archive of type: %s", artifactName)
 	}
 
 	return err
