@@ -95,14 +95,14 @@ api = "0.7"
     name = "BPL_OPENLIBERTY_LOG_LEVEL"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.2:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:generic/ibm-open-libery-runtime-full@22.0.0?arch=amd64"
+    purl = "pkg:generic/ibm-open-libery-runtime-full@22.0.2?arch=amd64"
     sha256 = "21d1a1e6014f000e4ea9fd357fa7863cfd15bd837115fc111593ce524354f2d2"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/22.0.0.2/openliberty-runtime-22.0.0.2.zip"
-    version = "22.0.0"
+    version = "22.0.2"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
