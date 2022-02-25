@@ -42,7 +42,7 @@ jobs:
                 YJ_VERSION: 5.0.0
             - uses: actions/checkout@v2
             - id: dependency
-              uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+              uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
               with:
                 artifact_id: openliberty-webProfile8
                 group_id: io.openliberty
