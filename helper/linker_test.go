@@ -61,12 +61,12 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(baseLayerDir)).To(Succeed())
 	})
 
-	it("fails with default values because local directories do not exist", func() {
+	it("fails as BPI_OL_RUNTIME_ROOT is required", func() {
 		Expect("/workspace").NotTo(BeADirectory())
 		Expect("/layers/paketo-buildpacks_open-liberty/open-liberty-runtime").NotTo(BeADirectory())
 
 		_, err := linker.Execute()
-		Expect(err).To(HaveOccurred())
+		Expect(err).To(MatchError("$BPI_OL_RUNTIME_ROOT must be set"))
 	})
 
 	context("with explicit env vars set to valid dirs", func() {
