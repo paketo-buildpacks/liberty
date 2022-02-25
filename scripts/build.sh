@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-GOOS="linux" go build -ldflags='-s -w' -o bin/helper github.com/paketo-buildpacks/open-liberty/cmd/helper
-GOOS="linux" go build -ldflags='-s -w' -o bin/main github.com/paketo-buildpacks/open-liberty/cmd/main
+GOOS="linux" go build -ldflags='-s -w' -tags osusergo -o bin/helper github.com/paketo-buildpacks/liberty/cmd/helper
+GOOS="linux" go build -ldflags='-s -w' -tags osusergo -o bin/main github.com/paketo-buildpacks/liberty/cmd/buildpack
 
 if [ "${STRIP:-false}" != "false" ]; then
   strip bin/helper bin/main

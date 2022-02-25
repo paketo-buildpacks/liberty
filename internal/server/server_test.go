@@ -1,7 +1,7 @@
 package server_test
 
 import (
-	"github.com/paketo-buildpacks/open-liberty/internal/server"
+	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"

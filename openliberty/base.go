@@ -7,7 +7,7 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -91,7 +91,7 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 	b.Logger.Bodyf("Expanding to %s", confPath)
 
 	c := 0
-	if s, ok := b.ConfigurationResolver.Resolve("BP_OPENLIBERTY_EXT_CONF_STRIP"); ok {
+	if s, ok := b.ConfigurationResolver.Resolve("BP_LIBERTY_EXT_CONF_STRIP"); ok {
 		if c, err = strconv.Atoi(s); err != nil {
 			return fmt.Errorf("unable to parse %s to integer\n%w", s, err)
 		}

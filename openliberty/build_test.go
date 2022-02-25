@@ -28,7 +28,7 @@ import (
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/openliberty"
 	"github.com/sclevine/spec"
 )
 
@@ -46,10 +46,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
-				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
-				{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
-				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
+				{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
+				{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
+				{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+				{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
@@ -125,15 +125,15 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("user env config set", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_OPENLIBERTY_VERSION", "21.0.10")).To(Succeed())
-			Expect(os.Setenv("BP_OPENLIBERTY_PROFILE", "microProfile4")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_VERSION", "21.0.10")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_PROFILE", "microProfile4")).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
 		})
 
 		it.After(func() {
-			Expect(os.Unsetenv("BP_OPENLIBERTY_VERSION")).To(Succeed())
-			Expect(os.Unsetenv("BP_OPENLIBERTY_PROFILE")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_VERSION")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_PROFILE")).To(Succeed())
 		})
 
 		it("honors user set configuration values", func() {
@@ -147,28 +147,28 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
-	context("$BP_OPENLIBERTY_EXT_CONF_URI", func() {
+	context("$BP_LIBERTY_EXT_CONF_URI", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_SHA256", "test-sha256")).To(Succeed())
-			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_URI", "test-uri")).To(Succeed())
-			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_VERSION", "test-version")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_SHA256", "test-sha256")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_URI", "test-uri")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_VERSION", "test-version")).To(Succeed())
 		})
 
 		it.After(func() {
-			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_SHA256")).To(Succeed())
-			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_URI")).To(Succeed())
-			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_VERSION")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_SHA256")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_URI")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_VERSION")).To(Succeed())
 		})
 
-		it("contributes external configuration when $BP_OPENLIBERTY_EXT_CONF_URI is set", func() {
+		it("contributes external configuration when $BP_LIBERTY_EXT_CONF_URI is set", func() {
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
 			ctx.Buildpack.Metadata = map[string]interface{}{
 				"configurations": []map[string]interface{}{
-					{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
-					{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
-					{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
-					{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
+					{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
+					{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
+					{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+					{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 				},
 				"dependencies": []map[string]interface{}{
 					{

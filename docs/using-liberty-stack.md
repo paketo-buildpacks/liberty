@@ -134,7 +134,7 @@ images that you have prepared earlier.
   uri = "docker://gcr.io/paketo-buildpacks/maven:6.0.1"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/open-liberty:0.1.0"
+  uri = "docker://gcr.io/paketo-buildpacks/liberty:0.4.0"
 
 [[buildpacks]]
   uri = "docker://gcr.io/paketo-buildpacks/procfile:5.0.1"
@@ -172,7 +172,7 @@ images that you have prepared earlier.
     version = "6.0.1"
 
   [[order.group]]
-    id = "paketo-buildpacks/open-liberty"
+    id = "paketo-buildpacks/liberty"
     optional = true
 
   [[order.group]]
@@ -208,5 +208,5 @@ $ pack -v builder create mybuilder:latest --config <path-to-your-builder-descipt
 With the stack images and custom builder created, a Liberty application can now be deployed using:
 
 ```console
-$ pack build myapp --builder mybuilder:latest --env BP_OPENLIBERTY_INSTALL_TYPE="none"
+$ pack build myapp --builder mybuilder:latest --env BP_LIBERTY_INSTALL_TYPE="none"
 ```

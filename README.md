@@ -1,6 +1,6 @@
-# `gcr.io/paketo-buildpacks/open-liberty`
+# `gcr.io/paketo-buildpacks/liberty`
 
-The Paketo Open Liberty Buildpack is a Cloud Native Buildpack that contributes Open Liberty for Java EE support.
+The Paketo Open Buildpack is a Cloud Native Buildpack that contributes Open Liberty or WebSphere Liberty for Java EE support.
 
 ## Behavior
 
@@ -26,28 +26,28 @@ following conditions are met:
 The buildpack will do the following:
 
 * Requests that a JRE be installed
-* Contribute an Open Liberty runtime and create a server called `defaultServer`
+* Contribute an Open Liberty or WebSphere Liberty runtime and create a server called `defaultServer`
 * Contributes `web` process type
 * If a web application was built, it will be symlink `<APPLICATION_ROOT>` to `defaultServer/apps/<APPLICATION_ROOT_BASENAME>`
   at launch time
 * If a Liberty server was built, it will symlink `<APPLICATION_ROOT>` to `<RUNTIME_ROOT>/usr`
 
-The buildpack will support all available profiles of the two most recent versions of the Open Liberty runtime. Because the Open Liberty versioning scheme is not conformant to semantic versioning, an Open Liberty version like `21.0.0.11` is defined here as `21.0.0`, and should be referenced as such.
+The buildpack will support all available profiles of the most recent versions of the Open Liberty runtime. Because the Liberty versioning scheme is not conformant to semantic versioning, an Liberty version like `22.0.0.2` is defined here as `22.0.2`, and should be referenced as such.
 
 ## Configuration
 
-| Environment Variable               | Description                                                                                                                                                                                                                                                         |
-|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `$BP_OPENLIBERTY_INSTALL_TYPE`     | [Install type](#install-types) of Liberty. Valid options: `ol` and `none`. Defaults to `ol`.                                                                                                                                                                        |
-| `$BP_OPENLIBERTY_VERSION`          | The version of Open Liberty to install. Defaults to the latest version of the runtime.                                                                                                                                                                              |
-| `$BP_OPENLIBERTY_PROFILE`          | The Open Liberty profile to use. Defaults to `full`.                                                                                                                                                                                                                |
-| `$BP_OPENLIBERTY_SERVER_NAME`      | Name of the server to use. Defaults to `defaultServer`.                                                                                                                                                                                                             |
-| `$BP_OPENLIBERTY_CONTEXT_ROOT`     | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. |
-| `$BPL_OPENLIBERTY_LOG_LEVEL`       | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                   |
-| `$BP_OPENLIBERTY_EXT_CONF_SHA256`  | The SHA256 hash of the external configuration package.                                                                                                                                                                                                              |
-| `$BP_OPENLIBERTY_EXT_CONF_STRIP`   | The number of directory levels to strip from the external configuration package. Defaults to 0.                                                                                                                                                                     |
-| `$BP_OPENLIBERTY_EXT_CONF_URI`     | The download URI of the external configuration package.                                                                                                                                                                                                             | 
-| `$BP_OPENLIBERTY_EXT_CONF_VERSION` | The version of the external configuration package.                                                                                                                                                                                                                  | 
+| Environment Variable           | Description                                                                                                                                                                                                                                                         |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$BP_LIBERTY_INSTALL_TYPE`     | [Install type](#install-types) of Liberty. Valid options: `ol` and `none`. Defaults to `ol`.                                                                                                                                                                        |
+| `$BP_LIBERTY_VERSION`          | The version of Liberty to install. Defaults to the latest version of the runtime.                                                                                                                                                                              |
+| `$BP_LIBERTY_PROFILE`          | The Liberty profile to use. Defaults to `full`.                                                                                                                                                                                                                |
+| `$BP_LIBERTY_SERVER_NAME`      | Name of the server to use. Defaults to `defaultServer`.                                                                                                                                                                                                             |
+| `$BP_LIBERTY_CONTEXT_ROOT`     | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. |
+| `$BPL_LIBERTY_LOG_LEVEL`       | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                   |
+| `$BP_LIBERTY_EXT_CONF_SHA256`  | The SHA256 hash of the external configuration package.                                                                                                                                                                                                              |
+| `$BP_LIBERTY_EXT_CONF_STRIP`   | The number of directory levels to strip from the external configuration package. Defaults to 0.                                                                                                                                                                     |
+| `$BP_LIBERTY_EXT_CONF_URI`     | The download URI of the external configuration package.                                                                                                                                                                                                             | 
+| `$BP_LIBERTY_EXT_CONF_VERSION` | The version of the external configuration package.                                                                                                                                                                                                                  | 
 
 ### Default Configurations that Vary from Open Liberty's Default
 
@@ -127,18 +127,18 @@ $ tar tzf liberty-conf.tar.gz
 ./features/cache.dummy_1.0.0.jar
 ```
 
-The external configuration package can be provided to the build by providing the `BP_OPENLIBERTY_EXT_CONF_*`
+The external configuration package can be provided to the build by providing the `BP_LIBERTY_EXT_CONF_*`
 environment variables to the build. For example, if the external configuration is hosted on a web server, you can use:
 
 ```console
-pack build --path myapp --env BP_OPENLIBERTY_EXT_CONF_URI=https://example.com/liberty-conf.tar.gz --env BP_OPENLIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_OPENLIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
+pack build --path myapp --env BP_LIBERTY_EXT_CONF_URI=https://example.com/liberty-conf.tar.gz --env BP_LIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_LIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
 ```
 
 If you'd like to provide the configuration as a file, you can do so by mounting the external configuration in the
 container and then providing the path to the external configuration like so:
 
 ```console
-pack build --path myapp --env BP_OPENLIBERTY_EXT_CONF_URI=file:///path/to/conf/liberty-conf.tar.gz --env BP_OPENLIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_OPENLIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
+pack build --path myapp --env BP_LIBERTY_EXT_CONF_URI=file:///path/to/conf/liberty-conf.tar.gz --env BP_LIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_LIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
 ```
 
 ## Building from a Liberty Server

@@ -24,9 +24,9 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/paketo-buildpacks/open-liberty/internal/server"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/liberty/liberty"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -59,8 +59,8 @@ type ServerConfig struct {
 
 func (f FileLinker) Execute() (map[string]string, error) {
 	var err error
-	appDir := sherpa.GetEnvWithDefault("BPI_OL_DROPIN_DIR", "/workspace")
-	f.RuntimeRootPath, err = sherpa.GetEnvRequired("BPI_OL_RUNTIME_ROOT")
+	appDir := sherpa.GetEnvWithDefault("BPI_LIBERTY_DROPIN_DIR", "/workspace")
+	f.RuntimeRootPath, err = sherpa.GetEnvRequired("BPI_LIBERTY_RUNTIME_ROOT")
 	if err != nil {
 		return map[string]string{}, err
 	}
@@ -78,14 +78,15 @@ func (f FileLinker) Execute() (map[string]string, error) {
 }
 
 func (f FileLinker) Configure(appDir string) error {
-	b, hasBindings, err := bindings.ResolveOne(f.Bindings, bindings.OfType("open-liberty"))
+	b, hasBindings, err := bindings.ResolveOne(f.Bindings, bindings.OfType("liberty"))
 	if err != nil {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
-
-	serverName := sherpa.GetEnvWithDefault("BP_OPENLIBERTY_SERVER_NAME", "defaultServer")
+	
+	serverName := sherpa.GetEnvWithDefault("BP_LIBERTY_SERVER_NAME", "defaultServer")
 	f.ServerRootPath = filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName)
 	configPath := filepath.Join(f.ServerRootPath, "server.xml")
+
 
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
@@ -107,9 +108,10 @@ func (f FileLinker) Configure(appDir string) error {
 		return fmt.Errorf("unable to read server config\n%w", err)
 	}
 
-	f.BaseLayerPath, err = sherpa.GetEnvRequired("BPI_OL_BASE_ROOT")
+	f.BaseLayerPath, err = sherpa.GetEnvRequired("BPI_LINERTY_BASE_ROOT")
 	if err != nil {
 		return err
+	}
 	}
 
 	// Check if we are contributing a packaged server
@@ -152,12 +154,12 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, bindi
 		return nil
 	}
 
-	contextRoot := sherpa.GetEnvWithDefault("BP_OPENLIBERTY_CONTEXT_ROOT", "/")
+	contextRoot := sherpa.GetEnvWithDefault("BP_LIBERTY_CONTEXT_ROOT", "/")
 	appType := "war"
 	if _, err := os.Stat(filepath.Join(appPath, "META-INF", "application.xml")); err == nil {
 		appType = "ear"
 	}
-
+	
 	appConfig := ApplicationConfig{
 		Path:        linkPath,
 		ContextRoot: contextRoot,

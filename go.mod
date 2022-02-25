@@ -1,4 +1,4 @@
-module github.com/paketo-buildpacks/open-liberty
+module github.com/paketo-buildpacks/liberty
 
 go 1.16
 

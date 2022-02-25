@@ -1,4 +1,4 @@
-# Copyright 2018-2020 the original author or authors.
+# Copyright 2018-2022 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
 api = "0.7"
 
 [buildpack]
-  description = "A Cloud Native Buildpack that provides the Open Liberty runtime"
-  homepage = "https://github.com/paketo-buildpacks/open-liberty"
-  id = "paketo-buildpacks/open-liberty"
-  keywords = ["java", "javaee", "open-liberty"]
-  name = "Paketo Open Liberty Buildpack"
+  description = "A Cloud Native Buildpack that provides the Open Liberty and WebSphere Liberty runtimes."
+  homepage = "https://github.com/paketo-buildpacks/liberty"
+  id = "paketo-buildpacks/liberty"
+  keywords = ["java", "javaee", "liberty"]
+  name = "Paketo Liberty Buildpack"
   sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
   version = "{{.version}}"
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
-    uri = "https://github.com/paketo-buildpacks/open-liberty/blob/main/LICENSE"
+    uri = "https://github.com/paketo-buildpacks/liberty/blob/main/LICENSE"
 
 [metadata]
   include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "bin/helper", "buildpack.toml", "templates/app.tmpl", "templates/features.tmpl"]
@@ -36,63 +36,63 @@ api = "0.7"
     default = "ol"
     description = "Install type of Liberty. Valid options: 'ol' and 'none'"
     launch = false
-    name = "BP_OPENLIBERTY_INSTALL_TYPE"
+    name = "BP_LIBERTY_INSTALL_TYPE"
 
   [[metadata.configurations]]
     build = true
     default = "*"
-    description = "Which version of the Open Liberty runtime to install. Defaults to latest supported version"
+    description = "Which version of the Liberty runtime to install. Defaults to latest supported version"
     launch = false
-    name = "BP_OPENLIBERTY_VERSION"
+    name = "BP_LIBERTY_VERSION"
 
   [[metadata.configurations]]
     build = true
     description = "The SHA256 hash of the external configuration archive"
-    name = "BP_OPENLIBERTY_EXT_CONF_SHA256"
+    name = "BP_LIBERTY_EXT_CONF_SHA256"
 
   [[metadata.configurations]]
     build = true
     default = "0"
     description = "The number of directory components to strip from the external configuration archive. Defaults to 0"
-    name = "BP_OPENLIBERTY_EXT_CONF_STRIP"
+    name = "BP_LIBERTY_EXT_CONF_STRIP"
 
   [[metadata.configurations]]
     build = true
     description = "The download location of the external configuration"
-    name = "BP_OPENLIBERTY_EXT_CONF_URI"
+    name = "BP_LIBERTY_EXT_CONF_URI"
 
   [[metadata.configurations]]
     build = true
     description = "The version of the Liberty configuration"
-    name = "BP_OPENLIBERTY_EXT_CONF_VERSION"
+    name = "BP_LIBERTY_EXT_CONF_VERSION"
 
   [[metadata.configurations]]
     build = true
     default = "full"
     description = "The Liberty profile to install. Current options are 'full', 'jakartaee9', 'javaee8', 'webProfile9', 'webProfile8', 'microProfile5', 'microProfile4', 'microProfile3', and 'kernel'"
     launch = false
-    name = "BP_OPENLIBERTY_PROFILE"
+    name = "BP_LIBERTY_PROFILE"
 
   [[metadata.configurations]]
     build = true
     default = "defaultServer"
     description = "Name of the server to use. Defaults to defaultServer"
     launch = true
-    name = "BP_OPENLIBERTY_SERVER_NAME"
+    name = "BP_LIBERTY_SERVER_NAME"
 
   [[metadata.configurations]]
     build = false
     default = ""
-    description = "If the server.xml does not have an application named `app` defined, Open Liberty will use this value as the context root. Defaults to the value of `/`."
+    description = "If the server.xml does not have an application named `app` defined, Liberty will use this value as the context root. Defaults to the value of `/`."
     launch = true
-    name = "BP_OPENLIBERTY_CONTEXT_ROOT"
+    name = "BP_LIBERTY_CONTEXT_ROOT"
 
   [[metadata.configurations]]
     build = false
     default = ""
     description = "Sets the logging level. If not set, attempts to get the buildpack's log level. If it is unable to, it defaults to `INFO`"
     launch = true
-    name = "BPL_OPENLIBERTY_LOG_LEVEL"
+    name = "BPL_LIBERTY_LOG_LEVEL"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:liberty:22.0.2:*:*:*:*:*:*:*:*"]

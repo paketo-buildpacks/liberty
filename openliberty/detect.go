@@ -23,8 +23,8 @@ import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/internal/server"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 )
 
 const (
@@ -43,7 +43,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
-	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
+	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
 	packagedServerDirs := []string{
 		filepath.Join("wlp", "usr"),
 		"usr",

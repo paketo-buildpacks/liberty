@@ -4,7 +4,7 @@ import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/openliberty"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"
@@ -30,7 +30,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer"},
+				{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer"},
 			},
 		}
 		srcTemplateDir := filepath.Join(ctx.Buildpack.Path, "templates")
