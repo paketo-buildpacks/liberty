@@ -19,6 +19,7 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/paketo-buildpacks/open-liberty/internal/server"
 	"github.com/paketo-buildpacks/open-liberty/internal/util"
 	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"io/ioutil"
@@ -85,19 +86,23 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
-	f.ServerRootPath = filepath.Join(layerDir, "usr", "servers", "defaultServer")
+	serverName := os.Getenv("BP_OPENLIBERTY_SERVER_NAME")
+	if serverName == "" {
+		serverName = "defaultServer"
+	}
+	f.ServerRootPath = filepath.Join(layerDir, "usr", "servers", serverName)
 	configPath := filepath.Join(f.ServerRootPath, "server.xml")
 
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
-			if err = util.LinkPath(bindingXML, configPath); err != nil {
+			if err = util.DeleteAndLinkPath(bindingXML, configPath); err != nil {
 				return fmt.Errorf("unable to replace server.xml\n%w", err)
 			}
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
-			existingBSP := filepath.Join(layerDir, "usr", "servers", "defaultServer", "bootstrap.properties")
-			if err = util.LinkPath(bootstrapProperties, existingBSP); err != nil {
+			existingBSP := filepath.Join(layerDir, "usr", "servers", serverName, "bootstrap.properties")
+			if err = util.DeleteAndLinkPath(bootstrapProperties, existingBSP); err != nil {
 				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
 		}
@@ -113,20 +118,36 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		f.BaseLayerPath = "/layers/paketo-buildpacks_open-liberty/base"
 	}
 
-	if err = f.ContributeApp(appDir, layerDir, b); err != nil {
-		return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
+	// Check if we are contributing a packaged server
+	isPackagedServer, usrPath, err := checkPackagedServer(appDir)
+	if err != nil {
+		return fmt.Errorf("unable to check package server directory\n%w", err)
 	}
+	if isPackagedServer {
+		libertyServer := server.LibertyServer{
+			ServerUserPath: filepath.Join(f.RuntimeRootPath, "usr"),
+			ServerName:     serverName,
+		}
+		if err := libertyServer.SetUserDirectory(usrPath); err != nil {
+			return fmt.Errorf("unable to contribute packaged server\n%w", err)
+		}
+	} else {
+		if err = f.ContributeApp(appDir, layerDir, serverName, b); err != nil {
+			return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
+		}
 
-	if err = f.ContributeUserFeatures(f.getConfigTemplate(b, "features.tmpl")); err != nil {
-		return fmt.Errorf("unable to contribute user features: %w", err)
+		if err = f.ContributeUserFeatures(serverName, f.getConfigTemplate(b, "features.tmpl")); err != nil {
+			return fmt.Errorf("unable to contribute user features\n%w", err)
+		}
 	}
 
 	return nil
 }
 
-func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Binding) error {
-	linkPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "apps", "app")
+func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, binding libcnb.Binding) error {
+	linkPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "apps", "app")
 	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
+
 	if err := os.Symlink(appPath, linkPath); err != nil {
 		return fmt.Errorf("unable to symlink application to '%s'\n%w", linkPath, err)
 	}
@@ -159,7 +180,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 		return fmt.Errorf("unable to create app template\n%w", err)
 	}
 
-	configOverridesPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "overrides")
+	configOverridesPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "configDropins", "overrides")
 	if err := os.MkdirAll(configOverridesPath, 0755); err != nil {
 		return fmt.Errorf("unable to make config overrides directory\n%w", err)
 	}
@@ -167,7 +188,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	appConfigPath := filepath.Join(configOverridesPath, "app.xml")
 	file, err := os.Create(appConfigPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file '%v'\n%w", appConfig, err)
+		return fmt.Errorf("unable to create file '%s'\n%w", appConfig, err)
 	}
 	defer file.Close()
 	err = t.Execute(file, appConfig)
@@ -177,7 +198,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot string, binding libcnb.Bi
 	return nil
 }
 
-func (f FileLinker) ContributeUserFeatures(configTemplatePath string) error {
+func (f FileLinker) ContributeUserFeatures(serverName, configTemplatePath string) error {
 	confDir := filepath.Join(f.BaseLayerPath, "conf")
 	featureDescriptor, err := openliberty.ReadFeatureDescriptor(confDir, f.Logger)
 	if err != nil {
@@ -200,6 +221,7 @@ func (f FileLinker) ContributeUserFeatures(configTemplatePath string) error {
 
 	featureInstaller := openliberty.NewFeatureInstaller(
 		f.RuntimeRootPath,
+		serverName,
 		configTemplatePath,
 		featureDescriptor.Features)
 
@@ -241,4 +263,25 @@ func readServerConfig(configPath string) (ServerConfig, error) {
 		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%s'\n%w", configPath, err)
 	}
 	return config, nil
+}
+
+// checkPackagedServer returns true if a packaged server is detected. If true, it also returns the detected usr path.
+func checkPackagedServer(appPath string) (bool, string, error) {
+	dirs := []string{
+		filepath.Join("wlp", "usr"),
+		"usr",
+	}
+
+	for _, dir := range dirs {
+		userPath := filepath.Join(appPath, dir)
+		isPackagedServer, err := util.DirExists(userPath)
+		if err != nil {
+			return false, "", fmt.Errorf("unable to check user directory\n%w", err)
+		}
+		if isPackagedServer {
+			return true, userPath, nil
+		}
+	}
+
+	return false, "", nil
 }

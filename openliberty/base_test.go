@@ -27,6 +27,12 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 
 		ctx.Buildpack.Path, err = ioutil.TempDir("", "base-buildpack")
+
+		ctx.Buildpack.Metadata = map[string]interface{}{
+			"configurations": []map[string]interface{}{
+				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer"},
+			},
+		}
 		srcTemplateDir := filepath.Join(ctx.Buildpack.Path, "templates")
 		Expect(os.Mkdir(srcTemplateDir, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(srcTemplateDir, "app.tmpl"), []byte{}, 0644)).To(Succeed())
@@ -46,7 +52,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"},
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := openliberty.NewBase(ctx.Buildpack.Path, &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
+		base := openliberty.NewBase(ctx.Buildpack.Path, "defaultServer", &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())

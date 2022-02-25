@@ -106,7 +106,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 					ManifestPath: filepath.Join(configRoot, "test.feature_1.0.0.mf"),
 				},
 			}
-			installer := openliberty.NewFeatureInstaller(runtimeRoot, filepath.Join(configRoot, "features.tmpl"), features)
+			installer := openliberty.NewFeatureInstaller(runtimeRoot, "defaultServer", filepath.Join(configRoot, "features.tmpl"), features)
 			Expect(installer.Install()).To(Succeed())
 			Expect(filepath.Join(runtimeRoot, "usr", "extension", "lib", "test.feature_1.0.0.jar")).To(BeARegularFile())
 			Expect(filepath.Join(runtimeRoot, "usr", "extension", "lib", "features", "test.feature_1.0.0.mf")).To(BeARegularFile())
@@ -138,7 +138,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 					ManifestPath: filepath.Join(configRoot, "test.feature_1.0.0.mf"),
 				},
 			}
-			installer := openliberty.NewFeatureInstaller(runtimeRoot, filepath.Join(configRoot, "features.tmpl"), features)
+			installer := openliberty.NewFeatureInstaller(runtimeRoot, "defaultServer", filepath.Join(configRoot, "features.tmpl"), features)
 			featureConfigPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "defaults", "features.xml")
 			Expect(installer.Enable()).To(Succeed())
 			Expect(featureConfigPath).To(BeARegularFile())

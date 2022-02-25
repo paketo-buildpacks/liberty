@@ -2,14 +2,15 @@ package openliberty
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/BurntSushi/toml"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
 )
 
 type Feature struct {
@@ -39,7 +40,7 @@ func ReadFeatureDescriptor(configRoot string, logger bard.Logger) (*FeatureDescr
 	}
 
 	if _, err := toml.DecodeFile(featuresTOML, &featureDescriptor); err != nil {
-		return &FeatureDescriptor{}, fmt.Errorf("unable to decode features.toml:\n %w", err)
+		return &FeatureDescriptor{}, fmt.Errorf("unable to decode features.toml\n%w", err)
 	}
 
 	return &FeatureDescriptor{
@@ -53,14 +54,14 @@ func (d *FeatureDescriptor) ResolveFeatures() error {
 	for i, feature := range d.Features {
 		featureUrl, err := url.Parse(feature.URI)
 		if err != nil {
-			return fmt.Errorf("unable to parse URI for feature %v:\n%w", feature.Name, err)
+			return fmt.Errorf("unable to parse URI for feature %s\n%w", feature.Name, err)
 		}
 		if featureUrl.Scheme == "file" {
 			if err := d.resolveFileFeature(d.Features[i]); err != nil {
 				return err
 			}
 		} else {
-			return fmt.Errorf("unable to resolve feature %v: %v scheme unsupported", feature.Name, featureUrl.Scheme)
+			return fmt.Errorf("unable to resolve feature '%s': %s scheme unsupported", feature.Name, featureUrl.Scheme)
 		}
 	}
 	return nil
@@ -69,7 +70,7 @@ func (d *FeatureDescriptor) ResolveFeatures() error {
 func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 	featureUrl, err := url.Parse(feature.URI)
 	if err != nil {
-		return fmt.Errorf("unable to parse URI for feature %v:\n%w", feature.Name, err)
+		return fmt.Errorf("unable to parse URI for feature %s\n%w", feature.Name, err)
 	}
 
 	featurePath := featureUrl.Path[1:]   // Strip leading '/' required by file URLs
@@ -77,7 +78,7 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 	var manifestPath string
 
 	if ext != "jar" && ext != "esa" {
-		return fmt.Errorf("unsupported feature packaging type for feature '%v': '%v'", feature.Name, ext)
+		return fmt.Errorf("unsupported feature packaging type for feature '%s': '%s'", feature.Name, ext)
 	}
 
 	if ext == "jar" {
@@ -88,7 +89,7 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 	// Verify the necessary files are found
 	resolvedFeaturePath := filepath.Join(d.Path, featurePath)
 	if _, err := os.Stat(resolvedFeaturePath); err != nil {
-		return fmt.Errorf("unable to find feature at '%v'", resolvedFeaturePath)
+		return fmt.Errorf("unable to find feature at '%s'", resolvedFeaturePath)
 	}
 	feature.ResolvedPath = resolvedFeaturePath
 
@@ -98,7 +99,7 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 
 	resolvedManifestPath := filepath.Join(d.Path, manifestPath)
 	if _, err := os.Stat(resolvedManifestPath); err != nil {
-		return fmt.Errorf("unable to find manifest for feature '%v': %v", feature.Name, resolvedManifestPath)
+		return fmt.Errorf("unable to find manifest for feature '%s': %s", feature.Name, resolvedManifestPath)
 	}
 	feature.ManifestPath = resolvedManifestPath
 
@@ -107,13 +108,15 @@ func (d *FeatureDescriptor) resolveFileFeature(feature *Feature) error {
 
 type FeatureInstaller struct {
 	RuntimeRootPath string
+	ServerName      string
 	TemplatePath    string
 	Features        []*Feature
 }
 
-func NewFeatureInstaller(runtimeRootPath, templatePath string, features []*Feature) FeatureInstaller {
+func NewFeatureInstaller(runtimeRootPath, serverName, templatePath string, features []*Feature) FeatureInstaller {
 	return FeatureInstaller{
 		RuntimeRootPath: runtimeRootPath,
+		ServerName:      serverName,
 		TemplatePath:    templatePath,
 		Features:        features,
 	}
@@ -127,7 +130,7 @@ func (i FeatureInstaller) Install() error {
 				return err
 			}
 		} else {
-			return fmt.Errorf("unable to install feature '%v' at '%v'", feature.Name, feature.ResolvedPath)
+			return fmt.Errorf("unable to install feature '%s' at '%s'", feature.Name, feature.ResolvedPath)
 		}
 	}
 	return nil
@@ -136,8 +139,8 @@ func (i FeatureInstaller) Install() error {
 func (i FeatureInstaller) installJar(feature Feature) error {
 	runtimeLibsPath := filepath.Join(i.RuntimeRootPath, "usr", "extension", "lib")
 	featureBase := filepath.Base(feature.ResolvedPath)
-	if err := util.LinkPath(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
-		return fmt.Errorf("unable to link feature '%v':\n%w", feature.Name, err)
+	if err := util.DeleteAndLinkPath(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
+		return fmt.Errorf("unable to link feature '%s'\n%w", feature.Name, err)
 	}
 
 	if feature.ManifestPath == "" {
@@ -145,8 +148,8 @@ func (i FeatureInstaller) installJar(feature Feature) error {
 	}
 
 	manifestBase := filepath.Base(feature.ManifestPath)
-	if err := util.LinkPath(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
-		return fmt.Errorf("unable to link feature manifest for '%v':\n%w", feature.Name, err)
+	if err := util.DeleteAndLinkPath(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
+		return fmt.Errorf("unable to link feature manifest for '%s'\n%w", feature.Name, err)
 	}
 
 	return nil
@@ -164,23 +167,23 @@ func (i FeatureInstaller) Enable() error {
 
 	t, err := template.New("features.tmpl").ParseFiles(i.TemplatePath)
 	if err != nil {
-		return fmt.Errorf("unable to create features template:\n%w", err)
+		return fmt.Errorf("unable to create features template\n%w", err)
 	}
 
-	configDefaultsPath := filepath.Join(i.RuntimeRootPath, "usr", "servers", "defaultServer", "configDropins", "defaults")
+	configDefaultsPath := filepath.Join(i.RuntimeRootPath, "usr", "servers", i.ServerName, "configDropins", "defaults")
 	if err := os.MkdirAll(configDefaultsPath, 0755); err != nil {
-		return fmt.Errorf("unable to make config defaults directory:\n%w", err)
+		return fmt.Errorf("unable to make config defaults directory\n%w", err)
 	}
 
 	featuresConfigPath := filepath.Join(configDefaultsPath, "features.xml")
 	file, err := os.Create(featuresConfigPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file '%v':\n%w", featuresConfigPath, err)
+		return fmt.Errorf("unable to create file '%s'\n%w", featuresConfigPath, err)
 	}
 	defer file.Close()
 	err = t.Execute(file, featuresToEnable)
 	if err != nil {
-		return fmt.Errorf("unable to execute template:\n%w", err)
+		return fmt.Errorf("unable to execute template\n%w", err)
 	}
 
 	return nil
