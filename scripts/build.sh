@@ -2,15 +2,15 @@
 
 set -euo pipefail
 
-GOOS="linux" go build -ldflags='-s -w' -tags osusergo -o bin/helper github.com/paketo-buildpacks/open-liberty/cmd/helper
-GOOS="linux" go build -ldflags='-s -w' -tags osusergo -o bin/main github.com/paketo-buildpacks/open-liberty/cmd/buildpack
+GOOS="linux" go build -ldflags='-s -w' -o bin/helper github.com/paketo-buildpacks/open-liberty/cmd/helper
+GOOS="linux" go build -ldflags='-s -w' -o bin/main github.com/paketo-buildpacks/open-liberty/cmd/main
 
 if [ "${STRIP:-false}" != "false" ]; then
-  strip bin/main
+  strip bin/helper bin/main
 fi
 
 if [ "${COMPRESS:-none}" != "none" ]; then
-  $COMPRESS bin/main
+  $COMPRESS bin/helper bin/main
 fi
 
 ln -fs main bin/build

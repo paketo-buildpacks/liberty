@@ -19,17 +19,19 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/paketo-buildpacks/open-liberty/internal/server"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/template"
 
+	"github.com/paketo-buildpacks/open-liberty/internal/server"
+	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/open-liberty/openliberty"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/bindings"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 type FileLinker struct {
@@ -57,40 +59,32 @@ type ServerConfig struct {
 
 func (f FileLinker) Execute() (map[string]string, error) {
 	var err error
-	appDir, ok := os.LookupEnv("BPI_OL_DROPIN_DIR")
-	if !ok {
-		appDir = "/workspace"
+	appDir := sherpa.GetEnvWithDefault("BPI_OL_DROPIN_DIR", "/workspace")
+	f.RuntimeRootPath, err = sherpa.GetEnvRequired("BPI_OL_RUNTIME_ROOT")
+	if err != nil {
+		return map[string]string{}, err
 	}
 
-	layerDir, ok := os.LookupEnv("BPI_OL_RUNTIME_ROOT")
-	if !ok {
-		layerDir = "/layers/paketo-buildpacks_open-liberty/open-liberty-runtime"
-	}
-	f.RuntimeRootPath = layerDir
-
-	_, err = os.Stat(layerDir)
+	_, err = os.Stat(f.RuntimeRootPath)
 	if err != nil && os.IsNotExist(err) {
-		return map[string]string{}, fmt.Errorf("unable to find '%s', folder does not exist", layerDir)
+		return map[string]string{}, fmt.Errorf("unable to find '%s', folder does not exist", f.RuntimeRootPath)
 	} else if err != nil {
-		return map[string]string{}, fmt.Errorf("unable to check %s\n%w", layerDir, err)
+		return map[string]string{}, fmt.Errorf("unable to check %s\n%w", f.RuntimeRootPath, err)
 	}
-	if err = f.Configure(layerDir, appDir); err != nil {
+	if err = f.Configure(appDir); err != nil {
 		return map[string]string{}, fmt.Errorf("unable to configure\n%w", err)
 	}
 	return map[string]string{}, nil
 }
 
-func (f FileLinker) Configure(layerDir, appDir string) error {
+func (f FileLinker) Configure(appDir string) error {
 	b, hasBindings, err := bindings.ResolveOne(f.Bindings, bindings.OfType("open-liberty"))
 	if err != nil {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
-	serverName := os.Getenv("BP_OPENLIBERTY_SERVER_NAME")
-	if serverName == "" {
-		serverName = "defaultServer"
-	}
-	f.ServerRootPath = filepath.Join(layerDir, "usr", "servers", serverName)
+	serverName := sherpa.GetEnvWithDefault("BP_OPENLIBERTY_SERVER_NAME", "defaultServer")
+	f.ServerRootPath = filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName)
 	configPath := filepath.Join(f.ServerRootPath, "server.xml")
 
 	if hasBindings {
@@ -101,7 +95,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
-			existingBSP := filepath.Join(layerDir, "usr", "servers", serverName, "bootstrap.properties")
+			existingBSP := filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName, "bootstrap.properties")
 			if err = util.DeleteAndLinkPath(bootstrapProperties, existingBSP); err != nil {
 				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
@@ -113,9 +107,9 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 		return fmt.Errorf("unable to read server config\n%w", err)
 	}
 
-	f.BaseLayerPath = os.Getenv("BPI_OL_BASE_ROOT")
-	if f.BaseLayerPath == "" {
-		f.BaseLayerPath = "/layers/paketo-buildpacks_open-liberty/base"
+	f.BaseLayerPath, err = sherpa.GetEnvRequired("BPI_OL_BASE_ROOT")
+	if err != nil {
+		return err
 	}
 
 	// Check if we are contributing a packaged server
@@ -132,7 +126,7 @@ func (f FileLinker) Configure(layerDir, appDir string) error {
 			return fmt.Errorf("unable to contribute packaged server\n%w", err)
 		}
 	} else {
-		if err = f.ContributeApp(appDir, layerDir, serverName, b); err != nil {
+		if err = f.ContributeApp(appDir, f.RuntimeRootPath, serverName, b); err != nil {
 			return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
 		}
 
@@ -158,11 +152,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, bindi
 		return nil
 	}
 
-	contextRoot := os.Getenv("BP_OPENLIBERTY_CONTEXT_ROOT")
-	if contextRoot == "" {
-		contextRoot = "/"
-	}
-
+	contextRoot := sherpa.GetEnvWithDefault("BP_OPENLIBERTY_CONTEXT_ROOT", "/")
 	appType := "war"
 	if _, err := os.Stat(filepath.Join(appPath, "META-INF", "application.xml")); err == nil {
 		appType = "ear"
