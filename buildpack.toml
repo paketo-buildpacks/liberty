@@ -151,14 +151,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:22.0.0:*:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:liberty:22.0.2:*:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile8"
     name = "Open Liberty (Web Profile 8)"
-    purl = "pkg:generic/ibm-open-libery-runtime-webProfile8@22.0.0?arch=amd64"
+    purl = "pkg:generic/ibm-open-libery-runtime-webProfile8@22.0.2?arch=amd64"
     sha256 = "51cc61b340a81b3cddb5fc34291b980cd5e5aa9cc83b9f7674e6f27e98fd67dc"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile8/22.0.0.2/openliberty-webProfile8-22.0.0.2.zip"
-    version = "22.0.0"
+    version = "22.0.2"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
