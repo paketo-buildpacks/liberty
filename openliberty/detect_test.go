@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
