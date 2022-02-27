@@ -108,10 +108,10 @@ func (f FileLinker) Configure(appDir string) error {
 		return fmt.Errorf("unable to read server config\n%w", err)
 	}
 
-	f.BaseLayerPath, err = sherpa.GetEnvRequired("BPI_LINERTY_BASE_ROOT")
-	if err != nil {
-		return err
-	}
+	f.BaseLayerPath = os.Getenv("BPI_LIBERTY_BASE_ROOT")
+	if f.BaseLayerPath == "" {
+		f.BaseLayerPath = "/layers/paketo-buildpacks_liberty/base"
+
 	}
 
 	// Check if we are contributing a packaged server

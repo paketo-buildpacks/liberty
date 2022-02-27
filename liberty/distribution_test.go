@@ -72,6 +72,6 @@ func testDistribution(t *testing.T, context spec.G, it spec.S) {
 		Expect(layer.Launch).To(BeTrue())
 		Expect(filepath.Join(layer.Path, "bin", "server")).To(BeARegularFile())
 		Expect(filepath.Join(layer.Path, "usr", "servers", "defaultServer", "apps")).To(BeADirectory())
-		Expect(layer.LaunchEnvironment["BPI_OL_RUNTIME_ROOT.default"]).To(Equal(layer.Path))
+		Expect(layer.LaunchEnvironment["BPI_LIBERTY_RUNTIME_ROOT.default"]).To(Equal(layer.Path))
 	})
 }

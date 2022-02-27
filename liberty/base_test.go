@@ -63,7 +63,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(layer.Launch).To(BeTrue())
 		Expect(filepath.Join(layer.Path, "templates")).To(BeADirectory())
 		Expect(filepath.Join(layer.Path, "templates", "app.tmpl")).To(BeARegularFile())
-		Expect(layer.LaunchEnvironment["BPI_OL_BASE_ROOT.default"]).To(Equal(layer.Path))
+		Expect(layer.LaunchEnvironment["BPI_LIBERTY_BASE_ROOT.default"]).To(Equal(layer.Path))
 		Expect(filepath.Join(layer.Path, "conf", "external-configuration", "fixture-marker")).To(BeARegularFile())
 	})
 }

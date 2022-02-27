@@ -68,7 +68,7 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features\n%w", err)
 		}
 
-		layer.LaunchEnvironment.Default("BPI_OL_BASE_ROOT", layer.Path)
+		layer.LaunchEnvironment.Default("BPI_LIBERTY_BASE_ROOT", layer.Path)
 
 		return layer, nil
 	})
