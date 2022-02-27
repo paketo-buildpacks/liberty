@@ -1,6 +1,6 @@
 # `gcr.io/paketo-buildpacks/liberty`
 
-The Paketo Open Buildpack is a Cloud Native Buildpack that contributes Open Liberty or WebSphere Liberty for Java EE support.
+The Paketo Liberty Buildpack is a Cloud-Native Buildpack that contributes Open Liberty or WebSphere Liberty for Java EE support.
 
 ## Behavior
 
