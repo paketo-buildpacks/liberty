@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"
