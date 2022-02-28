@@ -198,7 +198,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Plans: []libcnb.BuildPlan{
 					{
 						Provides: []libcnb.BuildPlanProvide{
-							{Name: liberty.PlanEntrypenLiberty},
+							{Name: liberty.PlanEntryLiberty},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
