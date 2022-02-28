@@ -206,7 +206,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			usrPath := filepath.Join(ctx.Application.Path, "usr")
 			Expect(os.MkdirAll(filepath.Join(usrPath, "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(usrPath, "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
-			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "open-liberty", Metadata: map[string]interface{}{
+			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "liberty", Metadata: map[string]interface{}{
 				"packaged-server":          true,
 				"packaged-server-usr-path": usrPath,
 			}}}
@@ -232,7 +232,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Unmet).To(HaveLen(1))
-			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "open-liberty"}))
+			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
 		})
 	})
 }
