@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty
+package liberty
 
 import (
 	"fmt"
@@ -232,7 +232,7 @@ func (b Build) validateApplication(appRoot string) (bool, error) {
 func isPackagedServerPlan(plans []libcnb.BuildpackPlanEntry) bool {
 	var value bool
 	for _, entry := range plans {
-		if entry.Name == PlanEntryOpenLiberty {
+		if entry.Name == PlanEntryLiberty {
 			if packagedServerValue, found := entry.Metadata["packaged-server"]; found {
 				val, ok := packagedServerValue.(bool)
 				value = ok && val
@@ -245,7 +245,7 @@ func isPackagedServerPlan(plans []libcnb.BuildpackPlanEntry) bool {
 
 func getPackagedServerUserPath(plans []libcnb.BuildpackPlanEntry) (string, error) {
 	for _, entry := range plans {
-		if entry.Name == PlanEntryOpenLiberty {
+		if entry.Name == PlanEntryLiberty {
 			if userPath, found := entry.Metadata["packaged-server-usr-path"]; found {
 				val, ok := userPath.(string)
 				if !ok {

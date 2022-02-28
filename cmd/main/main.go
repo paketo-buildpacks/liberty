@@ -26,10 +26,10 @@ import (
 
 func main() {
 	libpak.Main(
-		openliberty.Detect{
+		liberty.Detect{
 			Logger: bard.NewLogger(os.Stdout),
 		},
-		openliberty.Build{
+		liberty.Build{
 			Logger: bard.NewLogger(os.Stdout),
 		},
 	)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty_test
+package liberty_test
 
 import (
 	"bytes"
@@ -69,7 +69,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("picks the latest full profile when no arguments are set", func() {
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
-		result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+		result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(3))
@@ -97,7 +97,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -112,7 +112,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -137,7 +137,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("honors user set configuration values", func() {
-			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
@@ -183,14 +183,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}
 			ctx.StackID = "test-stack-id"
 
-			result, err := openliberty.Build{}.Build(ctx)
+			result, err := liberty.Build{}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
 			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
-			Expect(result.Layers[1].(openliberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
+			Expect(result.Layers[1].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
 				ID:      "open-liberty-external-configuration",
 				Name:    "Open Liberty External Configuration",
 				Version: "test-version",
@@ -218,7 +218,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("should discover the app", func() {
-			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
@@ -229,7 +229,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		it("should not run if no apps are installed", func() {
 			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "apps", "test.war"))).To(Succeed())
-			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Unmet).To(HaveLen(1))
 			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "open-liberty"}))

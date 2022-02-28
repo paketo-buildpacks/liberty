@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty_test
+package liberty_test
 
 import (
 	"io"
@@ -58,7 +58,7 @@ func testDistribution(t *testing.T, context spec.G, it spec.S) {
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 
-		distro, be := openliberty.NewDistribution(dep, dc, "defaultPath", ctx.Application.Path)
+		distro, be := liberty.NewDistribution(dep, dc, "defaultPath", ctx.Application.Path)
 		distro.Logger = bard.NewLogger(io.Discard)
 		Expect(be.Name).To(Equal("open-liberty-runtime"))
 		Expect(be.Launch).To(BeTrue())

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty
+package liberty
 
 import (
 	"fmt"

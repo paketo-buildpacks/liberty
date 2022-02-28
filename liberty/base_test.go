@@ -1,4 +1,4 @@
-package openliberty_test
+package liberty_test
 
 import (
 	"github.com/buildpacks/libcnb"
@@ -52,7 +52,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"},
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := openliberty.NewBase(ctx.Buildpack.Path, "defaultServer", &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
+		base := liberty.NewBase(ctx.Buildpack.Path, "defaultServer", &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())

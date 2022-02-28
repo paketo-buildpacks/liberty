@@ -1,0 +1,44 @@
+[lifecycle]
+  version = "0.13.3"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/bellsoft-liberica:9.1.1"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/syft:1.8.0"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/gradle:6.2.1"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/maven:6.2.1"
+
+[[buildpacks]]
+  uri = "docker://gcr.io/paketo-buildpacks/open-liberty:0.3.2"
+  #uri = "../open-liberty"
+
+[[order]]
+
+  [[order.group]]
+    id = "paketo-buildpacks/bellsoft-liberica"
+
+  [[order.group]]
+    id = "paketo-buildpacks/syft"
+    optional = true
+
+  [[order.group]]
+    id = "paketo-buildpacks/gradle"
+    optional = true
+
+  [[order.group]]
+    id = "paketo-buildpacks/maven"
+    optional = true
+
+  [[order.group]]
+    id = "paketo-buildpacks/open-liberty"
+    optional = true
+
+[stack]
+  id = "io.buildpacks.stacks.liberty"
+  run-image = "myol-run:latest"
+  build-image = "myol-build:latest"

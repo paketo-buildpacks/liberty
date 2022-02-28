@@ -1,4 +1,4 @@
-package openliberty
+package liberty
 
 import (
 	"fmt"

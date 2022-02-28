@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty_test
+package liberty_test
 
 import (
 	"testing"
@@ -24,7 +24,7 @@ import (
 )
 
 func TestUnit(t *testing.T) {
-	suite := spec.New("openliberty", spec.Report(report.Terminal{}))
+	suite := spec.New("liberty", spec.Report(report.Terminal{}))
 	suite("Build", testBuild)
 	suite("Detect", testDetect)
 	suite("Distribution", testDistribution)

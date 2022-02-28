@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty
+package liberty
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	PlanEntryOpenLiberty           = "open-liberty"
+	PlanEntryLiberty           = "liberty"
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
 )
@@ -87,7 +87,7 @@ func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
 		Plans: []libcnb.BuildPlan{
 			{
 				Provides: []libcnb.BuildPlanProvide{
-					{Name: PlanEntryOpenLiberty},
+					{Name: PlanEntryLiberty},
 				},
 
 				Requires: []libcnb.BuildPlanRequire{
@@ -97,7 +97,7 @@ func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
 						"cache":  true},
 					},
 					{Name: PlanEntryJVMApplicationPackage},
-					{Name: PlanEntryOpenLiberty},
+					{Name: PlanEntryLiberty},
 				},
 			},
 		},
@@ -130,7 +130,7 @@ func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.
 		Plans: []libcnb.BuildPlan{
 			{
 				Provides: []libcnb.BuildPlanProvide{
-					{Name: PlanEntryOpenLiberty},
+					{Name: PlanEntryLiberty},
 				},
 
 				Requires: []libcnb.BuildPlanRequire{
@@ -140,7 +140,7 @@ func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.
 						"cache":  true},
 					},
 					{Name: PlanEntryJVMApplicationPackage},
-					{Name: PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+					{Name: PlanEntryLiberty, Metadata: map[string]interface{}{
 						"packaged-server":          true,
 						"packaged-server-usr-path": serverUserPath,
 					}},

@@ -192,7 +192,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, bindi
 
 func (f FileLinker) ContributeUserFeatures(serverName, configTemplatePath string) error {
 	confDir := filepath.Join(f.BaseLayerPath, "conf")
-	featureDescriptor, err := openliberty.ReadFeatureDescriptor(confDir, f.Logger)
+	featureDescriptor, err := liberty.ReadFeatureDescriptor(confDir, f.Logger)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func (f FileLinker) ContributeUserFeatures(serverName, configTemplatePath string
 		return err
 	}
 
-	featureInstaller := openliberty.NewFeatureInstaller(
+	featureInstaller := liberty.NewFeatureInstaller(
 		f.RuntimeRootPath,
 		serverName,
 		configTemplatePath,
