@@ -56,7 +56,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}	
 	
 	pr := libpak.PlanEntryResolver{Plan: context.Plan}
-	_, _, err := pr.Resolve("java-app-server")
+	_, _, err := pr.Resolve(PlanEntryJavaAppServer)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve java-app-server plan entry\n%w", err)
 	}

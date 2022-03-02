@@ -79,6 +79,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 					},
 				},
 			},
@@ -107,6 +108,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 					},
 				},
 			},
@@ -136,6 +138,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 					},
 				},
 			},
@@ -166,6 +169,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 					},
 				},
 			},
@@ -208,6 +212,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
@@ -237,6 +242,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
@@ -277,6 +283,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
@@ -306,6 +313,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
