@@ -18,6 +18,8 @@ docker_credentials:
 
 dependencies:
 - id:   open-liberty-runtime-full
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -25,6 +27,8 @@ dependencies:
     artifact_id: openliberty-runtime
     packaging:   zip
 - id:   open-liberty-runtime-jakartaee9
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -32,6 +36,8 @@ dependencies:
     artifact_id: openliberty-jakartaee9
     packaging:   zip
 - id:   open-liberty-runtime-javaee8
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -39,6 +45,8 @@ dependencies:
     artifact_id: openliberty-javaee8
     packaging:   zip
 - id:   open-liberty-runtime-webProfile9
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -46,6 +54,8 @@ dependencies:
     artifact_id: openliberty-webProfile9
     packaging:   zip
 - id:   open-liberty-runtime-webProfile8
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -53,6 +63,8 @@ dependencies:
     artifact_id: openliberty-webProfile8
     packaging:   zip
 - id:   open-liberty-runtime-microProfile5
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -60,6 +72,8 @@ dependencies:
     artifact_id: openliberty-microProfile5
     packaging:   zip
 - id:   open-liberty-runtime-microProfile4
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -67,6 +81,8 @@ dependencies:
     artifact_id: openliberty-microProfile4
     packaging:   zip
 - id:   open-liberty-runtime-microProfile3
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
@@ -74,6 +90,8 @@ dependencies:
     artifact_id: openliberty-microProfile3
     packaging:   zip
 - id:   open-liberty-runtime-kernel
+  purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
+  cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
