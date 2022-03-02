@@ -24,6 +24,7 @@ import (
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 const (
@@ -41,7 +42,12 @@ type Build struct {
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
-
+	
+	appServer := sherpa.GetEnvWithDefault("BP_JAVA_APP_SERVER", "")
+	if appServer != "" && appServer != "liberty" {
+		return libcnb.BuildResult{}, nil
+	}	
+	
 	result := libcnb.NewBuildResult()
 
 	dr, err := libpak.NewDependencyResolver(context)

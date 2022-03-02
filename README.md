@@ -66,7 +66,7 @@ The different installation types that can be configured are:
 
 The buildpack accepts the following bindings:
 
-### Type: `open-liberty`
+### Type: `liberty`
 
 | Key                    | Value             | Description                                                                                                                                                                   |
 |------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
