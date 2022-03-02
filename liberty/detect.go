@@ -28,9 +28,10 @@ import (
 )
 
 const (
-	PlanEntryLiberty           = "liberty"
+	PlanEntryLiberty           	   = "liberty"
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
+	PlanEntryJavaAppServer		   = "java-app-server"
 )
 
 type Detect struct {
@@ -88,6 +89,7 @@ func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
 			{
 				Provides: []libcnb.BuildPlanProvide{
 					{Name: PlanEntryLiberty},
+					{Name: PlanEntryJavaAppServer},
 				},
 
 				Requires: []libcnb.BuildPlanRequire{
@@ -96,6 +98,7 @@ func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
 						"build":  true,
 						"cache":  true},
 					},
+					{Name: PlanEntryJavaAppServer},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryLiberty},
 				},
@@ -139,6 +142,7 @@ func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.
 						"build":  true,
 						"cache":  true},
 					},
+					{Name: PlanEntryJavaAppServer},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryLiberty, Metadata: map[string]interface{}{
 						"packaged-server":          true,
