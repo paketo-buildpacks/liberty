@@ -1,4 +1,4 @@
-package openliberty
+package liberty
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 )
 
 type Feature struct {

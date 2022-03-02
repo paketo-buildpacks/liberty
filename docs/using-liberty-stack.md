@@ -24,9 +24,9 @@ LABEL io.buildpacks.stack.id="io.buildpacks.stacks.liberty"
 
 # Set environment variables used by the Open Liberty CNB.
 ENV SERVICE_BINDING_ROOT=/platform/bindings
-ENV BPI_OL_ROOT=/opt/ol
-ENV BPI_OL_RUNTIME_ROOT=${BPI_OL_ROOT}/wlp
-ENV PATH=${BPI_OL_ROOT}/helpers/runtime:${BPI_OL_RUNTIME_ROOT}/bin:${PATH}
+ENV BPI_LIBERTY_ROOT=/opt/ol
+ENV BPI_LIBERTY_RUNTIME_ROOT=${BPI_LIBERTY_ROOT}/wlp
+ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${PATH}
 
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
@@ -40,8 +40,8 @@ ENV CNB_STACK_ID="io.buildpacks.stacks.liberty"
 LABEL io.buildpacks.stack.id="io.buildpacks.stacks.liberty"
 
 # Provides hint to the Open Liberty buildpack which version of Liberty is being used at build time
-ENV BPI_OL_RUNTIME_ROOT=/opt/ol/wlp
-RUN mkdir -p ${BPI_OL_RUNTIME_ROOT}
+ENV BPI_LIBERTY_RUNTIME_ROOT=/opt/ol/wlp
+RUN mkdir -p ${BPI_LIBERTY_RUNTIME_ROOT}
 
 RUN useradd --uid ${CNB_USER_ID} --gid ${CNB_GROUP_ID} -m -s /bin/bash cnb
 
@@ -64,9 +64,9 @@ LABEL io.buildpacks.stack.id="io.buildpacks.stacks.liberty"
 
 # Set environment variables used by the Open Liberty CNB.
 ENV SERVICE_BINDING_ROOT=/platform/bindings
-ENV BPI_OL_ROOT=/opt/ibm
-ENV BPI_OL_RUNTIME_ROOT=${BPI_OL_ROOT}/wlp
-ENV PATH=${BPI_OL_ROOT}/helpers/runtime:${BPI_OL_RUNTIME_ROOT}/bin:${PATH}
+ENV BPI_LIBERTY_ROOT=/opt/ibm
+ENV BPI_LIBERTY_RUNTIME_ROOT=${BPI_LIBERTY_ROOT}/wlp
+ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${PATH}
 
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
@@ -80,8 +80,8 @@ ENV CNB_STACK_ID="io.buildpacks.stacks.liberty"
 LABEL io.buildpacks.stack.id="io.buildpacks.stacks.liberty"
 
 # Provides hint to the Open Liberty buildpack which version of Liberty is being used at build time
-ENV BPI_OL_RUNTIME_ROOT=/opt/ibm/wlp
-RUN mkdir -p ${BPI_OL_RUNTIME_ROOT}
+ENV BPI_LIBERTY_RUNTIME_ROOT=/opt/ibm/wlp
+RUN mkdir -p ${BPI_LIBERTY_RUNTIME_ROOT}
 
 RUN useradd --uid ${CNB_USER_ID} --gid ${CNB_GROUP_ID} -m -s /bin/bash cnb
 
@@ -134,7 +134,7 @@ images that you have prepared earlier.
   uri = "docker://gcr.io/paketo-buildpacks/maven:6.0.1"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/open-liberty:0.1.0"
+  uri = "docker://gcr.io/paketo-buildpacks/liberty:0.4.0"
 
 [[buildpacks]]
   uri = "docker://gcr.io/paketo-buildpacks/procfile:5.0.1"
@@ -172,7 +172,7 @@ images that you have prepared earlier.
     version = "6.0.1"
 
   [[order.group]]
-    id = "paketo-buildpacks/open-liberty"
+    id = "paketo-buildpacks/liberty"
     optional = true
 
   [[order.group]]
@@ -208,5 +208,5 @@ $ pack -v builder create mybuilder:latest --config <path-to-your-builder-descipt
 With the stack images and custom builder created, a Liberty application can now be deployed using:
 
 ```console
-$ pack build myapp --builder mybuilder:latest --env BP_OPENLIBERTY_INSTALL_TYPE="none"
+$ pack build myapp --builder mybuilder:latest --env BP_LIBERTY_INSTALL_TYPE="none"
 ```

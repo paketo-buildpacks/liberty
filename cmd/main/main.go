@@ -21,15 +21,15 @@ import (
 
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 )
 
 func main() {
 	libpak.Main(
-		openliberty.Detect{
+		liberty.Detect{
 			Logger: bard.NewLogger(os.Stdout),
 		},
-		openliberty.Build{
+		liberty.Build{
 			Logger: bard.NewLogger(os.Stdout),
 		},
 	)

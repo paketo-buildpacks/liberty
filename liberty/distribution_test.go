@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty_test
+package liberty_test
 
 import (
 	"io"
@@ -26,7 +26,7 @@ import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -58,7 +58,7 @@ func testDistribution(t *testing.T, context spec.G, it spec.S) {
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 
-		distro, be := openliberty.NewDistribution(dep, dc, "defaultPath", ctx.Application.Path)
+		distro, be := liberty.NewDistribution(dep, dc, "defaultPath", ctx.Application.Path)
 		distro.Logger = bard.NewLogger(io.Discard)
 		Expect(be.Name).To(Equal("open-liberty-runtime"))
 		Expect(be.Launch).To(BeTrue())
@@ -72,6 +72,6 @@ func testDistribution(t *testing.T, context spec.G, it spec.S) {
 		Expect(layer.Launch).To(BeTrue())
 		Expect(filepath.Join(layer.Path, "bin", "server")).To(BeARegularFile())
 		Expect(filepath.Join(layer.Path, "usr", "servers", "defaultServer", "apps")).To(BeADirectory())
-		Expect(layer.LaunchEnvironment["BPI_OL_RUNTIME_ROOT.default"]).To(Equal(layer.Path))
+		Expect(layer.LaunchEnvironment["BPI_LIBERTY_RUNTIME_ROOT.default"]).To(Equal(layer.Path))
 	})
 }

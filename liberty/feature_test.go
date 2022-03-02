@@ -1,10 +1,10 @@
-package openliberty_test
+package liberty_test
 
 import (
 	"encoding/xml"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"
@@ -38,7 +38,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 
 	when("feature descriptor is not provided", func() {
 		it("should not load any features", func() {
-			desc, err := openliberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
+			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(desc.Features).To(BeEmpty())
 		})
@@ -57,7 +57,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("should resolve features", func() {
-			desc, err := openliberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
+			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(desc.Features).To(HaveLen(1))
 
@@ -82,7 +82,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.WriteFile(filepath.Join(configRoot, "features.toml"), []byte(features), 0644)).To(Succeed())
 		})
 		it("should throw an error", func() {
-			desc, err := openliberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
+			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(desc.ResolveFeatures()).ToNot(Succeed())
 		})
@@ -96,7 +96,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("should link the feature jar to usr/extension/lib", func() {
-			features := []*openliberty.Feature{
+			features := []*liberty.Feature{
 				{
 					Name:         "testFeature",
 					URI:          "file:///test.feature_1.0.0.jar",
@@ -106,7 +106,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 					ManifestPath: filepath.Join(configRoot, "test.feature_1.0.0.mf"),
 				},
 			}
-			installer := openliberty.NewFeatureInstaller(runtimeRoot, "defaultServer", filepath.Join(configRoot, "features.tmpl"), features)
+			installer := liberty.NewFeatureInstaller(runtimeRoot, "defaultServer", filepath.Join(configRoot, "features.tmpl"), features)
 			Expect(installer.Install()).To(Succeed())
 			Expect(filepath.Join(runtimeRoot, "usr", "extension", "lib", "test.feature_1.0.0.jar")).To(BeARegularFile())
 			Expect(filepath.Join(runtimeRoot, "usr", "extension", "lib", "features", "test.feature_1.0.0.mf")).To(BeARegularFile())
@@ -128,7 +128,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("should create the feature config", func() {
-			features := []*openliberty.Feature{
+			features := []*liberty.Feature{
 				{
 					Name:         "testFeature",
 					URI:          "file:///test.feature_1.0.0.jar",
@@ -138,7 +138,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 					ManifestPath: filepath.Join(configRoot, "test.feature_1.0.0.mf"),
 				},
 			}
-			installer := openliberty.NewFeatureInstaller(runtimeRoot, "defaultServer", filepath.Join(configRoot, "features.tmpl"), features)
+			installer := liberty.NewFeatureInstaller(runtimeRoot, "defaultServer", filepath.Join(configRoot, "features.tmpl"), features)
 			featureConfigPath := filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "defaults", "features.xml")
 			Expect(installer.Enable()).To(Succeed())
 			Expect(featureConfigPath).To(BeARegularFile())

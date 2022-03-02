@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io/ioutil"
 	"path/filepath"
 	"strings"

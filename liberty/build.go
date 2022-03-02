@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty
+package liberty
 
 import (
 	"fmt"
@@ -22,8 +22,8 @@ import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/internal/server"
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 )
 
 const (
@@ -60,7 +60,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
-	serverName, _ := cr.Resolve("BP_OPENLIBERTY_SERVER_NAME")
+	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
 
 	if hasApp, err := b.checkJvmApplicationProvided(context, serverName); err != nil {
 		return libcnb.BuildResult{}, err
@@ -71,8 +71,8 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return result, nil
 	}
 
-	version, _ := cr.Resolve("BP_OPENLIBERTY_VERSION")
-	profile, _ := cr.Resolve("BP_OPENLIBERTY_PROFILE")
+	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
+	profile, _ := cr.Resolve("BP_LIBERTY_PROFILE")
 
 	dep, err := dr.Resolve(fmt.Sprintf("open-liberty-runtime-%s", profile), version)
 	if err != nil {
@@ -86,9 +86,9 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.BOM.Entries = append(result.BOM.Entries, be)
 
 	var externalConfigurationDependency *libpak.BuildpackDependency
-	if uri, ok := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_URI"); ok {
-		v, _ := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_VERSION")
-		s, _ := cr.Resolve("BP_OPENLIBERTY_EXT_CONF_SHA256")
+	if uri, ok := cr.Resolve("BP_LIBERTY_EXT_CONF_URI"); ok {
+		v, _ := cr.Resolve("BP_LIBERTY_EXT_CONF_VERSION")
+		s, _ := cr.Resolve("BP_LIBERTY_EXT_CONF_SHA256")
 
 		externalConfigurationDependency = &libpak.BuildpackDependency{
 			ID:      "open-liberty-external-configuration",
@@ -106,7 +106,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)
 
-	installType, _ := cr.Resolve("BP_OPENLIBERTY_INSTALL_TYPE")
+	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
 		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path)
@@ -232,7 +232,7 @@ func (b Build) validateApplication(appRoot string) (bool, error) {
 func isPackagedServerPlan(plans []libcnb.BuildpackPlanEntry) bool {
 	var value bool
 	for _, entry := range plans {
-		if entry.Name == PlanEntryOpenLiberty {
+		if entry.Name == PlanEntryLiberty {
 			if packagedServerValue, found := entry.Metadata["packaged-server"]; found {
 				val, ok := packagedServerValue.(bool)
 				value = ok && val
@@ -245,7 +245,7 @@ func isPackagedServerPlan(plans []libcnb.BuildpackPlanEntry) bool {
 
 func getPackagedServerUserPath(plans []libcnb.BuildpackPlanEntry) (string, error) {
 	for _, entry := range plans {
-		if entry.Name == PlanEntryOpenLiberty {
+		if entry.Name == PlanEntryLiberty {
 			if userPath, found := entry.Metadata["packaged-server-usr-path"]; found {
 				val, ok := userPath.(string)
 				if !ok {

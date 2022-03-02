@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty
+package liberty
 
 import (
 	"fmt"
@@ -77,8 +77,8 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		layer.LaunchEnvironment.Default("BPL_JVM_CLASS_ADJUSTMENT", strconv.Itoa(libertyClasses))
 
 		// these are used by the exec.d helper to successfully create the symlink to the dropin app
-		layer.LaunchEnvironment.Default("BPI_OL_DROPIN_DIR", d.ApplicationPath)
-		layer.LaunchEnvironment.Default("BPI_OL_RUNTIME_ROOT", layer.Path)
+		layer.LaunchEnvironment.Default("BPI_LIBERTY_DROPIN_DIR", d.ApplicationPath)
+		layer.LaunchEnvironment.Default("BPI_LIBERTY_RUNTIME_ROOT", layer.Path)
 
 		// set logging to write to the console. Using `server run` instead of `server start` ensures that
 		// stdout/stderr are actually written to their respective streams instead of to `console.log`

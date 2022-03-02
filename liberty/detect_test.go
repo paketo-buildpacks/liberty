@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty_test
+package liberty_test
 
 import (
 	"io/ioutil"
@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
@@ -34,7 +34,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect = NewWithT(t).Expect
 
 		ctx    libcnb.DetectContext
-		detect openliberty.Detect
+		detect liberty.Detect
 	)
 
 	it.Before(func() {
@@ -48,7 +48,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer"},
+				{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer"},
 			},
 		}
 
@@ -68,17 +68,17 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Plans: []libcnb.BuildPlan{
 				{
 					Provides: []libcnb.BuildPlanProvide{
-						{Name: openliberty.PlanEntryOpenLiberty},
+						{Name: liberty.PlanEntryLiberty},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
 							"build":  true,
 							"cache":  true,
 						}},
-						{Name: openliberty.PlanEntryJVMApplicationPackage},
-						{Name: openliberty.PlanEntryOpenLiberty},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -95,18 +95,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Plans: []libcnb.BuildPlan{
 				{
 					Provides: []libcnb.BuildPlanProvide{
-						{Name: openliberty.PlanEntryOpenLiberty},
-						{Name: openliberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
 							"build":  true,
 							"cache":  true,
 						}},
-						{Name: openliberty.PlanEntryJVMApplicationPackage},
-						{Name: openliberty.PlanEntryOpenLiberty},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -124,18 +124,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Plans: []libcnb.BuildPlan{
 				{
 					Provides: []libcnb.BuildPlanProvide{
-						{Name: openliberty.PlanEntryOpenLiberty},
-						{Name: openliberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
 							"build":  true,
 							"cache":  true,
 						}},
-						{Name: openliberty.PlanEntryJVMApplicationPackage},
-						{Name: openliberty.PlanEntryOpenLiberty},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -154,18 +154,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Plans: []libcnb.BuildPlan{
 				{
 					Provides: []libcnb.BuildPlanProvide{
-						{Name: openliberty.PlanEntryOpenLiberty},
-						{Name: openliberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
-						{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
 							"build":  true,
 							"cache":  true,
 						}},
-						{Name: openliberty.PlanEntryJVMApplicationPackage},
-						{Name: openliberty.PlanEntryOpenLiberty},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -198,18 +198,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Plans: []libcnb.BuildPlan{
 					{
 						Provides: []libcnb.BuildPlanProvide{
-							{Name: openliberty.PlanEntryOpenLiberty},
-							{Name: openliberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
 						Requires: []libcnb.BuildPlanRequire{
-							{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
 								"build":  true,
 								"cache":  true,
 							}},
-							{Name: openliberty.PlanEntryJVMApplicationPackage},
-							{Name: openliberty.PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
 							}},
@@ -228,17 +228,17 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Plans: []libcnb.BuildPlan{
 					{
 						Provides: []libcnb.BuildPlanProvide{
-							{Name: openliberty.PlanEntryOpenLiberty},
+							{Name: liberty.PlanEntryLiberty},
 						},
 
 						Requires: []libcnb.BuildPlanRequire{
-							{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
 								"build":  true,
 								"cache":  true,
 							}},
-							{Name: openliberty.PlanEntryJVMApplicationPackage},
-							{Name: openliberty.PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
 							}},
@@ -267,18 +267,18 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Plans: []libcnb.BuildPlan{
 					{
 						Provides: []libcnb.BuildPlanProvide{
-							{Name: openliberty.PlanEntryOpenLiberty},
-							{Name: openliberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
 						Requires: []libcnb.BuildPlanRequire{
-							{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
 								"build":  true,
 								"cache":  true,
 							}},
-							{Name: openliberty.PlanEntryJVMApplicationPackage},
-							{Name: openliberty.PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
 							}},
@@ -297,17 +297,17 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Plans: []libcnb.BuildPlan{
 					{
 						Provides: []libcnb.BuildPlanProvide{
-							{Name: openliberty.PlanEntryOpenLiberty},
+							{Name: liberty.PlanEntryLiberty},
 						},
 
 						Requires: []libcnb.BuildPlanRequire{
-							{Name: openliberty.PlanEntryJRE, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
 								"build":  true,
 								"cache":  true,
 							}},
-							{Name: openliberty.PlanEntryJVMApplicationPackage},
-							{Name: openliberty.PlanEntryOpenLiberty, Metadata: map[string]interface{}{
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
 								"packaged-server":          true,
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
 							}},

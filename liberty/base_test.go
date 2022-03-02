@@ -1,10 +1,10 @@
-package openliberty_test
+package liberty_test
 
 import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"
@@ -30,7 +30,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer"},
+				{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer"},
 			},
 		}
 		srcTemplateDir := filepath.Join(ctx.Buildpack.Path, "templates")
@@ -52,7 +52,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"},
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := openliberty.NewBase(ctx.Buildpack.Path, "defaultServer", &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
+		base := liberty.NewBase(ctx.Buildpack.Path, "defaultServer", &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -63,7 +63,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(layer.Launch).To(BeTrue())
 		Expect(filepath.Join(layer.Path, "templates")).To(BeADirectory())
 		Expect(filepath.Join(layer.Path, "templates", "app.tmpl")).To(BeARegularFile())
-		Expect(layer.LaunchEnvironment["BPI_OL_BASE_ROOT.default"]).To(Equal(layer.Path))
+		Expect(layer.LaunchEnvironment["BPI_LIBERTY_BASE_ROOT.default"]).To(Equal(layer.Path))
 		Expect(filepath.Join(layer.Path, "conf", "external-configuration", "fixture-marker")).To(BeARegularFile())
 	})
 }

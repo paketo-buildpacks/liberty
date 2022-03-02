@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package openliberty_test
+package liberty_test
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ import (
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/open-liberty/openliberty"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 )
 
@@ -46,10 +46,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
-				{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
-				{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
-				{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
+				{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
+				{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
+				{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+				{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
@@ -69,7 +69,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("picks the latest full profile when no arguments are set", func() {
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
-		result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+		result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(3))
@@ -97,7 +97,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -112,7 +112,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
 				buf := &bytes.Buffer{}
-				result, err := openliberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
@@ -125,19 +125,19 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("user env config set", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_OPENLIBERTY_VERSION", "21.0.10")).To(Succeed())
-			Expect(os.Setenv("BP_OPENLIBERTY_PROFILE", "microProfile4")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_VERSION", "21.0.10")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_PROFILE", "microProfile4")).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
 		})
 
 		it.After(func() {
-			Expect(os.Unsetenv("BP_OPENLIBERTY_VERSION")).To(Succeed())
-			Expect(os.Unsetenv("BP_OPENLIBERTY_PROFILE")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_VERSION")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_PROFILE")).To(Succeed())
 		})
 
 		it("honors user set configuration values", func() {
-			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
@@ -147,28 +147,28 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
-	context("$BP_OPENLIBERTY_EXT_CONF_URI", func() {
+	context("$BP_LIBERTY_EXT_CONF_URI", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_SHA256", "test-sha256")).To(Succeed())
-			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_URI", "test-uri")).To(Succeed())
-			Expect(os.Setenv("BP_OPENLIBERTY_EXT_CONF_VERSION", "test-version")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_SHA256", "test-sha256")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_URI", "test-uri")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_VERSION", "test-version")).To(Succeed())
 		})
 
 		it.After(func() {
-			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_SHA256")).To(Succeed())
-			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_URI")).To(Succeed())
-			Expect(os.Unsetenv("BP_OPENLIBERTY_EXT_CONF_VERSION")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_SHA256")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_URI")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_VERSION")).To(Succeed())
 		})
 
-		it("contributes external configuration when $BP_OPENLIBERTY_EXT_CONF_URI is set", func() {
+		it("contributes external configuration when $BP_LIBERTY_EXT_CONF_URI is set", func() {
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
 			ctx.Buildpack.Metadata = map[string]interface{}{
 				"configurations": []map[string]interface{}{
-					{"name": "BP_OPENLIBERTY_VERSION", "default": "21.0.11", "build": true},
-					{"name": "BP_OPENLIBERTY_PROFILE", "default": "full", "build": true},
-					{"name": "BP_OPENLIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
-					{"name": "BP_OPENLIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
+					{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
+					{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
+					{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
+					{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
 				},
 				"dependencies": []map[string]interface{}{
 					{
@@ -183,14 +183,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}
 			ctx.StackID = "test-stack-id"
 
-			result, err := openliberty.Build{}.Build(ctx)
+			result, err := liberty.Build{}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
 			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
-			Expect(result.Layers[1].(openliberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
+			Expect(result.Layers[1].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
 				ID:      "open-liberty-external-configuration",
 				Name:    "Open Liberty External Configuration",
 				Version: "test-version",
@@ -206,7 +206,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			usrPath := filepath.Join(ctx.Application.Path, "usr")
 			Expect(os.MkdirAll(filepath.Join(usrPath, "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(usrPath, "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
-			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "open-liberty", Metadata: map[string]interface{}{
+			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "liberty", Metadata: map[string]interface{}{
 				"packaged-server":          true,
 				"packaged-server-usr-path": usrPath,
 			}}}
@@ -218,7 +218,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("should discover the app", func() {
-			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
@@ -229,10 +229,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		it("should not run if no apps are installed", func() {
 			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "apps", "test.war"))).To(Succeed())
-			result, err := openliberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Unmet).To(HaveLen(1))
-			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "open-liberty"}))
+			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
 		})
 	})
 }

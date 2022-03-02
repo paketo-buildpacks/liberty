@@ -1,7 +1,7 @@
 package util_test
 
 import (
-	"github.com/paketo-buildpacks/open-liberty/internal/util"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"
