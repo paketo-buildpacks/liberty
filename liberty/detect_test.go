@@ -69,6 +69,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				{
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
+						{Name: PlanEntryJavaAppServer},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
@@ -97,6 +98,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				{
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
+						{Name: PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 					},
 
@@ -128,6 +130,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
+						{Name: PlanEntryJavaAppServer},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
@@ -159,6 +162,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
+						{Name: PlanEntryJavaAppServer},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{

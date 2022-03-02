@@ -134,6 +134,7 @@ func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.
 			{
 				Provides: []libcnb.BuildPlanProvide{
 					{Name: PlanEntryLiberty},
+					{Name: PlanEntryJavaAppServer},
 				},
 
 				Requires: []libcnb.BuildPlanRequire{
