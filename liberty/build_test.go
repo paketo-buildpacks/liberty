@@ -77,7 +77,28 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(result.Layers[1].Name()).To(Equal("base"))
 		Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 	})
+	
+	context("requested app server is not liberty", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_JAVA_APP_SERVER", "notliberty")).To(Succeed())
+		})
+		
+		it.After(func() {
+			Expect(os.Unsetenv("BP_JAVA_APP_SERVER")).To(Succeed())
+		})
+		
+		it("should not run if liberty is not the requested java app server", func() {
+			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
 
+			buf := &bytes.Buffer{}
+			result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(0))
+			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
+		})
+	})
+	
 	context("missing required info", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BP_DEBUG", "true")).To(Succeed())

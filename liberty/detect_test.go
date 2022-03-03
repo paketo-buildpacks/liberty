@@ -192,10 +192,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		it.Before(func() {
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+			Expect(os.Setenv("BP_JAVA_APP_SERVER", "liberty")).To(Succeed())
 		})
 
 		it.After(func() {
 			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "wlp"))).To(Succeed())
+			Expect(os.Unsetenv("BP_JAVA_APP_SERVER")).To(Succeed())
 		})
 
 		it("works", func() {
@@ -265,10 +267,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		it.Before(func() {
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+			Expect(os.Setenv("BP_JAVA_APP_SERVER", "liberty")).To(Succeed())
 		})
 
 		it.After(func() {
 			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "usr"))).To(Succeed())
+			Expect(os.Unsetenv("BP_JAVA_APP_SERVER")).To(Succeed())
 		})
 
 		it("works", func() {
