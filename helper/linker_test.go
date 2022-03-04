@@ -164,6 +164,44 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
+	context("when building a packaged server with non default server name", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BPI_LIBERTY_DROPIN_DIR", appDir)).To(Succeed())
+			Expect(os.Setenv("BPI_LIBERTY_RUNTIME_ROOT", layerDir)).To(Succeed())
+			Expect(os.Setenv("BPI_LIBERTY_BASE_ROOT", baseLayerDir)).To(Succeed())
+			Expect(os.Setenv("BPI_LIBERTY_SERVER_NAME", "testServer")).To(Succeed())
+
+			Expect(os.MkdirAll(filepath.Join(layerDir, "usr"), 0755)).To(Succeed())
+
+			packagedServerDir := filepath.Join(appDir, "wlp", "usr", "servers", "testServer")
+			Expect(os.MkdirAll(packagedServerDir, 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(packagedServerDir, "server.xml"), []byte{}, 0644)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BPI_LIBERTY_DROPIN_DIR")).To(Succeed())
+			Expect(os.Unsetenv("BPI_LIBERTY_RUNTIME_ROOT")).To(Succeed())
+			Expect(os.Unsetenv("BPI_LIBERTY_BASE_ROOT")).To(Succeed())
+			Expect(os.Unsetenv("BPI_LIBERTY_SERVER_NAME")).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(layerDir, "usr"))).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(appDir, "wlp"))).To(Succeed())
+		})
+
+		it("replaces the runtime's user directory with app's wlp directory", func() {
+			_, err := linker.Execute()
+			Expect(err).NotTo(HaveOccurred())
+
+			resolvedAppDir, err := filepath.EvalSymlinks(filepath.Join(appDir, "wlp", "usr"))
+			Expect(err).NotTo(HaveOccurred())
+
+			linkName := filepath.Join(layerDir, "usr")
+			resolved, err := filepath.EvalSymlinks(linkName)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resolved).To(Equal(resolvedAppDir))
+			Expect(filepath.Join(linkName, "servers", "testServer", "server.xml")).To(BeARegularFile())
+		})
+	})
+
 	context("when building a packaged server containing a usr directory", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BPI_LIBERTY_DROPIN_DIR", appDir)).To(Succeed())
