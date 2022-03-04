@@ -84,6 +84,7 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			templatesDir := filepath.Join(baseLayerDir, "templates")
 			Expect(os.MkdirAll(templatesDir, 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(templatesDir, "app.tmpl"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(templatesDir, "default-http-endpoint.tmpl"), []byte{}, 0644)).To(Succeed())
 		})
 
 		it.After(func() {
@@ -110,6 +111,9 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 
 			appConfigPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml")
 			Expect(appConfigPath).To(BeARegularFile())
+
+			httpEndpointConfigPath := filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "defaults", "default-http-endpoint.xml")
+			Expect(httpEndpointConfigPath).To(BeARegularFile())
 		})
 	})
 

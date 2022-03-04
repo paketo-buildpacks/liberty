@@ -82,11 +82,10 @@ func (f FileLinker) Configure(appDir string) error {
 	if err != nil {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
-	
+
 	serverName := sherpa.GetEnvWithDefault("BP_LIBERTY_SERVER_NAME", "defaultServer")
 	f.ServerRootPath = filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName)
 	configPath := filepath.Join(f.ServerRootPath, "server.xml")
-
 
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
@@ -132,6 +131,10 @@ func (f FileLinker) Configure(appDir string) error {
 			return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
 		}
 
+		if err = f.ContributeDefaultHttpEndpoint(f.RuntimeRootPath, serverName, b); err != nil {
+			return fmt.Errorf("unable to contribute default http endpoint\n%w", err)
+		}
+
 		if err = f.ContributeUserFeatures(serverName, f.getConfigTemplate(b, "features.tmpl")); err != nil {
 			return fmt.Errorf("unable to contribute user features\n%w", err)
 		}
@@ -159,7 +162,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, bindi
 	if _, err := os.Stat(filepath.Join(appPath, "META-INF", "application.xml")); err == nil {
 		appType = "ear"
 	}
-	
+
 	appConfig := ApplicationConfig{
 		Path:        linkPath,
 		ContextRoot: contextRoot,
@@ -225,6 +228,16 @@ func (f FileLinker) ContributeUserFeatures(serverName, configTemplatePath string
 	}
 
 	return nil
+}
+
+func (f FileLinker) ContributeDefaultHttpEndpoint(runtimeRoot, serverName string, binding libcnb.Binding) error {
+	configDefaultsPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "configDropins", "defaults")
+	if err := os.MkdirAll(configDefaultsPath, 0755); err != nil {
+		return fmt.Errorf("unable to make config defaults directory\n%w", err)
+	}
+	templatePath := f.getConfigTemplate(binding, "default-http-endpoint.tmpl")
+	configPath := filepath.Join(configDefaultsPath, "default-http-endpoint.xml")
+	return util.CopyFile(templatePath, configPath)
 }
 
 func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) string {

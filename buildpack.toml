@@ -28,7 +28,7 @@ api = "0.7"
     uri = "https://github.com/paketo-buildpacks/liberty/blob/main/LICENSE"
 
 [metadata]
-  include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "bin/helper", "buildpack.toml", "templates/app.tmpl", "templates/features.tmpl"]
+  include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "bin/helper", "buildpack.toml", "templates/app.tmpl", "templates/features.tmpl", "templates/default-http-endpoint.tmpl"]
   pre-package = "scripts/build.sh"
 
   [[metadata.configurations]]
