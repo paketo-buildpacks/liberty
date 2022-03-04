@@ -20,10 +20,10 @@ import (
 	"fmt"
 
 	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
 )
 
 const (
@@ -60,7 +60,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
-	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
+	serverName, ok := getPlanMetadata("server-name", context.Plan.Entries)
+	if !ok {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to find detected server name in Liberty plan metadata")
+	}
 
 	if hasApp, err := b.checkJvmApplicationProvided(context, serverName); err != nil {
 		return libcnb.BuildResult{}, err
@@ -172,22 +175,18 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 }
 
 func (b Build) checkJvmApplicationProvided(context libcnb.BuildContext, serverName string) (bool, error) {
-	isPackagedServer := isPackagedServerPlan(context.Plan.Entries)
+	usrPath, isPackagedServer := getPlanMetadata("packaged-server-usr-path", context.Plan.Entries)
 
 	if isPackagedServer {
-		serverUserPath, err := getPackagedServerUserPath(context.Plan.Entries)
-		if err != nil {
-			return false, err
-		}
-		return b.validatePackagedServer(serverUserPath, serverName)
+		return b.validatePackagedServer(usrPath, serverName)
 	}
 	return b.validateApplication(context.Application.Path)
 }
 
 // validatePackagedServer returns true if a server.xml is found and at least one app is installed.
-func (b Build) validatePackagedServer(userPath, serverName string) (bool, error) {
+func (b Build) validatePackagedServer(usrPath, serverName string) (bool, error) {
 	libertyServer := server.LibertyServer{
-		ServerUserPath: userPath,
+		ServerUserPath: usrPath,
 		ServerName:     serverName,
 	}
 
@@ -229,32 +228,17 @@ func (b Build) validateApplication(appRoot string) (bool, error) {
 	return true, nil
 }
 
-func isPackagedServerPlan(plans []libcnb.BuildpackPlanEntry) bool {
-	var value bool
+func getPlanMetadata(name string, plans []libcnb.BuildpackPlanEntry) (string, bool) {
 	for _, entry := range plans {
 		if entry.Name == PlanEntryLiberty {
-			if packagedServerValue, found := entry.Metadata["packaged-server"]; found {
-				val, ok := packagedServerValue.(bool)
-				value = ok && val
-			}
-			break
-		}
-	}
-	return value
-}
-
-func getPackagedServerUserPath(plans []libcnb.BuildpackPlanEntry) (string, error) {
-	for _, entry := range plans {
-		if entry.Name == PlanEntryLiberty {
-			if userPath, found := entry.Metadata["packaged-server-usr-path"]; found {
-				val, ok := userPath.(string)
+			if val, found := entry.Metadata[name]; found {
+				data, ok := val.(string)
 				if !ok {
-					return "", fmt.Errorf("unable to parse packaged-server-usr-path: '%v'", userPath)
+					return "", false
 				}
-				return val, nil
+				return data, true
 			}
-			break
 		}
 	}
-	return "", fmt.Errorf("unable to find packaged-server-usr-path")
+	return "", false
 }

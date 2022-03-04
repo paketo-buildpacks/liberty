@@ -75,8 +75,8 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
-    default = "defaultServer"
-    description = "Name of the server to use. Defaults to defaultServer"
+    default = ""
+    description = "Name of the server to use. If not set, the buildpack tries to detect the server name for packaged servers. Otherwise, it defaults to 'defaultServer'"
     launch = true
     name = "BP_LIBERTY_SERVER_NAME"
 

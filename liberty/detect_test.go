@@ -48,7 +48,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
-				{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer"},
+				{"name": "BP_LIBERTY_SERVER_NAME", "default": ""},
 			},
 		}
 
@@ -78,7 +78,9 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
+							"server-name": "defaultServer",
+						}},
 					},
 				},
 			},
@@ -106,7 +108,9 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
+							"server-name": "defaultServer",
+						}},
 					},
 				},
 			},
@@ -135,7 +139,9 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
+							"server-name": "defaultServer",
+						}},
 					},
 				},
 			},
@@ -165,7 +171,9 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
+							"server-name": "defaultServer",
+						}},
 					},
 				},
 			},
@@ -190,7 +198,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "wlp"))).To(Succeed())
 		})
 
-		it("works", func() {
+		it("works with defaultServer", func() {
 			result, err := detect.Detect(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result).To(Equal(libcnb.DetectResult{
@@ -210,13 +218,97 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"packaged-server":          true,
+								"server-name":              "defaultServer",
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
 							}},
 						},
 					},
 				},
 			}))
+		})
+
+		it("detects the correct server name", func() {
+			defaultServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer")
+			testServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "testServer")
+			Expect(os.Rename(defaultServerPath, testServerPath)).To(Succeed())
+
+			result, err := detect.Detect(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(libcnb.DetectResult{
+				Pass: true,
+				Plans: []libcnb.BuildPlan{
+					{
+						Provides: []libcnb.BuildPlanProvide{
+							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+						},
+
+						Requires: []libcnb.BuildPlanRequire{
+							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
+								"launch": true,
+								"build":  true,
+								"cache":  true,
+							}},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
+								"server-name":              "testServer",
+								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
+							}},
+						},
+					},
+				},
+			}))
+		})
+
+		it("works when there is more than one server and BP_LIBERTY_SERVER_NAME is set", func() {
+			Expect(os.Setenv("BP_LIBERTY_SERVER_NAME", "testServer")).To(Succeed())
+			testServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "testServer")
+			Expect(os.MkdirAll(filepath.Join(testServerPath, "apps", "test.war"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+
+			result, err := detect.Detect(ctx)
+			Expect(os.Unsetenv("BP_LIBERTY_SERVER_NAME")).To(Succeed())
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result).To(Equal(libcnb.DetectResult{
+				Pass: true,
+				Plans: []libcnb.BuildPlan{
+					{
+						Provides: []libcnb.BuildPlanProvide{
+							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+						},
+
+						Requires: []libcnb.BuildPlanRequire{
+							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
+								"launch": true,
+								"build":  true,
+								"cache":  true,
+							}},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
+								"server-name":              "testServer",
+								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
+							}},
+						},
+					},
+				},
+			}))
+		})
+
+		it("returns an error when there is more than one server and BP_LIBERTY_SERVER_NAME is not set", func() {
+			serverName := os.Getenv("BP_LIBERTY_SERVER_NAME")
+			Expect(serverName).To(BeEmpty())
+			testServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "testServer")
+			Expect(os.MkdirAll(testServerPath, 0755)).To(Succeed())
+
+			_, err := detect.Detect(ctx)
+			Expect(err).To(HaveOccurred())
+		})
+
+		it("returns an error when there are no servers found", func() {
+			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer"))).To(Succeed())
+			_, err := detect.Detect(ctx)
+			Expect(err).To(HaveOccurred())
 		})
 
 		it("does not provide jvm-application-package if packaged server has no apps", func() {
@@ -239,7 +331,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"packaged-server":          true,
+								"server-name":              "defaultServer",
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
 							}},
 						},
@@ -279,7 +371,40 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"packaged-server":          true,
+								"server-name":              "defaultServer",
+								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
+							}},
+						},
+					},
+				},
+			}))
+		})
+
+		it("detects the correct server name", func() {
+			defaultServerPath := filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer")
+			testServerPath := filepath.Join(ctx.Application.Path, "usr", "servers", "testServer")
+			Expect(os.Rename(defaultServerPath, testServerPath)).To(Succeed())
+
+			result, err := detect.Detect(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(libcnb.DetectResult{
+				Pass: true,
+				Plans: []libcnb.BuildPlan{
+					{
+						Provides: []libcnb.BuildPlanProvide{
+							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+						},
+
+						Requires: []libcnb.BuildPlanRequire{
+							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
+								"launch": true,
+								"build":  true,
+								"cache":  true,
+							}},
+							{Name: liberty.PlanEntryJVMApplicationPackage},
+							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
+								"server-name":              "testServer",
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
 							}},
 						},
@@ -308,7 +433,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"packaged-server":          true,
+								"server-name":              "defaultServer",
 								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
 							}},
 						},

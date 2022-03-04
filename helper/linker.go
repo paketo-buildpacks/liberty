@@ -83,7 +83,10 @@ func (f FileLinker) Configure(appDir string) error {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
-	serverName := sherpa.GetEnvWithDefault("BP_LIBERTY_SERVER_NAME", "defaultServer")
+	serverName, err := sherpa.GetEnvRequired("BPI_LIBERTY_SERVER_NAME")
+	if err != nil {
+		return err
+	}
 	f.ServerRootPath = filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName)
 	configPath := filepath.Join(f.ServerRootPath, "server.xml")
 
