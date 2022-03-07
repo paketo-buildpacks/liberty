@@ -18,9 +18,8 @@ package liberty
 
 import (
 	"fmt"
-
 	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -60,18 +59,52 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
-	serverName, ok := getPlanMetadata("server-name", context.Plan.Entries)
-	if !ok {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to find detected server name in Liberty plan metadata")
+	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
+	serverBuildSrc := core.NewServerBuildSource(context.Application.Path, serverName, b.Logger)
+	appBuildSrc := core.NewAppBuildSource(context.Application.Path, b.Logger)
+
+	buildSources := []core.BuildSource{
+		serverBuildSrc,
+		appBuildSrc,
 	}
 
-	if hasApp, err := b.checkJvmApplicationProvided(context, serverName); err != nil {
-		return libcnb.BuildResult{}, err
-	} else if !hasApp {
+	var detectedBuildSrc core.BuildSource
+
+	for _, buildSrc := range buildSources {
+		b.Logger.Debugf("Checking build source '%s'", buildSrc.Name())
+		ok, err := buildSrc.Detect()
+		if err != nil {
+			return libcnb.BuildResult{},
+				fmt.Errorf("unable to detect build source '%s'\n%w", buildSrc.Name(), err)
+		}
+		if !ok {
+			continue
+		}
+
+		validApp, err := buildSrc.ValidateApp()
+		if err != nil {
+			return libcnb.BuildResult{},
+				fmt.Errorf("unable to validate build source '%s'\n%w", buildSrc.Name(), err)
+		}
+		if validApp {
+			detectedBuildSrc = buildSrc
+			break
+		}
+	}
+
+	if detectedBuildSrc == nil {
 		for _, entry := range context.Plan.Entries {
 			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
 		}
 		return result, nil
+	}
+
+	if serverName == "" {
+		serverName, err = detectedBuildSrc.DefaultServerName()
+		if err != nil {
+			return libcnb.BuildResult{},
+				fmt.Errorf("unable to get default server name for '%s'\n%w", detectedBuildSrc.Name(), err)
+		}
 	}
 
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
@@ -172,73 +205,4 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 	}
 
 	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
-}
-
-func (b Build) checkJvmApplicationProvided(context libcnb.BuildContext, serverName string) (bool, error) {
-	usrPath, isPackagedServer := getPlanMetadata("packaged-server-usr-path", context.Plan.Entries)
-
-	if isPackagedServer {
-		return b.validatePackagedServer(usrPath, serverName)
-	}
-	return b.validateApplication(context.Application.Path)
-}
-
-// validatePackagedServer returns true if a server.xml is found and at least one app is installed.
-func (b Build) validatePackagedServer(usrPath, serverName string) (bool, error) {
-	libertyServer := server.LibertyServer{
-		ServerUserPath: usrPath,
-		ServerName:     serverName,
-	}
-
-	if serverConfigFound, err := util.FileExists(libertyServer.GetServerConfigPath()); err != nil {
-		return false, fmt.Errorf("unable to read server.xml\n%w", err)
-	} else if !serverConfigFound {
-		b.Logger.Debug("Server config not found, skipping build")
-		return false, nil
-	}
-
-	if hasApps, err := libertyServer.HasInstalledApps(); err != nil {
-		return false, err
-	} else if !hasApps {
-		b.Logger.Debug("No apps found in packaged server, skipping build")
-		return false, nil
-	}
-
-	return true, nil
-}
-
-// validateApplication returns true if `Main-Class` is not be defined in the application manifest and either of the
-// following files exist: `META-INF/application.xml` or `WEB-INF/`.
-func (b Build) validateApplication(appRoot string) (bool, error) {
-	// Check contributed app if it is valid
-	if isMainClassDefined, err := util.ManifestHasMainClassDefined(appRoot); err != nil {
-		return false, err
-	} else if isMainClassDefined {
-		b.Logger.Debug("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build")
-		return false, nil
-	}
-
-	if isJvmAppPackage, err := util.IsJvmApplicationPackage(appRoot); err != nil {
-		return false, err
-	} else if !isJvmAppPackage {
-		b.Logger.Debug("No `WEB-INF/` or `META-INF/application.xml` found, skipping build")
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func getPlanMetadata(name string, plans []libcnb.BuildpackPlanEntry) (string, bool) {
-	for _, entry := range plans {
-		if entry.Name == PlanEntryLiberty {
-			if val, found := entry.Metadata[name]; found {
-				data, ok := val.(string)
-				if !ok {
-					return "", false
-				}
-				return data, true
-			}
-		}
-	}
-	return "", false
 }

@@ -78,9 +78,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-							"server-name": "defaultServer",
-						}},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -108,9 +106,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-							"server-name": "defaultServer",
-						}},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -139,9 +135,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-							"server-name": "defaultServer",
-						}},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -171,9 +165,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
-						{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-							"server-name": "defaultServer",
-						}},
+						{Name: liberty.PlanEntryLiberty},
 					},
 				},
 			},
@@ -181,7 +173,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("fails if a Main-Class is present", func() {
-		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte("Main-Class: com.java.Helloworld"), 0644))
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte("Main-Class: com.java.HelloWorld"), 0644)).To(Succeed())
 
 		result, err := detect.Detect(ctx)
 		Expect(err).NotTo(HaveOccurred())
@@ -217,10 +209,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"server-name":              "defaultServer",
-								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
-							}},
+							{Name: liberty.PlanEntryLiberty},
 						},
 					},
 				},
@@ -250,10 +239,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"server-name":              "testServer",
-								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
-							}},
+							{Name: liberty.PlanEntryLiberty},
 						},
 					},
 				},
@@ -285,10 +271,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"server-name":              "testServer",
-								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
-							}},
+							{Name: liberty.PlanEntryLiberty},
 						},
 					},
 				},
@@ -330,10 +313,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"server-name":              "defaultServer",
-								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "wlp", "usr"),
-							}},
+							{Name: liberty.PlanEntryLiberty},
 						},
 					},
 				},
@@ -370,10 +350,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"server-name":              "defaultServer",
-								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
-							}},
+							{Name: liberty.PlanEntryLiberty},
 						},
 					},
 				},
@@ -403,10 +380,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"server-name":              "testServer",
-								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
-							}},
+							{Name: liberty.PlanEntryLiberty},
 						},
 					},
 				},
@@ -432,10 +406,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty, Metadata: map[string]interface{}{
-								"server-name":              "defaultServer",
-								"packaged-server-usr-path": filepath.Join(ctx.Application.Path, "usr"),
-							}},
+							{Name: liberty.PlanEntryLiberty},
 						},
 					},
 				},

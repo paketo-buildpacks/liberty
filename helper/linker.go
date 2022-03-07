@@ -19,12 +19,13 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/paketo-buildpacks/liberty/internal/core"
+	"github.com/paketo-buildpacks/liberty/internal/server"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/template"
 
-	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/liberty/liberty"
 
@@ -91,16 +92,18 @@ func (f FileLinker) Configure(appDir string) error {
 	f.BaseLayerPath = sherpa.GetEnvWithDefault("BPI_LIBERTY_BASE_ROOT", "/layers/paketo-buildpacks_liberty/base")
 
 	// Check if we are contributing a packaged server
-	isPackagedServer, usrPath, err := checkPackagedServer(appDir)
+	serverBuildSource := core.NewServerBuildSource(appDir, serverName, f.Logger)
+	isPackagedServer, err := serverBuildSource.Detect()
 	if err != nil {
 		return fmt.Errorf("unable to check package server directory\n%w", err)
 	}
 	if isPackagedServer {
-		libertyServer := server.LibertyServer{
-			ServerUserPath: filepath.Join(f.RuntimeRootPath, "usr"),
-			ServerName:     serverName,
+		usrPath, err := serverBuildSource.UserPath()
+		if err != nil {
+			return fmt.Errorf("unable to get Liberty usr directory\n%w", err)
 		}
-		if err := libertyServer.SetUserDirectory(usrPath); err != nil {
+		destUserPath := filepath.Join(f.RuntimeRootPath, "usr")
+		if err := server.SetUserDirectory(usrPath, destUserPath, serverName); err != nil {
 			return fmt.Errorf("unable to contribute packaged server\n%w", err)
 		}
 	} else {
@@ -267,25 +270,4 @@ func readServerConfig(configPath string) (ServerConfig, error) {
 		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%s'\n%w", configPath, err)
 	}
 	return config, nil
-}
-
-// checkPackagedServer returns true if a packaged server is detected. If true, it also returns the detected usr path.
-func checkPackagedServer(appPath string) (bool, string, error) {
-	dirs := []string{
-		filepath.Join("wlp", "usr"),
-		"usr",
-	}
-
-	for _, dir := range dirs {
-		userPath := filepath.Join(appPath, dir)
-		isPackagedServer, err := util.DirExists(userPath)
-		if err != nil {
-			return false, "", fmt.Errorf("unable to check user directory\n%w", err)
-		}
-		if isPackagedServer {
-			return true, userPath, nil
-		}
-	}
-
-	return false, "", nil
 }
