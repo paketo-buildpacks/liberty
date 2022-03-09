@@ -1,31 +1,3 @@
-
-Skip to content
-Pull requests
-Issues
-Marketplace
-Explore
-@kevin-ortega
-paketo-buildpacks /
-liberty
-Public
-
-Code
-Issues 3
-Pull requests 1
-Actions
-Security
-
-    Insights
-
-liberty/liberty/build.go /
-@hibell
-hibell Auto detect server name for packaged servers. (#97)
-Latest commit 542f650 2 hours ago
-History
-2 contributors
-@kevin-ortega
-@hibell
-208 lines (176 sloc) 6.18 KB
 /*
  * Copyright 2018-2020 the original author or authors.
  *
