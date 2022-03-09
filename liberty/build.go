@@ -33,6 +33,8 @@ const (
 
 	openLibertyStackRuntimeRoot = "/opt/ol"
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
+	
+	libertyAppServer 		= "liberty"
 )
 
 type Build struct {
@@ -221,19 +223,3 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 
 	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
 }
-
-    © 2022 GitHub, Inc.
-
-    Terms
-    Privacy
-    Security
-    Status
-    Docs
-    Contact GitHub
-    Pricing
-    API
-    Training
-    Blog
-    About
-
-Loading complete
