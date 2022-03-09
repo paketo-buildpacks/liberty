@@ -18,13 +18,11 @@ package liberty
 
 import (
 	"fmt"
-
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/liberty/internal/core"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/liberty/internal/server"
-	"github.com/paketo-buildpacks/liberty/internal/util"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 const (
@@ -34,8 +32,6 @@ const (
 
 	openLibertyStackRuntimeRoot = "/opt/ol"
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
-	
-	libertyAppServer 		= "liberty"
 )
 
 type Build struct {
@@ -44,23 +40,9 @@ type Build struct {
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
-	
+
 	result := libcnb.NewBuildResult()
-	
-	appServer := sherpa.GetEnvWithDefault("BP_JAVA_APP_SERVER", "")
-	if appServer != "" && appServer != libertyAppServer {
-		for _, entry := range context.Plan.Entries {
-			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
-		}
-		return result, nil
-	}	
-	
-	pr := libpak.PlanEntryResolver{Plan: context.Plan}
-	_, _, err := pr.Resolve(PlanEntryJavaAppServer)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve java-app-server plan entry\n%w", err)
-	}
-	
+
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
@@ -78,14 +60,51 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
+	serverBuildSrc := core.NewServerBuildSource(context.Application.Path, serverName, b.Logger)
+	appBuildSrc := core.NewAppBuildSource(context.Application.Path, b.Logger)
 
-	if hasApp, err := b.checkJvmApplicationProvided(context, serverName); err != nil {
-		return libcnb.BuildResult{}, err
-	} else if !hasApp {
+	buildSources := []core.BuildSource{
+		serverBuildSrc,
+		appBuildSrc,
+	}
+
+	var detectedBuildSrc core.BuildSource
+
+	for _, buildSrc := range buildSources {
+		b.Logger.Debugf("Checking build source '%s'", buildSrc.Name())
+		ok, err := buildSrc.Detect()
+		if err != nil {
+			return libcnb.BuildResult{},
+				fmt.Errorf("unable to detect build source '%s'\n%w", buildSrc.Name(), err)
+		}
+		if !ok {
+			continue
+		}
+
+		validApp, err := buildSrc.ValidateApp()
+		if err != nil {
+			return libcnb.BuildResult{},
+				fmt.Errorf("unable to validate build source '%s'\n%w", buildSrc.Name(), err)
+		}
+		if validApp {
+			detectedBuildSrc = buildSrc
+			break
+		}
+	}
+
+	if detectedBuildSrc == nil {
 		for _, entry := range context.Plan.Entries {
 			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
 		}
 		return result, nil
+	}
+
+	if serverName == "" {
+		serverName, err = detectedBuildSrc.DefaultServerName()
+		if err != nil {
+			return libcnb.BuildResult{},
+				fmt.Errorf("unable to get default server name for '%s'\n%w", detectedBuildSrc.Name(), err)
+		}
 	}
 
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
@@ -119,10 +138,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
-	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
-	base.Logger = b.Logger
-	result.Layers = append(result.Layers, base)
-
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
@@ -146,6 +161,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	} else {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
+	
+	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
 
 	return result, nil
 }
@@ -186,92 +205,4 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 	}
 
 	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
-}
-
-func (b Build) checkJvmApplicationProvided(context libcnb.BuildContext, serverName string) (bool, error) {
-	isPackagedServer := isPackagedServerPlan(context.Plan.Entries)
-
-	if isPackagedServer {
-		serverUserPath, err := getPackagedServerUserPath(context.Plan.Entries)
-		if err != nil {
-			return false, err
-		}
-		return b.validatePackagedServer(serverUserPath, serverName)
-	}
-	return b.validateApplication(context.Application.Path)
-}
-
-// validatePackagedServer returns true if a server.xml is found and at least one app is installed.
-func (b Build) validatePackagedServer(userPath, serverName string) (bool, error) {
-	libertyServer := server.LibertyServer{
-		ServerUserPath: userPath,
-		ServerName:     serverName,
-	}
-
-	if serverConfigFound, err := util.FileExists(libertyServer.GetServerConfigPath()); err != nil {
-		return false, fmt.Errorf("unable to read server.xml\n%w", err)
-	} else if !serverConfigFound {
-		b.Logger.Debug("Server config not found, skipping build")
-		return false, nil
-	}
-
-	if hasApps, err := libertyServer.HasInstalledApps(); err != nil {
-		return false, err
-	} else if !hasApps {
-		b.Logger.Debug("No apps found in packaged server, skipping build")
-		return false, nil
-	}
-
-	return true, nil
-}
-
-// validateApplication returns true if `Main-Class` is not be defined in the application manifest and either of the
-// following files exist: `META-INF/application.xml` or `WEB-INF/`.
-func (b Build) validateApplication(appRoot string) (bool, error) {
-	// Check contributed app if it is valid
-	if isMainClassDefined, err := util.ManifestHasMainClassDefined(appRoot); err != nil {
-		return false, err
-	} else if isMainClassDefined {
-		b.Logger.Debug("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build")
-		return false, nil
-	}
-
-	if isJvmAppPackage, err := util.IsJvmApplicationPackage(appRoot); err != nil {
-		return false, err
-	} else if !isJvmAppPackage {
-		b.Logger.Debug("No `WEB-INF/` or `META-INF/application.xml` found, skipping build")
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func isPackagedServerPlan(plans []libcnb.BuildpackPlanEntry) bool {
-	var value bool
-	for _, entry := range plans {
-		if entry.Name == PlanEntryLiberty {
-			if packagedServerValue, found := entry.Metadata["packaged-server"]; found {
-				val, ok := packagedServerValue.(bool)
-				value = ok && val
-			}
-			break
-		}
-	}
-	return value
-}
-
-func getPackagedServerUserPath(plans []libcnb.BuildpackPlanEntry) (string, error) {
-	for _, entry := range plans {
-		if entry.Name == PlanEntryLiberty {
-			if userPath, found := entry.Metadata["packaged-server-usr-path"]; found {
-				val, ok := userPath.(string)
-				if !ok {
-					return "", fmt.Errorf("unable to parse packaged-server-usr-path: '%v'", userPath)
-				}
-				return val, nil
-			}
-			break
-		}
-	}
-	return "", fmt.Errorf("unable to find packaged-server-usr-path")
 }

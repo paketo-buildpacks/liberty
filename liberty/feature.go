@@ -9,8 +9,8 @@ import (
 	"text/template"
 
 	"github.com/BurntSushi/toml"
-	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak/bard"
 )
 
 type Feature struct {

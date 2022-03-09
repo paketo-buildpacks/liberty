@@ -27,8 +27,8 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/liberty/liberty"
+	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/sclevine/spec"
 )
 
@@ -49,13 +49,17 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
 				{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
 				{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
-				{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
+				{"name": "BP_LIBERTY_SERVER_NAME", "default": "", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
 				{"id": "open-liberty-runtime-microProfile4", "version": "21.0.10"},
 			},
 		}
+
+		ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "liberty", Metadata: map[string]interface{}{
+			"server-name": "defaultServer",
+		}}}
 
 		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
 		Expect(err).NotTo(HaveOccurred())
@@ -115,14 +119,12 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("doesn't run", func() {
-				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
-
 				buf := &bytes.Buffer{}
 				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
-				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
+				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
 
 				Expect(buf.String()).To(ContainSubstring("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
 			})
@@ -130,14 +132,12 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		context("missing WEB-INF and application.xml", func() {
 			it("doesn't run", func() {
-				ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "test"}}
-
 				buf := &bytes.Buffer{}
 				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
-				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "test"}))
+				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
 
 				Expect(buf.String()).To(ContainSubstring("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
 			})
@@ -189,7 +189,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 					{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
 					{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
 					{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
-					{"name": "BP_LIBERTY_SERVER_NAME", "default": "defaultServer", "build": true},
+					{"name": "BP_LIBERTY_SERVER_NAME", "default": "", "build": true},
 				},
 				"dependencies": []map[string]interface{}{
 					{
@@ -228,7 +228,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.MkdirAll(filepath.Join(usrPath, "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(usrPath, "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
 			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "liberty", Metadata: map[string]interface{}{
-				"packaged-server":          true,
+				"server-name":              "defaultServer",
 				"packaged-server-usr-path": usrPath,
 			}}}
 			Expect(os.Setenv("BP_DEBUG", "true"))
