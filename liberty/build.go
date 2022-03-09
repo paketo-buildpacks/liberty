@@ -1,3 +1,31 @@
+
+Skip to content
+Pull requests
+Issues
+Marketplace
+Explore
+@kevin-ortega
+paketo-buildpacks /
+liberty
+Public
+
+Code
+Issues 3
+Pull requests 1
+Actions
+Security
+
+    Insights
+
+liberty/liberty/build.go /
+@hibell
+hibell Auto detect server name for packaged servers. (#97)
+Latest commit 542f650 2 hours ago
+History
+2 contributors
+@kevin-ortega
+@hibell
+208 lines (176 sloc) 6.18 KB
 /*
  * Copyright 2018-2020 the original author or authors.
  *
@@ -23,6 +51,7 @@ import (
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 const (
@@ -42,7 +71,21 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
 
 	result := libcnb.NewBuildResult()
-
+	
+	appServer := sherpa.GetEnvWithDefault("BP_JAVA_APP_SERVER", "")
+	if appServer != "" && appServer != libertyAppServer {
+		for _, entry := range context.Plan.Entries {
+			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
+		}
+		return result, nil
+	}
+		
+	pr := libpak.PlanEntryResolver{Plan: context.Plan}
+	_, _, err := pr.Resolve(PlanEntryJavaAppServer)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve java-app-server plan entry\n%w", err)
+	}
+	
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
@@ -138,6 +181,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
+	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
+
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
@@ -161,10 +208,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	} else {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
-	
-	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
-	base.Logger = b.Logger
-	result.Layers = append(result.Layers, base)
 
 	return result, nil
 }
@@ -206,3 +249,19 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 
 	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
 }
+
+    © 2022 GitHub, Inc.
+
+    Terms
+    Privacy
+    Security
+    Status
+    Docs
+    Contact GitHub
+    Pricing
+    API
+    Training
+    Blog
+    About
+
+Loading complete

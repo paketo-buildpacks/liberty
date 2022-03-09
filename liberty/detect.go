@@ -18,17 +18,14 @@ package liberty
 
 import (
 	"fmt"
-	"path/filepath"
-
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/liberty/internal/server"
-	"github.com/paketo-buildpacks/liberty/internal/util"
 )
 
 const (
-	PlanEntryLiberty           	   = "liberty"
+	PlanEntryLiberty               = "liberty"
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
 	PlanEntryJavaAppServer		   = "java-app-server"
@@ -45,43 +42,34 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 	}
 
 	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
-	packagedServerDirs := []string{
-		filepath.Join("wlp", "usr"),
-		"usr",
+	serverBuildSrc := core.NewServerBuildSource(context.Application.Path, serverName, d.Logger)
+	appBuildSrc := core.NewAppBuildSource(context.Application.Path, d.Logger)
+
+	buildSources := []core.BuildSource{
+		serverBuildSrc,
+		appBuildSrc,
 	}
 
-	for _, dir := range packagedServerDirs {
-		serverUserPath := filepath.Join(context.Application.Path, dir)
-		isPackagedServer, err := util.FileExists(filepath.Join(serverUserPath, "servers", serverName, "server.xml"))
+	var detectedBuildSrc core.BuildSource
+
+	for _, buildSrc := range buildSources {
+		d.Logger.Debugf("Checking build source '%s'", buildSrc.Name())
+		ok, err := buildSrc.Detect()
 		if err != nil {
-			return libcnb.DetectResult{}, fmt.Errorf("unable to read packaged server.xml\n%w", err)
+			return libcnb.DetectResult{},
+				fmt.Errorf("unable to detect build source '%s'\n%w", buildSrc.Name(), err)
 		}
-		if isPackagedServer {
-			d.Logger.Debug("Detected packaged server")
-			return d.detectPackagedServer(serverUserPath, serverName)
+		if ok {
+			detectedBuildSrc = buildSrc
+			break
 		}
 	}
 
-	d.Logger.Debug("Detected application")
-	return d.detectApplication(context.Application.Path)
-}
-
-// detectApplication will handle detection of applications. It will pass detection iff `Main-Class` is not defined in
-// the manifest. If a compiled artifact was pushed, detectApplication will mark the `jvm-application-package`
-// requirement as being met.
-func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
-	if mainClassDefined, err := util.ManifestHasMainClassDefined(appPath); err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to check manifest\n%w", err)
-	} else if mainClassDefined {
+	if detectedBuildSrc == nil {
 		return libcnb.DetectResult{Pass: false}, nil
 	}
 
-	// When a compiled artifact is pushed, mark that a JVM application package has been provided so that the build
-	// plan requirement is satisfied.
-	isJvmAppPackage, err := util.IsJvmApplicationPackage(appPath)
-	if err != nil {
-		return libcnb.DetectResult{}, err
-	}
+	d.Logger.Debugf("Detected build source '%s'", detectedBuildSrc.Name())
 
 	result := libcnb.DetectResult{
 		Pass: true,
@@ -106,61 +94,22 @@ func (d Detect) detectApplication(appPath string) (libcnb.DetectResult, error) {
 		},
 	}
 
-	if isJvmAppPackage {
-		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{
-			Name: PlanEntryJVMApplicationPackage,
-		})
-	} else {
-		d.Logger.Debug("Not a JVM application package")
-	}
-
-	return result, nil
-}
-
-// detectPackagedServer handles detection of a packaged Liberty server.
-func (d Detect) detectPackagedServer(serverUserPath, serverName string) (libcnb.DetectResult, error) {
-	libertyServer := server.LibertyServer{
-		ServerUserPath: serverUserPath,
-		ServerName:     serverName,
-	}
-	hasApps, err := libertyServer.HasInstalledApps()
+	validApp, err := detectedBuildSrc.ValidateApp()
 	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to check if packaged server has apps\n%w", err)
+		return libcnb.DetectResult{},
+			fmt.Errorf("unable to check if app was provided for build source '%s'\n%w", detectedBuildSrc.Name(), err)
 	}
 
-	result := libcnb.DetectResult{
-		Pass: true,
-		Plans: []libcnb.BuildPlan{
-			{
-				Provides: []libcnb.BuildPlanProvide{
-					{Name: PlanEntryLiberty},
-					{Name: PlanEntryJavaAppServer},
-				},
-
-				Requires: []libcnb.BuildPlanRequire{
-					{Name: PlanEntryJRE, Metadata: map[string]interface{}{
-						"launch": true,
-						"build":  true,
-						"cache":  true},
-					},
-					{Name: PlanEntryJavaAppServer},
-					{Name: PlanEntryJVMApplicationPackage},
-					{Name: PlanEntryLiberty, Metadata: map[string]interface{}{
-						"packaged-server":          true,
-						"packaged-server-usr-path": serverUserPath,
-					}},
-				},
-			},
-		},
+	if !validApp {
+		d.Logger.Debugf("No applications provided in build source '%s'", detectedBuildSrc.Name())
+		return result, nil
 	}
 
-	if hasApps {
-		result.Plans[0].Provides = append(result.Plans[0].Provides, libcnb.BuildPlanProvide{
+	result.Plans[0].Provides = append(result.Plans[0].Provides,
+		libcnb.BuildPlanProvide{
 			Name: PlanEntryJVMApplicationPackage,
-		})
-	} else {
-		d.Logger.Debug("No applications detected in server bundle")
-	}
+		},
+	)
 
 	return result, nil
 }
