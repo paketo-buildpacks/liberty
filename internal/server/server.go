@@ -8,29 +8,24 @@ import (
 	"strings"
 )
 
-type LibertyServer struct {
-	ServerUserPath string
-	ServerName     string
-}
-
-func (s LibertyServer) GetServerConfigPath() string {
-	return filepath.Join(s.ServerUserPath, "servers", s.ServerName, "server.xml")
+func GetServerConfigPath(serverPath string) string {
+	return filepath.Join(serverPath, "server.xml")
 }
 
 // SetUserDirectory sets the server's user directory to the specified directory.
-func (s LibertyServer) SetUserDirectory(path string) error {
+func SetUserDirectory(srcUserPath string, destUserPath string, serverName string) error {
 	// Copy the configDropins directory to the new user directory. This is needed by Liberty runtimes provided in the
 	// stack run image
-	configDropinsDir := filepath.Join(s.ServerUserPath, "servers", "defaultServer", "configDropins")
+	configDropinsDir := filepath.Join(destUserPath, "servers", "defaultServer", "configDropins")
 	if configDropinsFound, err := util.DirExists(configDropinsDir); err != nil {
 		return fmt.Errorf("unable to read configDropins directory\n%w", err)
 	} else if configDropinsFound {
-		newConfigDropinsDir := filepath.Join(path, "servers", s.ServerName, "configDropins")
+		newConfigDropinsDir := filepath.Join(srcUserPath, "servers", serverName, "configDropins")
 		if err := util.CopyDir(configDropinsDir, newConfigDropinsDir); err != nil {
 			return fmt.Errorf("unable to copy configDropins to new user directory\n%w", err)
 		}
 	}
-	if err := util.DeleteAndLinkPath(path, s.ServerUserPath); err != nil {
+	if err := util.DeleteAndLinkPath(srcUserPath, destUserPath); err != nil {
 		return fmt.Errorf("unable to set new user directory\n%w", err)
 	}
 	return nil
@@ -38,8 +33,7 @@ func (s LibertyServer) SetUserDirectory(path string) error {
 
 // HasInstalledApps checks the directories `<server-path>/apps` and `<server-path>/dropins` for any web or enterprise
 // archives. Returns true if it finds at least one compiled artifact.
-func (s LibertyServer) HasInstalledApps() (bool, error) {
-	serverPath := filepath.Join(s.ServerUserPath, "servers", s.ServerName)
+func HasInstalledApps(serverPath string) (bool, error) {
 	if hasApps, err := dirHasCompiledArtifacts(filepath.Join(serverPath, "apps")); err != nil {
 		return false, fmt.Errorf("unable to check apps directory for app archives\n%w", err)
 	} else if hasApps {
@@ -53,6 +47,30 @@ func (s LibertyServer) HasInstalledApps() (bool, error) {
 	}
 
 	return false, nil
+}
+
+func GetServerList(userPath string) ([]string, error) {
+	serversPath := filepath.Join(userPath, "servers")
+
+	serversExists, err := util.FileExists(serversPath)
+	if err != nil {
+		return []string{}, err
+	}
+	if !serversExists {
+		return []string{}, nil
+	}
+
+	serverDirs, err := ioutil.ReadDir(serversPath)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var servers []string
+	for _, dir := range serverDirs {
+		servers = append(servers, dir.Name())
+	}
+
+	return servers, nil
 }
 
 // dirHasCompiledArtifacts checks if the given directory has any web or enterprise archives.

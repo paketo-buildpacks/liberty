@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/buildpacks/libcnb"
 	"github.com/heroku/color"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -69,6 +69,7 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		}
 
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_BASE_ROOT", layer.Path)
+		layer.LaunchEnvironment.Default("BPI_LIBERTY_SERVER_NAME", b.ServerName)
 
 		return layer, nil
 	})

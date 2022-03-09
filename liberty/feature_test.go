@@ -3,8 +3,8 @@ package liberty_test
 import (
 	"encoding/xml"
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/liberty/liberty"
+	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"

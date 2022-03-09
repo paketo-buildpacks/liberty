@@ -2,9 +2,9 @@ package liberty_test
 
 import (
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"

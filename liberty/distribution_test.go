@@ -24,9 +24,9 @@ import (
 	"testing"
 
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"

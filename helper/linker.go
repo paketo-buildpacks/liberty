@@ -19,12 +19,13 @@ package helper
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/paketo-buildpacks/liberty/internal/core"
+	"github.com/paketo-buildpacks/liberty/internal/server"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/template"
 
-	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/liberty/liberty"
 
@@ -37,7 +38,6 @@ import (
 type FileLinker struct {
 	Bindings        libcnb.Bindings
 	Logger          bard.Logger
-	Config          ServerConfig
 	BaseLayerPath   string
 	RuntimeRootPath string
 	ServerRootPath  string
@@ -83,47 +83,27 @@ func (f FileLinker) Configure(appDir string) error {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
 	}
 
-	serverName := sherpa.GetEnvWithDefault("BP_LIBERTY_SERVER_NAME", "defaultServer")
-	f.ServerRootPath = filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName)
-	configPath := filepath.Join(f.ServerRootPath, "server.xml")
-
-	if hasBindings {
-		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
-			if err = util.DeleteAndLinkPath(bindingXML, configPath); err != nil {
-				return fmt.Errorf("unable to replace server.xml\n%w", err)
-			}
-		}
-
-		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
-			existingBSP := filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName, "bootstrap.properties")
-			if err = util.DeleteAndLinkPath(bootstrapProperties, existingBSP); err != nil {
-				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
-			}
-		}
-	}
-
-	f.Config, err = readServerConfig(configPath)
+	serverName, err := sherpa.GetEnvRequired("BPI_LIBERTY_SERVER_NAME")
 	if err != nil {
-		return fmt.Errorf("unable to read server config\n%w", err)
+		return err
 	}
 
-	f.BaseLayerPath = os.Getenv("BPI_LIBERTY_BASE_ROOT")
-	if f.BaseLayerPath == "" {
-		f.BaseLayerPath = "/layers/paketo-buildpacks_liberty/base"
-
-	}
+	f.ServerRootPath = filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName)
+	f.BaseLayerPath = sherpa.GetEnvWithDefault("BPI_LIBERTY_BASE_ROOT", "/layers/paketo-buildpacks_liberty/base")
 
 	// Check if we are contributing a packaged server
-	isPackagedServer, usrPath, err := checkPackagedServer(appDir)
+	serverBuildSource := core.NewServerBuildSource(appDir, serverName, f.Logger)
+	isPackagedServer, err := serverBuildSource.Detect()
 	if err != nil {
 		return fmt.Errorf("unable to check package server directory\n%w", err)
 	}
 	if isPackagedServer {
-		libertyServer := server.LibertyServer{
-			ServerUserPath: filepath.Join(f.RuntimeRootPath, "usr"),
-			ServerName:     serverName,
+		usrPath, err := serverBuildSource.UserPath()
+		if err != nil {
+			return fmt.Errorf("unable to get Liberty usr directory\n%w", err)
 		}
-		if err := libertyServer.SetUserDirectory(usrPath); err != nil {
+		destUserPath := filepath.Join(f.RuntimeRootPath, "usr")
+		if err := server.SetUserDirectory(usrPath, destUserPath, serverName); err != nil {
 			return fmt.Errorf("unable to contribute packaged server\n%w", err)
 		}
 	} else {
@@ -140,6 +120,22 @@ func (f FileLinker) Configure(appDir string) error {
 		}
 	}
 
+	configPath := filepath.Join(f.ServerRootPath, "server.xml")
+	if hasBindings {
+		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
+			if err = util.DeleteAndLinkPath(bindingXML, configPath); err != nil {
+				return fmt.Errorf("unable to replace server.xml\n%w", err)
+			}
+		}
+
+		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
+			existingBSP := filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName, "bootstrap.properties")
+			if err = util.DeleteAndLinkPath(bootstrapProperties, existingBSP); err != nil {
+				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -152,7 +148,13 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, bindi
 	}
 
 	// Skip contributing app config if already defined in the server.xml
-	if f.Config.Application.Name == "app" {
+	configPath := filepath.Join(f.ServerRootPath, "server.xml")
+	config, err := readServerConfig(configPath)
+	if err != nil {
+		return fmt.Errorf("unable to read server config\n%w", err)
+	}
+
+	if config.Application.Name == "app" {
 		f.Logger.Debugf("server.xml already has an application named 'app' defined. Skipping contribution of app config snippet...")
 		return nil
 	}
@@ -268,25 +270,4 @@ func readServerConfig(configPath string) (ServerConfig, error) {
 		return ServerConfig{}, fmt.Errorf("unable to unmarshal server.xml: '%s'\n%w", configPath, err)
 	}
 	return config, nil
-}
-
-// checkPackagedServer returns true if a packaged server is detected. If true, it also returns the detected usr path.
-func checkPackagedServer(appPath string) (bool, string, error) {
-	dirs := []string{
-		filepath.Join("wlp", "usr"),
-		"usr",
-	}
-
-	for _, dir := range dirs {
-		userPath := filepath.Join(appPath, dir)
-		isPackagedServer, err := util.DirExists(userPath)
-		if err != nil {
-			return false, "", fmt.Errorf("unable to check user directory\n%w", err)
-		}
-		if isPackagedServer {
-			return true, userPath, nil
-		}
-	}
-
-	return false, "", nil
 }
