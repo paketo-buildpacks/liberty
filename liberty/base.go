@@ -135,7 +135,7 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 		executor := effect.NewExecutor()
 		if err := executor.Execute(effect.Execution{
 			Command: filepath.Join("java"),
-			Args:    []string{"-jar", ifix, "--installLocation", installationLocation, "--acceptLicense"},
+			Args:    []string{"-jar", ifix, "--installLocation", installationLocation},
 			Dir:     layer.Path,
 			Stdout:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
 			Stderr:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
