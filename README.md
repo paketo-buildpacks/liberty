@@ -42,6 +42,7 @@ The buildpack will support all available profiles of the most recent versions of
 | `$BP_LIBERTY_VERSION`          | The version of Liberty to install. Defaults to the latest version of the runtime.                                                                                                                                                                                   |
 | `$BP_LIBERTY_PROFILE`          | The Liberty profile to use. Defaults to `full`.                                                                                                                                                                                                                     |
 | `$BP_LIBERTY_SERVER_NAME`      | Name of the server to use. Defaults to `defaultServer` when building an application. If building a packaged server and there is only one bundled server present, then the buildpack will use that.                                                                  |
+| `$BP_LIBERTY_FEATURES`		 | Space separated list of Liberty features to be installed with the Liberty runtime.                                                                                                                                                                                  |
 | `$BP_LIBERTY_CONTEXT_ROOT`     | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. |
 | `$BPL_LIBERTY_LOG_LEVEL`       | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                   |
 | `$BP_LIBERTY_EXT_CONF_SHA256`  | The SHA256 hash of the external configuration package.                                                                                                                                                                                                              |
@@ -51,7 +52,7 @@ The buildpack will support all available profiles of the most recent versions of
 
 ### Default Configurations that Vary from Open Liberty's Default
 
-By default, the Open Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Open Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
+By default, the Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Open Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
 
 All of these defaults can be overridden by setting the appropriate properties found in Open Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
 
@@ -169,6 +170,10 @@ The packaged server can then be supplied to the build by using the `--path` argu
 ```console
 pack build --path <packaged-server-zip-path> myapp
 ```
+
+## Installing iFixes
+
+Liberty iFixes can be applied using an [external configuration package](docs/installing-ifixes.md).
 
 ## License
 

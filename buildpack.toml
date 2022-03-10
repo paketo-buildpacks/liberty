@@ -86,6 +86,13 @@ api = "0.7"
     description = "Context root to use for app"
     launch = true
     name = "BP_LIBERTY_CONTEXT_ROOT"
+    
+   [[metadata.configurations]]
+    build = true
+    default = ""
+    description = "A space separated list of liberty features to install."
+    launch = false
+    name = "BP_LIBERTY_FEATURES" 
 
   [[metadata.configurations]]
     build = false
@@ -187,20 +194,6 @@ api = "0.7"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/22.0.0.2/openliberty-microProfile4-22.0.0.2.zip"
     version = "22.0.2"
-
-    [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
-
-  [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:liberty:21.0.2:*:*:*:*:*:*:*:*"]
-    id = "open-liberty-runtime-microProfile3"
-    name = "Open Liberty (Micro Profile 3)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile3@21.0.0.2"
-    sha256 = "0945661bb2492057a86b7e57c37d812e0e57df155a4b9d52b3b560c17778d470"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile3/21.0.0.2/openliberty-microProfile3-21.0.0.2.zip"
-    version = "21.0.2"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"

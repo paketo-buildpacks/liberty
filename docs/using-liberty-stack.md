@@ -31,6 +31,9 @@ ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${P
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
 
+# This script will add the requested server configurations (optionally), apply any interim fixes (optionally) and populate caches to optimize runtime
+RUN configure.sh
+
 FROM registry.access.redhat.com/ubi8/ubi:8.5 as build
 
 # BUILD IMAGE
@@ -71,6 +74,9 @@ ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${P
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
 
+# This script will add the requested server configurations (optionally), apply any interim fixes (optionally) and populate caches to optimize runtime
+RUN configure.sh
+
 FROM registry.access.redhat.com/ubi8/ubi:8.5 as build
 
 # BUILD IMAGE
@@ -89,6 +95,15 @@ RUN yum -y install git wget jq && wget https://github.com/sclevine/yj/releases/d
 
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
+```
+
+### Installing Open Liberty or WebSphere Liberty iFixes
+
+Place iFix jar files in a directory named `interim-fixes` in the directory containing your Dockerfile.
+
+Add the following to your Dockerfile before the `RUN configure.sh`:
+```console
+COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID}  interim-fixes /opt/ol/fixes/
 ```
 
 ### Selecting a Different Java Runtime
