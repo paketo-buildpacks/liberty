@@ -28,6 +28,7 @@ const (
 	PlanEntryLiberty               = "liberty"
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
+	PlanEntryJavaAppServer		   = "java-app-server"
 )
 
 type Detect struct {
@@ -76,6 +77,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 			{
 				Provides: []libcnb.BuildPlanProvide{
 					{Name: PlanEntryLiberty},
+					{Name: PlanEntryJavaAppServer},
 				},
 
 				Requires: []libcnb.BuildPlanRequire{
@@ -84,6 +86,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 						"build":  true,
 						"cache":  true},
 					},
+					{Name: PlanEntryJavaAppServer},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryLiberty},
 				},

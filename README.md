@@ -46,12 +46,12 @@ The buildpack will support all available profiles of the most recent versions of
 | `$BPL_LIBERTY_LOG_LEVEL`       | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                   |
 | `$BP_LIBERTY_EXT_CONF_SHA256`  | The SHA256 hash of the external configuration package.                                                                                                                                                                                                              |
 | `$BP_LIBERTY_EXT_CONF_STRIP`   | The number of directory levels to strip from the external configuration package. Defaults to 0.                                                                                                                                                                     |
-| `$BP_LIBERTY_EXT_CONF_URI`     | The download URI of the external configuration package.                                                                                                                                                                                                             | 
-| `$BP_LIBERTY_EXT_CONF_VERSION` | The version of the external configuration package.                                                                                                                                                                                                                  | 
+| `$BP_LIBERTY_EXT_CONF_URI`     | The download URI of the external configuration package.                                                                                                                                                                                                             |
+| `$BP_LIBERTY_EXT_CONF_VERSION` | The version of the external configuration package.                                                                                                                                                                                                                  |
 
 ### Default Configurations that Vary from Open Liberty's Default
 
-By default, the Open Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Open Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
+By default, the Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Open Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
 
 All of these defaults can be overridden by setting the appropriate properties found in Open Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
 
@@ -66,7 +66,7 @@ The different installation types that can be configured are:
 
 The buildpack accepts the following bindings:
 
-### Type: `open-liberty`
+### Type: `liberty`
 
 | Key                    | Value             | Description                                                                                                                                                                   |
 |------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -175,4 +175,3 @@ pack build --path <packaged-server-zip-path> myapp
 This buildpack is released under version 2.0 of the [Apache License][a].
 
 [a]: http://www.apache.org/licenses/LICENSE-2.0
-

@@ -78,8 +78,29 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(result.Layers).To(HaveLen(3))
 		Expect(result.Layers[0].Name()).To(Equal("helper"))
-		Expect(result.Layers[1].Name()).To(Equal("base"))
-		Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+		Expect(result.Layers[2].Name()).To(Equal("base"))
+	})
+	
+	context("requested app server is not liberty", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_JAVA_APP_SERVER", "notliberty")).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BP_JAVA_APP_SERVER")).To(Succeed())
+		})
+
+		it("should not run if liberty is not the requested java app server", func() {
+			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
+
+			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(0))
+			Expect(result.Unmet).To(HaveLen(1))
+			Expect(result.Unmet[0].Name).To(Equal("liberty"))
+		})
 	})
 
 	context("missing required info", func() {
@@ -142,8 +163,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-microProfile4"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-microProfile4"))
+			Expect(result.Layers[2].Name()).To(Equal("base"))
 		})
 	})
 
@@ -188,9 +209,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
-			Expect(result.Layers[1].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[2].Name()).To(Equal("base"))
+			Expect(result.Layers[2].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
 				ID:      "open-liberty-external-configuration",
 				Name:    "Open Liberty External Configuration",
 				Version: "test-version",
@@ -222,8 +243,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[2].Name()).To(Equal("base"))
 			Expect(result.Unmet).To(HaveLen(0))
 		})
 

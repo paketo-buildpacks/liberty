@@ -69,6 +69,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				{
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 					},
 
 					Requires: []libcnb.BuildPlanRequire{
@@ -77,6 +78,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"build":  true,
 							"cache":  true,
 						}},
+						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
 					},
@@ -96,6 +98,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				{
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 					},
 
@@ -105,6 +108,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"build":  true,
 							"cache":  true,
 						}},
+						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
 					},
@@ -125,6 +129,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				{
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 					},
 
@@ -134,6 +139,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"build":  true,
 							"cache":  true,
 						}},
+						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
 					},
@@ -155,6 +161,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				{
 					Provides: []libcnb.BuildPlanProvide{
 						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 					},
 
@@ -164,6 +171,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							"build":  true,
 							"cache":  true,
 						}},
+						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
 						{Name: liberty.PlanEntryLiberty},
 					},
@@ -199,6 +207,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Provides: []libcnb.BuildPlanProvide{
 							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
@@ -208,6 +217,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty},
 						},
@@ -229,6 +239,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Provides: []libcnb.BuildPlanProvide{
 							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
@@ -238,6 +249,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty},
 						},
@@ -261,6 +273,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Provides: []libcnb.BuildPlanProvide{
 							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
@@ -270,6 +283,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty},
 						},
@@ -304,6 +318,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Provides: []libcnb.BuildPlanProvide{
 							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJavaAppServer},
 						},
 
 						Requires: []libcnb.BuildPlanRequire{
@@ -312,6 +327,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty},
 						},
@@ -340,6 +356,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Provides: []libcnb.BuildPlanProvide{
 							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
@@ -349,6 +366,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty},
 						},
@@ -370,6 +388,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Provides: []libcnb.BuildPlanProvide{
 							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 						},
 
@@ -379,6 +398,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty},
 						},
@@ -397,6 +417,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					{
 						Provides: []libcnb.BuildPlanProvide{
 							{Name: liberty.PlanEntryLiberty},
+							{Name: liberty.PlanEntryJavaAppServer},
 						},
 
 						Requires: []libcnb.BuildPlanRequire{
@@ -405,6 +426,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								"build":  true,
 								"cache":  true,
 							}},
+							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
 							{Name: liberty.PlanEntryLiberty},
 						},
