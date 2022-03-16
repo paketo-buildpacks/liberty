@@ -137,14 +137,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.2:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.3:*:*:*:liberty:*:*:*"]
     id = "open-liberty-runtime-webProfile9"
     name = "Open Liberty (Web Profile 9)"
-    purl = "pkg:maven/io.openliberty/openliberty-webProfile9@22.0.0.2"
-    sha256 = "ec52c60fac7b2ade706b5c173c93348836c6a925d4f5d901790466125b66205a"
+    purl = "pkg:maven/io.openliberty/openliberty-webProfile9@22.0.0.3"
+    sha256 = "33e247a21034a90d479f4fdfaf28167e328fabae68f128c6ae410a2d6e0c82a9"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/22.0.0.2/openliberty-webProfile9-22.0.0.2.zip"
-    version = "22.0.2"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/22.0.0.3/openliberty-webProfile9-22.0.0.3.zip"
+    version = "22.0.3"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
