@@ -1,0 +1,7 @@
+id = "liberty-external-configuration"
+uri = "https://localhost/ifixes.zip"
+sha256 = "dd464bd1e278123c00ce7b1fb21dd63d0441b3cf9877d0a1b2284ad01abd061a"
+purl = "pkg:generic/ibm-open-libery-runtime-full@21.0.0.12?arch=amd64"
+cpes = [
+    "cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"
+]
