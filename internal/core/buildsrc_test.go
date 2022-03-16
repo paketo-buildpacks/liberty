@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package core_test
 
 import (
-	"github.com/paketo-buildpacks/liberty/internal/core"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/sclevine/spec"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/liberty/internal/core"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
 )
@@ -54,14 +55,14 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.WriteFile(filepath.Join(testPath, "META-INF", "MANIFEST.MF"),
 				[]byte("Main-Class: com.java.HelloWorld"),
 				0644)).To(Succeed())
-			appBuildSource := core.NewAppBuildSource(testPath, bard.NewLogger(ioutil.Discard))
+			appBuildSource := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
 			ok, err := appBuildSource.Detect()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(ok).To(BeFalse())
 		})
 
 		it("detects successfully when Main-Class is not set", func() {
-			appBuildSrc := core.NewAppBuildSource(testPath, bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
 			ok, err := appBuildSrc.Detect()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(ok).To(BeTrue())
@@ -69,7 +70,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 
 		it("validates successfully when a compiled web archive is supplied", func() {
 			Expect(os.Mkdir(filepath.Join(testPath, "WEB-INF"), 0755)).To(Succeed())
-			appBuildSrc := core.NewAppBuildSource(testPath, bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
 			ok, err := appBuildSrc.ValidateApp()
 			Expect(err).To(Succeed())
 			Expect(ok).To(BeTrue())
@@ -78,14 +79,21 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 		it("validates successfully when a compiled enterprise archive is supplied", func() {
 			Expect(os.Mkdir(filepath.Join(testPath, "META-INF"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(testPath, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
-			appBuildSrc := core.NewAppBuildSource(testPath, bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
 			ok, err := appBuildSrc.ValidateApp()
 			Expect(err).To(Succeed())
 			Expect(ok).To(BeTrue())
 		})
 
 		it("fails app validation when META-INF or application.xml not found", func() {
-			appBuildSrc := core.NewAppBuildSource(testPath, bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			ok, err := appBuildSrc.ValidateApp()
+			Expect(err).To(Succeed())
+			Expect(ok).To(BeFalse())
+		})
+
+		it("fails app validation when requested server is unknown", func() {
+			appBuildSrc := core.NewAppBuildSource(testPath, "foo", bard.NewLogger(ioutil.Discard))
 			ok, err := appBuildSrc.ValidateApp()
 			Expect(err).To(Succeed())
 			Expect(ok).To(BeFalse())
