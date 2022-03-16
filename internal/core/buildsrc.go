@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package core
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"path/filepath"
+)
+
+const (
+	JavaAppServerLiberty = "liberty"
 )
 
 // BuildSource represents different build sources that the Liberty buildpack supports
@@ -38,15 +43,17 @@ type BuildSource interface {
 
 // AppBuildSource is the default build source type for the Liberty buildpack
 type AppBuildSource struct {
-	Root   string
-	Logger bard.Logger
+	RequestedAppServer string
+	Root               string
+	Logger             bard.Logger
 }
 
 // NewAppBuildSource returns the default BuildSource
-func NewAppBuildSource(appPath string, logger bard.Logger) AppBuildSource {
+func NewAppBuildSource(appPath string, requestedAppServer string, logger bard.Logger) AppBuildSource {
 	return AppBuildSource{
-		Root:   appPath,
-		Logger: logger,
+		RequestedAppServer: requestedAppServer,
+		Root:               appPath,
+		Logger:             logger,
 	}
 }
 
@@ -56,6 +63,11 @@ func (a AppBuildSource) Name() string {
 
 // Detect checks to make sure Main-Class is not defined in `META-INF/MANIFEST.MF`
 func (a AppBuildSource) Detect() (bool, error) {
+	if a.RequestedAppServer != "" && a.RequestedAppServer != JavaAppServerLiberty {
+		a.Logger.Debugf("failed to match requested app server of [%s], buildpack supports [%s]", a.RequestedAppServer, JavaAppServerLiberty)
+		return false, nil
+	}
+
 	// Check contributed app if it is valid
 	isMainClassDefined, err := util.ManifestHasMainClassDefined(a.Root)
 	if err != nil {

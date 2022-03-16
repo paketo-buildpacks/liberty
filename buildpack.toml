@@ -33,6 +33,12 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
+    description = "the application server to use"
+    default = ""
+    name = "BP_JAVA_APP_SERVER"
+
+  [[metadata.configurations]]
+    build = true
     default = "ol"
     description = "Install type of Liberty"
     launch = false

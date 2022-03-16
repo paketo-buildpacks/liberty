@@ -18,24 +18,24 @@ package liberty
 
 import (
 	"fmt"
+
+	"strings"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
-	"strings"
 )
 
 const (
-	openLibertyInstall      = "ol"
-	websphereLibertyInstall = "wlp"
-	noneInstall             = "none"
-
+	openLibertyInstall          = "ol"
+	websphereLibertyInstall     = "wlp"
+	noneInstall                 = "none"
 	openLibertyStackRuntimeRoot = "/opt/ol"
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
-
-	javaAppServerLiberty = "liberty"
+	javaAppServerLiberty        = "liberty"
 )
 
 type Build struct {
@@ -79,7 +79,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
 	serverBuildSrc := core.NewServerBuildSource(context.Application.Path, serverName, b.Logger)
-	appBuildSrc := core.NewAppBuildSource(context.Application.Path, b.Logger)
+	appBuildSrc := core.NewAppBuildSource(context.Application.Path, core.JavaAppServerLiberty, b.Logger)
 
 	buildSources := []core.BuildSource{
 		serverBuildSrc,
