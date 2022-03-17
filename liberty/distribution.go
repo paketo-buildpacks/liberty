@@ -35,7 +35,6 @@ type Distribution struct {
 	ApplicationPath  string
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
-	InstallationPath string
 }
 
 func NewDistribution(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, serverName, applicationPath string) (Distribution, libcnb.BOMEntry) {
@@ -55,8 +54,6 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 	return d.LayerContributor.Contribute(layer, func(artifact *os.File) (libcnb.Layer, error) {
 		d.Logger.Bodyf("Expanding to %s", layer.Path)
-		d.InstallationPath = layer.Path
-		d.Logger.Info("d.InstallationPath: ", d.InstallationPath)
 		if err := crush.ExtractZip(artifact, layer.Path, 1); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to expand Liberty Runtime\n%w", err)
 		}
@@ -101,8 +98,4 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 func (d Distribution) Name() string {
 	return d.LayerContributor.LayerName()
-}
-
-func (d Distribution) InstallPath() string {
-	return d.InstallationPath
 }

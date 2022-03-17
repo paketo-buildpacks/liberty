@@ -154,12 +154,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
-	var dl Distribution
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
 		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path)
 		distro.Logger = b.Logger
-		dl = distro
 
 		result.Layers = append(result.Layers, distro)
 		result.BOM.Entries = append(result.BOM.Entries, bomEntry)
@@ -179,7 +177,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
 	
-	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc, dl)
+	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)
 

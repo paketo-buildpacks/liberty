@@ -39,7 +39,6 @@ type Base struct {
 	ConfigurationResolver           libpak.ConfigurationResolver
 	DependencyCache                 libpak.DependencyCache
 	ExternalConfigurationDependency *libpak.BuildpackDependency
-	Distro							Distribution
 	Logger                          bard.Logger
 }
 
@@ -49,7 +48,6 @@ func NewBase(
 	externalConfigurationDependency *libpak.BuildpackDependency,
 	configurationResolver libpak.ConfigurationResolver,
 	cache libpak.DependencyCache,
-	distroLayer Distribution,
 ) Base {
 	contributor := libpak.NewLayerContributor(
 		"Open Liberty Config",
@@ -65,7 +63,6 @@ func NewBase(
 		ConfigurationResolver:           configurationResolver,
 		DependencyCache:                 cache,
 		ExternalConfigurationDependency: externalConfigurationDependency,
-		Distro:					 		 distroLayer,
 	}
 
 	return b
@@ -84,17 +81,32 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 				return libcnb.Layer{}, fmt.Errorf("unable to contribute external configuration\n%w", err)
 			}
 		}
-		
-		ListOfFeatures, _ := b.ConfigurationResolver.Resolve("BP_LIBERTY_FEATURES")
 
-		if err := b.ApplyFeatures(ListOfFeatures,b.Distro.InstallPath(), layer); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to apply features\n%w", err)
-		}
-		
 		if err := b.ContributeUserFeatures(layer); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features\n%w", err)
 		}
-		
+
+		listoffeatures, _ := b.ConfigurationResolver.Resolve("BP_LIBERTY_FEATURES")
+		features := strings.Fields(listoffeatures)
+
+		profile, _ := b.ConfigurationResolver.Resolve("BP_LIBERTY_PROFILE")
+		installationLocation := fmt.Sprintf("/layers/paketo-buildpacks_liberty/open-liberty-runtime-%s", profile)
+
+		for _, feature := range features {
+			b.Logger.Info("Installing ", feature)
+
+			executor := effect.NewExecutor()
+			if err := executor.Execute(effect.Execution{
+				Command: filepath.Join(installationLocation, "bin", "featureUtility"),
+				Args:    []string{"installFeature", feature, "--acceptLicense"},
+				Dir:     layer.Path,
+				Stdout:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
+				Stderr:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
+			}); err != nil {
+				return libcnb.Layer{}, fmt.Errorf("unable to apply ifix\n%w", err)
+			}
+		}
+
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_BASE_ROOT", layer.Path)
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_SERVER_NAME", b.ServerName)
 
@@ -135,12 +147,9 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 		return fmt.Errorf("unable to check if iFixes were provided\n%w", err)
 	}
 	if iFixesProvided {
-		installationPath := b.Distro.InstallPath()
-		b.Logger.Info("installtionPath: ", installationPath)
-		err := b.ApplyIFixes(iFixesPath, b.Distro.InstallPath())
-		if err != nil {
-			return fmt.Errorf("unable to apply iFixes\n%w", err)
-		}
+		profile, _ := b.ConfigurationResolver.Resolve("BP_LIBERTY_PROFILE")
+		installLocation := fmt.Sprintf("/layers/paketo-buildpacks_liberty/open-liberty-runtime-%s", profile)
+		return b.ApplyIFixes(iFixesPath, installLocation)
 	}
 
 	return nil
@@ -153,7 +162,6 @@ func (b Base) ApplyIFixes(iFixesPath string, installLocation string) error {
 	}
 	for _, iFix := range iFixes {
 		b.Logger.Info("Installing ", iFix.Name())
-		b.Logger.Info("Installing to...", installLocation)
 		iFixPath := filepath.Join(iFixesPath, iFix.Name())
 		executor := effect.NewExecutor()
 		if err := executor.Execute(effect.Execution{
@@ -163,26 +171,6 @@ func (b Base) ApplyIFixes(iFixesPath string, installLocation string) error {
 			Stderr:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
 		}); err != nil {
 			return fmt.Errorf("unable to apply iFix\n%w", err)
-		}
-	}
-	return nil
-}
-
-func (b Base) ApplyFeatures(ListOfFeatures string, installationLocation string, layer libcnb.Layer) error {
-	Features := strings.Fields(ListOfFeatures)
-	b.Logger.Info("applying features")
-	for _, feature := range Features {
-		b.Logger.Info("Installing ", feature)
-
-		executor := effect.NewExecutor()
-		if err := executor.Execute(effect.Execution{
-			Command: filepath.Join(installationLocation, "bin", "featureUtility"),
-			Args:    []string{"installFeature", feature, "--acceptLicense"},
-			Dir:     layer.Path,
-			Stdout:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
-			Stderr:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
-		}); err != nil {
-			return fmt.Errorf("unable to apply features\n%w", err)
 		}
 	}
 	return nil
