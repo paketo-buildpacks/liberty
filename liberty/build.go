@@ -36,8 +36,6 @@ const (
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
 
 	javaAppServerLiberty = "liberty"
-
-	baseLayerPath = "/layers/paketo-buildpacks_liberty/base"
 )
 
 type Build struct {
