@@ -23,6 +23,8 @@ import (
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
+	"strings"
 )
 
 const (
@@ -32,12 +34,15 @@ const (
 
 	openLibertyStackRuntimeRoot = "/opt/ol"
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
-	
-	javaAppServerLiberty 		= "liberty"
+
+	javaAppServerLiberty = "liberty"
+
+	baseLayerPath = "/layers/paketo-buildpacks_liberty/base"
 )
 
 type Build struct {
-	Logger bard.Logger
+	Executor effect.Executor
+	Logger   bard.Logger
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
@@ -153,10 +158,20 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
+	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
+
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
-		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path)
+		features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
+		featureList := strings.Fields(features)
+		baseLayer, err := context.Layers.Layer("base")
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to get base layer\n%w", err)
+		}
+		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path, baseLayer.Path, featureList, b.Executor)
 		distro.Logger = b.Logger
 
 		result.Layers = append(result.Layers, distro)
@@ -176,10 +191,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	} else {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
-	
-	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
-	base.Logger = b.Logger
-	result.Layers = append(result.Layers, base)
 
 	return result, nil
 }

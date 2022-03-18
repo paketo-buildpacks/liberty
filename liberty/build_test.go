@@ -78,10 +78,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(result.Layers).To(HaveLen(3))
 		Expect(result.Layers[0].Name()).To(Equal("helper"))
-		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
-		Expect(result.Layers[2].Name()).To(Equal("base"))
+		Expect(result.Layers[1].Name()).To(Equal("base"))
+		Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 	})
-	
+
 	context("requested app server is not liberty", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BP_JAVA_APP_SERVER", "notliberty")).To(Succeed())
@@ -163,8 +163,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-microProfile4"))
-			Expect(result.Layers[2].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-microProfile4"))
 		})
 	})
 
@@ -209,9 +209,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
-			Expect(result.Layers[2].Name()).To(Equal("base"))
-			Expect(result.Layers[2].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[1].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
 				ID:      "open-liberty-external-configuration",
 				Name:    "Open Liberty External Configuration",
 				Version: "test-version",
@@ -243,8 +243,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
-			Expect(result.Layers[2].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 			Expect(result.Unmet).To(HaveLen(0))
 		})
 

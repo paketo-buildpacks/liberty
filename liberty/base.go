@@ -23,13 +23,11 @@ import (
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/effect"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 type Base struct {
@@ -86,27 +84,6 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features\n%w", err)
 		}
 
-		listoffeatures, _ := b.ConfigurationResolver.Resolve("BP_LIBERTY_FEATURES")
-		features := strings.Fields(listoffeatures)
-
-		profile, _ := b.ConfigurationResolver.Resolve("BP_LIBERTY_PROFILE")
-		installationLocation := fmt.Sprintf("/layers/paketo-buildpacks_liberty/open-liberty-runtime-%s", profile)
-
-		for _, feature := range features {
-			b.Logger.Info("Installing ", feature)
-
-			executor := effect.NewExecutor()
-			if err := executor.Execute(effect.Execution{
-				Command: filepath.Join(installationLocation, "bin", "featureUtility"),
-				Args:    []string{"installFeature", feature, "--acceptLicense"},
-				Dir:     layer.Path,
-				Stdout:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
-				Stderr:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
-			}); err != nil {
-				return libcnb.Layer{}, fmt.Errorf("unable to apply ifix\n%w", err)
-			}
-		}
-
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_BASE_ROOT", layer.Path)
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_SERVER_NAME", b.ServerName)
 
@@ -141,38 +118,6 @@ func (b Base) ContributeExternalConfiguration(layer libcnb.Layer) error {
 		return fmt.Errorf("unable to expand external configuration\n%w", err)
 	}
 
-	iFixesPath := filepath.Join(confPath, "ifixes")
-	iFixesProvided, err := util.DirExists(iFixesPath)
-	if err != nil {
-		return fmt.Errorf("unable to check if iFixes were provided\n%w", err)
-	}
-	if iFixesProvided {
-		profile, _ := b.ConfigurationResolver.Resolve("BP_LIBERTY_PROFILE")
-		installLocation := fmt.Sprintf("/layers/paketo-buildpacks_liberty/open-liberty-runtime-%s", profile)
-		return b.ApplyIFixes(iFixesPath, installLocation)
-	}
-
-	return nil
-}
-
-func (b Base) ApplyIFixes(iFixesPath string, installLocation string) error {
-	iFixes, err := ioutil.ReadDir(iFixesPath)
-	if err != nil {
-		return fmt.Errorf("unable to read iFixes dir\n%w", err)
-	}
-	for _, iFix := range iFixes {
-		b.Logger.Info("Installing ", iFix.Name())
-		iFixPath := filepath.Join(iFixesPath, iFix.Name())
-		executor := effect.NewExecutor()
-		if err := executor.Execute(effect.Execution{
-			Command: filepath.Join("java"),
-			Args:    []string{"-jar", iFixPath, "--installLocation", installLocation},
-			Stdout:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
-			Stderr:  bard.NewWriter(b.Logger.InfoWriter(), bard.WithIndent(3)),
-		}); err != nil {
-			return fmt.Errorf("unable to apply iFix\n%w", err)
-		}
-	}
 	return nil
 }
 

@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package server
 
 import (
 	"fmt"
 	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -87,6 +90,46 @@ func GetServerList(userPath string) ([]string, error) {
 	}
 
 	return servers, nil
+}
+
+func InstallIFixes(installRoot string, iFixesPath string, executor effect.Executor, logger bard.Logger) error {
+	iFixes, err := ioutil.ReadDir(iFixesPath)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("unable to read iFixes directory\n%w", err)
+	}
+	if os.IsNotExist(err) {
+		return nil
+	}
+
+	for _, iFix := range iFixes {
+		logger.Infof("Installing iFix %s\n", iFix.Name())
+		iFixPath := filepath.Join(iFixesPath, iFix.Name())
+		if err := executor.Execute(effect.Execution{
+			Command: "java",
+			Args:    []string{"-jar", iFixPath, "--installLocation", installRoot},
+			Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+			Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+		}); err != nil {
+			return fmt.Errorf("unable to install iFix '%s'\n%w", iFix.Name(), err)
+		}
+	}
+
+	return nil
+}
+
+func InstallFeatures(installRoot string, features []string, executor effect.Executor, logger bard.Logger) error {
+	for _, feature := range features {
+		logger.Infof("Installing feature %s\n", feature)
+		if err := executor.Execute(effect.Execution{
+			Command: filepath.Join(installRoot, "bin", "featureUtility"),
+			Args:    []string{"installFeature", feature, "--acceptLicense"},
+			Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+			Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+		}); err != nil {
+			return fmt.Errorf("unable to install feature '%s'\n%w", feature, err)
+		}
+	}
+	return nil
 }
 
 // dirHasCompiledArtifacts checks if the given directory has any web or enterprise archives.

@@ -89,31 +89,4 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(layer.LaunchEnvironment["BPI_LIBERTY_BASE_ROOT.default"]).To(Equal(layer.Path))
 		Expect(filepath.Join(layer.Path, "conf", "external-configuration", "fixture-marker")).To(BeARegularFile())
 	})
-
-	it("contributes ifix external configuraiton", func() {
-		externalConfigurationDep := libpak.BuildpackDependency{
-			ID:     "liberty-external-configuration",
-			URI:    "https://localhost/ifixes.zip",
-			SHA256: "dd464bd1e278123c00ce7b1fb21dd63d0441b3cf9877d0a1b2284ad01abd061a",
-			PURL:   "pkg:generic/ibm-open-libery-runtime-full@21.0.0.12?arch=amd64",
-			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.12:*:*:*:*:*:*:*:*"},
-		}
-
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Buildpack.Path, "defaultServer", &externalConfigurationDep, libpak.ConfigurationResolver{}, dc)
-		base.Logger = bard.NewLogger(os.Stdout)
-		layer, err := ctx.Layers.Layer("test-layer")
-		Expect(err).NotTo(HaveOccurred())
-
-		layer, err = base.Contribute(layer)
-		Expect(err).ToNot(HaveOccurred())
-
-		Expect(layer.Launch).To(BeTrue())
-		Expect(filepath.Join(layer.Path, "ifixes")).To(BeADirectory())
-		Expect(filepath.Join(layer.Path, "ifixes", "210012-wlp-archive-ifph42489.jar")).To(BeARegularFile())
-		Expect(filepath.Join(layer.Path, "ifixes", "210012-wlp-archive-ifph12345.jar")).To(BeARegularFile())
-		Expect(layer.LaunchEnvironment["BPI_LIBERTY_BASE_ROOT.default"]).To(Equal(layer.Path))
-		Expect(filepath.Join(layer.Path, "conf", "external-configuration", "fixture-marker")).To(BeARegularFile())
-
-	})
 }
