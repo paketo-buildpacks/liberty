@@ -63,6 +63,7 @@ func (a AppBuildSource) Name() string {
 
 // Detect checks to make sure Main-Class is not defined in `META-INF/MANIFEST.MF`
 func (a AppBuildSource) Detect() (bool, error) {
+        // if user reqeuests an app server and it's not liberty then skip
 	if a.RequestedAppServer != "" && a.RequestedAppServer != JavaAppServerLiberty {
 		a.Logger.Debugf("failed to match requested app server of [%s], buildpack supports [%s]", a.RequestedAppServer, JavaAppServerLiberty)
 		return false, nil
