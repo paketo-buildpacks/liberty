@@ -283,7 +283,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Expect(os.Unsetenv("BP_LIBERTY_SERVER_NAME")).To(Succeed())
 			})
 
-			it("works when there is more than one server and ", func() {
+			it("works when there is more than one server ", func() {
 				testServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "testServer")
 				Expect(os.MkdirAll(filepath.Join(testServerPath, "apps", "test.war"), 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
