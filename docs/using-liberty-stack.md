@@ -129,7 +129,7 @@ RUN features.sh
 
 The Java runtime can be configured by updating the tag in the `FROM` for the run image in the template above with the
 desired version. For example, if you require the Java 8 version of Open Liberty, update the `FROM` for the run image
-to use `openliberty/open-liberty:full-java8-openj9-ubi`.
+to use `icr.io/appcafe/open-liberty:full-java8-openj9-ubi`.
 
 ### Building the Stack Images
 
