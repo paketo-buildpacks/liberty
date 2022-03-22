@@ -12,6 +12,7 @@ The buildpack will participate when building any of the following:
 
 When building a web application, this buildpack will participate if all the following conditions are met:
 
+* `$BP_JAVA_APP_SERVER` is `liberty` or if `$BP_JAVA_APP_SERVER` is unset or empty and this is the first buildpack to provide a Java application server.
 * `Main-Class` is NOT defined in the manifest
 * `<APPLICATION_ROOT>/META-INF/application.xml` or `<APPLICATION_ROOT>/WEB-INF` exist
 
@@ -37,17 +38,18 @@ The buildpack will support all available profiles of the most recent versions of
 ## Configuration
 
 | Environment Variable           | Description                                                                                                                                                                                                                                                         |
-|--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$BP_JAVA_APP_SERVER`          | The application server to use. It defaults to `` (empty string) which means that order dictates which Java application server is installed. The first Java application server buildpack to run will be picked.                                                      |
 | `$BP_LIBERTY_INSTALL_TYPE`     | [Install type](#install-types) of Liberty. Valid options: `ol` and `none`. Defaults to `ol`.                                                                                                                                                                        |
 | `$BP_LIBERTY_VERSION`          | The version of Liberty to install. Defaults to the latest version of the runtime.                                                                                                                                                                                   |
 | `$BP_LIBERTY_PROFILE`          | The Liberty profile to use. Defaults to `full`.                                                                                                                                                                                                                     |
 | `$BP_LIBERTY_SERVER_NAME`      | Name of the server to use. Defaults to `defaultServer` when building an application. If building a packaged server and there is only one bundled server present, then the buildpack will use that.                                                                  |
 | `$BP_LIBERTY_CONTEXT_ROOT`     | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. |
-| `$BPL_LIBERTY_LOG_LEVEL`       | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                   |
 | `$BP_LIBERTY_EXT_CONF_SHA256`  | The SHA256 hash of the external configuration package.                                                                                                                                                                                                              |
 | `$BP_LIBERTY_EXT_CONF_STRIP`   | The number of directory levels to strip from the external configuration package. Defaults to 0.                                                                                                                                                                     |
 | `$BP_LIBERTY_EXT_CONF_URI`     | The download URI of the external configuration package.                                                                                                                                                                                                             |
 | `$BP_LIBERTY_EXT_CONF_VERSION` | The version of the external configuration package.                                                                                                                                                                                                                  |
+| `$BPL_LIBERTY_LOG_LEVEL`       | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                   |
 
 ### Default Configurations that Vary from Open Liberty's Default
 
@@ -69,14 +71,14 @@ The buildpack accepts the following bindings:
 ### Type: `liberty`
 
 | Key                    | Value             | Description                                                                                                                                                                   |
-|------------------------|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `server.xml`           | `<file-contents>` | This file will replace the `defaultServer`'s `server.xml` and is not subject to any post-processing; therefore, any variable references therein must be resolvable. Optional. |
 | `bootstrap.properties` | `<file-contents>` | This file will replace the `defaultServer`'s `bootstrap.properties`. This is one place to define variables used by `server.xml`. Optional.                                    |
 
 ### Type: `dependency-mapping`
 
 | Key                   | Value   | Description                                                                                       |
-|-----------------------|---------|---------------------------------------------------------------------------------------------------|
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------- |
 | `<dependency-digest>` | `<uri>` | If needed, the buildpack will fetch the dependency with digest `<dependency-digest>` from `<uri>` |
 
 ## Using Custom Features

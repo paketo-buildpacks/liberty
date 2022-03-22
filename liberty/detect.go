@@ -18,6 +18,7 @@ package liberty
 
 import (
 	"fmt"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/libpak"
@@ -28,7 +29,7 @@ const (
 	PlanEntryLiberty               = "liberty"
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
-	PlanEntryJavaAppServer		   = "java-app-server"
+	PlanEntryJavaAppServer         = "java-app-server"
 )
 
 type Detect struct {
@@ -42,8 +43,9 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 	}
 
 	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
+	requestedAppServer, _ := cr.Resolve("BP_JAVA_APP_SERVER")
 	serverBuildSrc := core.NewServerBuildSource(context.Application.Path, serverName, d.Logger)
-	appBuildSrc := core.NewAppBuildSource(context.Application.Path, d.Logger)
+	appBuildSrc := core.NewAppBuildSource(context.Application.Path, requestedAppServer, d.Logger)
 
 	buildSources := []core.BuildSource{
 		serverBuildSrc,

@@ -18,6 +18,7 @@ package liberty
 
 import (
 	"fmt"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/liberty/internal/util"
@@ -26,14 +27,12 @@ import (
 )
 
 const (
-	openLibertyInstall      = "ol"
-	websphereLibertyInstall = "wlp"
-	noneInstall             = "none"
-
+	openLibertyInstall          = "ol"
+	websphereLibertyInstall     = "wlp"
+	noneInstall                 = "none"
 	openLibertyStackRuntimeRoot = "/opt/ol"
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
-	
-	javaAppServerLiberty 		= "liberty"
+	javaAppServerLiberty        = "liberty"
 )
 
 type Build struct {
@@ -76,7 +75,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
 	serverBuildSrc := core.NewServerBuildSource(context.Application.Path, serverName, b.Logger)
-	appBuildSrc := core.NewAppBuildSource(context.Application.Path, b.Logger)
+	appBuildSrc := core.NewAppBuildSource(context.Application.Path, core.JavaAppServerLiberty, b.Logger)
 
 	buildSources := []core.BuildSource{
 		serverBuildSrc,
@@ -176,7 +175,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	} else {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
-	
+
 	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)

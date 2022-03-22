@@ -18,12 +18,13 @@ package liberty_test
 
 import (
 	"bytes"
-	"github.com/paketo-buildpacks/libpak"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/libpak"
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
@@ -81,7 +82,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
 		Expect(result.Layers[2].Name()).To(Equal("base"))
 	})
-	
+
 	context("requested app server is not liberty", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BP_JAVA_APP_SERVER", "notliberty")).To(Succeed())
@@ -231,7 +232,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				"server-name":              "defaultServer",
 				"packaged-server-usr-path": usrPath,
 			}}}
-			Expect(os.Setenv("BP_DEBUG", "true"))
 		})
 
 		it.After(func() {

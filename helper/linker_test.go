@@ -69,13 +69,22 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).To(MatchError("$BPI_LIBERTY_RUNTIME_ROOT must be set"))
 	})
 
-	it("fails as BPI_LIBERTY_SERVER_NAME is required", func() {
-		Expect("/workspace").NotTo(BeADirectory())
-		Expect("/layers/paketo-buildpacks_liberty/open-liberty-runtime").NotTo(BeADirectory())
-		Expect(os.Setenv("BPI_LIBERTY_RUNTIME_ROOT", layerDir)).To(Succeed())
+	context("with BPI_LIBERTY_RUNTIME_ROOT set", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BPI_LIBERTY_RUNTIME_ROOT", layerDir)).To(Succeed())
+		})
 
-		_, err := linker.Execute()
-		Expect(err).To(MatchError("unable to configure\n$BPI_LIBERTY_SERVER_NAME must be set"))
+		it.After(func() {
+			Expect(os.Unsetenv("BPI_LIBERTY_RUNTIME_ROOT")).To(Succeed())
+		})
+
+		it("still fails as BPI_LIBERTY_SERVER_NAME is required", func() {
+			Expect("/workspace").NotTo(BeADirectory())
+			Expect("/layers/paketo-buildpacks_liberty/open-liberty-runtime").NotTo(BeADirectory())
+
+			_, err := linker.Execute()
+			Expect(err).To(MatchError("unable to configure\n$BPI_LIBERTY_SERVER_NAME must be set"))
+		})
 	})
 
 	context("with explicit env vars set to valid dirs", func() {
