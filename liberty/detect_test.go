@@ -188,6 +188,22 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect(result).To(Equal(libcnb.DetectResult{Pass: false}))
 	})
 
+	context("an unrecognized app server is set", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_JAVA_APP_SERVER", "foo")).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BP_JAVA_APP_SERVER")).To(Succeed())
+		})
+
+		it("fails if an unrecognized app server is set", func() {
+			result, err := detect.Detect(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(libcnb.DetectResult{Pass: false}))
+		})
+	})
+
 	context("when building a packaged server", func() {
 		it.Before(func() {
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
@@ -258,43 +274,53 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			}))
 		})
 
-		it("works when there is more than one server and BP_LIBERTY_SERVER_NAME is set", func() {
-			Expect(os.Setenv("BP_LIBERTY_SERVER_NAME", "testServer")).To(Succeed())
-			testServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "testServer")
-			Expect(os.MkdirAll(filepath.Join(testServerPath, "apps", "test.war"), 0755)).To(Succeed())
-			Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+		context("BP_LIBERTY_SERVER_NAME is set", func() {
+			it.Before(func() {
+				Expect(os.Setenv("BP_LIBERTY_SERVER_NAME", "testServer")).To(Succeed())
+			})
 
-			result, err := detect.Detect(ctx)
-			Expect(os.Unsetenv("BP_LIBERTY_SERVER_NAME")).To(Succeed())
-			Expect(err).ToNot(HaveOccurred())
-			Expect(result).To(Equal(libcnb.DetectResult{
-				Pass: true,
-				Plans: []libcnb.BuildPlan{
-					{
-						Provides: []libcnb.BuildPlanProvide{
-							{Name: liberty.PlanEntryLiberty},
-							{Name: liberty.PlanEntryJavaAppServer},
-							{Name: liberty.PlanEntryJVMApplicationPackage},
-						},
+			it.After(func() {
+				Expect(os.Unsetenv("BP_LIBERTY_SERVER_NAME")).To(Succeed())
+			})
 
-						Requires: []libcnb.BuildPlanRequire{
-							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
-								"launch": true,
-								"build":  true,
-								"cache":  true,
-							}},
-							{Name: liberty.PlanEntryJavaAppServer},
-							{Name: liberty.PlanEntryJVMApplicationPackage},
-							{Name: liberty.PlanEntryLiberty},
+			it("works when there is more than one server ", func() {
+				testServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "testServer")
+				Expect(os.MkdirAll(filepath.Join(testServerPath, "apps", "test.war"), 0755)).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+
+				result, err := detect.Detect(ctx)
+
+				Expect(err).ToNot(HaveOccurred())
+				Expect(result).To(Equal(libcnb.DetectResult{
+					Pass: true,
+					Plans: []libcnb.BuildPlan{
+						{
+							Provides: []libcnb.BuildPlanProvide{
+								{Name: liberty.PlanEntryLiberty},
+								{Name: liberty.PlanEntryJavaAppServer},
+								{Name: liberty.PlanEntryJVMApplicationPackage},
+							},
+
+							Requires: []libcnb.BuildPlanRequire{
+								{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
+									"launch": true,
+									"build":  true,
+									"cache":  true,
+								}},
+								{Name: liberty.PlanEntryJavaAppServer},
+								{Name: liberty.PlanEntryJVMApplicationPackage},
+								{Name: liberty.PlanEntryLiberty},
+							},
 						},
 					},
-				},
-			}))
+				}))
+			})
 		})
 
 		it("returns an error when there is more than one server and BP_LIBERTY_SERVER_NAME is not set", func() {
 			serverName := os.Getenv("BP_LIBERTY_SERVER_NAME")
 			Expect(serverName).To(BeEmpty())
+
 			testServerPath := filepath.Join(ctx.Application.Path, "wlp", "usr", "servers", "testServer")
 			Expect(os.MkdirAll(testServerPath, 0755)).To(Succeed())
 
