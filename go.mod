@@ -7,7 +7,7 @@ require (
 	github.com/buildpacks/libcnb v1.25.5
 	github.com/heroku/color v0.0.6
 	github.com/onsi/gomega v1.18.1
-	github.com/paketo-buildpacks/libjvm v1.35.0
+	github.com/paketo-buildpacks/libjvm v1.36.0
 	github.com/paketo-buildpacks/libpak v1.59.0
 	github.com/sclevine/spec v1.4.0
 )
@@ -25,7 +25,7 @@ require (
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
+	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
