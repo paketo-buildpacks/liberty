@@ -18,26 +18,27 @@ package liberty
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strconv"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 type Base struct {
 	BuildpackPath                   string
-	ServerName                      string
-	LayerContributor                libpak.LayerContributor
 	ConfigurationResolver           libpak.ConfigurationResolver
 	DependencyCache                 libpak.DependencyCache
 	ExternalConfigurationDependency *libpak.BuildpackDependency
+	LayerContributor                libpak.LayerContributor
 	Logger                          bard.Logger
+	ServerName                      string
 }
 
 func NewBase(
@@ -56,11 +57,11 @@ func NewBase(
 
 	b := Base{
 		BuildpackPath:                   buildpackPath,
-		ServerName:                      serverName,
-		LayerContributor:                contributor,
 		ConfigurationResolver:           configurationResolver,
 		DependencyCache:                 cache,
 		ExternalConfigurationDependency: externalConfigurationDependency,
+		LayerContributor:                contributor,
+		ServerName:                      serverName,
 	}
 
 	return b

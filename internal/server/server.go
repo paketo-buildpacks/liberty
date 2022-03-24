@@ -18,13 +18,14 @@ package server
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/liberty/internal/util"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/effect"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
 )
 
 func GetServerConfigPath(serverPath string) string {
@@ -92,25 +93,33 @@ func GetServerList(userPath string) ([]string, error) {
 	return servers, nil
 }
 
-func InstallIFixes(installRoot string, iFixesPath string, executor effect.Executor, logger bard.Logger) error {
-	iFixes, err := ioutil.ReadDir(iFixesPath)
+func LoadIFixesList(ifixesPath string) ([]string, error) {
+	fileInfos, err := ioutil.ReadDir(ifixesPath)
 	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("unable to read iFixes directory\n%w", err)
+		return []string{}, fmt.Errorf("unable to read iFixes directory\n%w", err)
 	}
 	if os.IsNotExist(err) {
-		return nil
+		return []string{}, nil
 	}
 
-	for _, iFix := range iFixes {
-		logger.Infof("Installing iFix %s\n", iFix.Name())
-		iFixPath := filepath.Join(iFixesPath, iFix.Name())
+	ifixes := []string{}
+	for _, fileInfo := range fileInfos {
+		ifixes = append(ifixes, filepath.Join(ifixesPath, fileInfo.Name()))
+	}
+
+	return ifixes, nil
+}
+
+func InstallIFixes(installRoot string, ifixes []string, executor effect.Executor, logger bard.Logger) error {
+	for _, ifix := range ifixes {
+		logger.Bodyf("Installing iFix %s\n", filepath.Base(ifix))
 		if err := executor.Execute(effect.Execution{
 			Command: "java",
-			Args:    []string{"-jar", iFixPath, "--installLocation", installRoot},
+			Args:    []string{"-jar", ifix, "--installLocation", installRoot},
 			Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
 			Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
 		}); err != nil {
-			return fmt.Errorf("unable to install iFix '%s'\n%w", iFix.Name(), err)
+			return fmt.Errorf("unable to install iFix '%s'\n%w", filepath.Base(ifix), err)
 		}
 	}
 
@@ -119,7 +128,7 @@ func InstallIFixes(installRoot string, iFixesPath string, executor effect.Execut
 
 func InstallFeatures(installRoot string, features []string, executor effect.Executor, logger bard.Logger) error {
 	for _, feature := range features {
-		logger.Infof("Installing feature %s\n", feature)
+		logger.Bodyf("Installing feature %s\n", feature)
 		if err := executor.Execute(effect.Execution{
 			Command: filepath.Join(installRoot, "bin", "featureUtility"),
 			Args:    []string{"installFeature", feature, "--acceptLicense"},

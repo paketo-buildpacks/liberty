@@ -23,6 +23,7 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
+	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -36,6 +37,7 @@ const (
 	openLibertyStackRuntimeRoot = "/opt/ol"
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
 	javaAppServerLiberty        = "liberty"
+	ifixesRoot                  = "/ifixes"
 )
 
 type Build struct {
@@ -165,11 +167,13 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		// Provide the OL distribution
 		features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 		featureList := strings.Fields(features)
-		baseLayer, err := context.Layers.Layer("base")
+
+		ifixes, err := server.LoadIFixesList(ifixesRoot)
 		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to get base layer\n%w", err)
+			return libcnb.BuildResult{}, fmt.Errorf("unable to load ifixes\n%w", err)
 		}
-		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path, baseLayer.Path, featureList, b.Executor)
+
+		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path, featureList, ifixes, b.Executor)
 		distro.Logger = b.Logger
 
 		result.Layers = append(result.Layers, distro)

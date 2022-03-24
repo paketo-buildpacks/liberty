@@ -17,14 +17,15 @@
 package liberty_test
 
 import (
-	"github.com/paketo-buildpacks/libpak/effect"
-	"github.com/paketo-buildpacks/libpak/effect/mocks"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/effect/mocks"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/liberty"
@@ -39,8 +40,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx           libcnb.BuildContext
-		baseLayerPath string
+		ctx libcnb.BuildContext
 	)
 
 	it.Before(func() {
@@ -48,8 +48,6 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 
 		ctx.Layers.Path, err = ioutil.TempDir("", "home-layers")
 		Expect(err).NotTo(HaveOccurred())
-		baseLayerPath = filepath.Join(ctx.Layers.Path, "base")
-		Expect(os.Mkdir(baseLayerPath, 0755)).To(Succeed())
 	})
 
 	it.After(func() {
@@ -64,13 +62,18 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 
-		distro, be := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, baseLayerPath, []string{}, effect.NewExecutor())
+		distro, be := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, []string{}, []string{}, effect.NewExecutor())
 		distro.Logger = bard.NewLogger(io.Discard)
 		Expect(be.Name).To(Equal("open-liberty-runtime"))
 		Expect(be.Launch).To(BeTrue())
 
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
+
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("server-name", "defaultServer"))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("features", []string{}))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("ifixes", []string{}))
 
 		layer, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
@@ -92,16 +95,23 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		executor := &mocks.Executor{}
 		executor.On("Execute", mock.Anything).Return(nil)
 
-		iFixesPath := filepath.Join(baseLayerPath, "conf", "ifixes")
+		iFixesPath, err := ioutil.TempDir("", "ifixes")
+		Expect(err).NotTo(HaveOccurred())
+
 		Expect(os.MkdirAll(iFixesPath, 0755)).To(Succeed())
 		iFixPath := filepath.Join(iFixesPath, "210012-wlp-archive-ifph12345.jar")
 		Expect(os.WriteFile(iFixPath, []byte{}, 0644)).To(Succeed())
 
-		distro, _ := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, baseLayerPath, []string{}, executor)
+		distro, _ := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, []string{}, []string{iFixPath}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
+
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("server-name", "defaultServer"))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("features", []string{}))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("ifixes", []string{iFixPath}))
 
 		layer, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
@@ -128,11 +138,16 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		executor.On("Execute", mock.Anything).Return(nil)
 
 		features := []string{"foo", "bar", "baz"}
-		distro, _ := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, baseLayerPath, features, executor)
+		distro, _ := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, features, []string{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
+
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("server-name", "defaultServer"))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("features", features))
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("ifixes", []string{}))
 
 		layer, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())

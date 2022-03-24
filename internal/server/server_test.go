@@ -17,17 +17,18 @@
 package server_test
 
 import (
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
 	"github.com/paketo-buildpacks/libpak/effect/mocks"
 	"github.com/sclevine/spec"
 	"github.com/stretchr/testify/mock"
-	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"testing"
 
 	. "github.com/onsi/gomega"
 )
@@ -166,22 +167,26 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("does not install anything if there are no iFixes", func() {
-			Expect(server.InstallIFixes(wlpPath, iFixesPath, executor, bard.NewLogger(io.Discard))).To(Succeed())
+			Expect(server.InstallIFixes(wlpPath, []string{}, executor, bard.NewLogger(io.Discard))).To(Succeed())
 			Expect(executor.Calls).To(BeEmpty())
 		})
 
 		it("works", func() {
-			Expect(os.WriteFile(filepath.Join(iFixesPath, "210012-wlp-archive-ifph42489.jar"), []byte{}, 0644)).To(Succeed())
-			Expect(os.WriteFile(filepath.Join(iFixesPath, "210012-wlp-archive-ifph12345.jar"), []byte{}, 0644)).To(Succeed())
-			Expect(server.InstallIFixes(wlpPath, iFixesPath, executor, bard.NewLogger(io.Discard))).To(Succeed())
+			ifixes := []string{
+				filepath.Join(iFixesPath, "210012-wlp-archive-ifph42489.jar"),
+				filepath.Join(iFixesPath, "210012-wlp-archive-ifph12345.jar"),
+			}
+			Expect(os.WriteFile(ifixes[0], []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(ifixes[1], []byte{}, 0644)).To(Succeed())
+			Expect(server.InstallIFixes(wlpPath, ifixes, executor, bard.NewLogger(io.Discard))).To(Succeed())
 
 			execution := executor.Calls[0].Arguments[0].(effect.Execution)
 			Expect(execution.Command).To(Equal("java"))
-			Expect(execution.Args).To(Equal([]string{"-jar", filepath.Join(iFixesPath, "210012-wlp-archive-ifph12345.jar"), "--installLocation", wlpPath}))
+			Expect(execution.Args).To(Equal([]string{"-jar", ifixes[0], "--installLocation", wlpPath}))
 
 			execution = executor.Calls[1].Arguments[0].(effect.Execution)
 			Expect(execution.Command).To(Equal("java"))
-			Expect(execution.Args).To(Equal([]string{"-jar", filepath.Join(iFixesPath, "210012-wlp-archive-ifph42489.jar"), "--installLocation", wlpPath}))
+			Expect(execution.Args).To(Equal([]string{"-jar", ifixes[1], "--installLocation", wlpPath}))
 		})
 	})
 
