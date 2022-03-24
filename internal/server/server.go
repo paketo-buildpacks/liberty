@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package server
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+
+	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
 )
 
 func GetServerConfigPath(serverPath string) string {
@@ -87,6 +90,47 @@ func GetServerList(userPath string) ([]string, error) {
 	}
 
 	return servers, nil
+}
+
+func LoadIFixesList(ifixesPath string) ([]string, error) {
+	return filepath.Glob(fmt.Sprintf("%s/*.jar", ifixesPath))
+}
+
+func InstallIFixes(installRoot string, ifixes []string, executor effect.Executor, logger bard.Logger) error {
+	for _, ifix := range ifixes {
+		logger.Bodyf("Installing iFix %s\n", filepath.Base(ifix))
+		if err := executor.Execute(effect.Execution{
+			Command: "java",
+			Args:    []string{"-jar", ifix, "--installLocation", installRoot},
+			Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+			Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+		}); err != nil {
+			return fmt.Errorf("unable to install iFix '%s'\n%w", filepath.Base(ifix), err)
+		}
+	}
+
+	return nil
+}
+
+func InstallFeatures(installRoot string, features []string, executor effect.Executor, logger bard.Logger) error {
+	if len(features) > 0 {
+		logger.Bodyf("Installing features with arguments %s\n", features)
+
+		args := []string{"installFeature"}
+		args = append(args, features...)
+		args = append(args, "--acceptLicense")
+
+		if err := executor.Execute(effect.Execution{
+			Command: filepath.Join(installRoot, "bin", "featureUtility"),
+			Args:    args,
+			Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+			Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+		}); err != nil {
+			return fmt.Errorf("unable to install feature '%s'\n%w", features, err)
+		}
+	}
+
+	return nil
 }
 
 // dirHasCompiledArtifacts checks if the given directory has any web or enterprise archives.

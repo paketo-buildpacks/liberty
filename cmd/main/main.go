@@ -17,6 +17,7 @@
 package main
 
 import (
+	"github.com/paketo-buildpacks/libpak/effect"
 	"os"
 
 	"github.com/paketo-buildpacks/liberty/liberty"
@@ -30,7 +31,8 @@ func main() {
 			Logger: bard.NewLogger(os.Stdout),
 		},
 		liberty.Build{
-			Logger: bard.NewLogger(os.Stdout),
+			Executor: effect.NewExecutor(),
+			Logger:   bard.NewLogger(os.Stdout),
 		},
 	)
 }

@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package server_test
 
 import (
-	"github.com/paketo-buildpacks/liberty/internal/server"
-	"github.com/sclevine/spec"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/effect/mocks"
+	"github.com/sclevine/spec"
+	"github.com/stretchr/testify/mock"
 
 	. "github.com/onsi/gomega"
 )
@@ -31,7 +37,7 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 	var (
 		Expect   = NewWithT(t).Expect
 		testPath string
-		userPath string
+		wlpPath  string
 	)
 
 	it.Before(func() {
@@ -43,15 +49,15 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		testPath, err = filepath.EvalSymlinks(testPath)
 		Expect(err).NotTo(HaveOccurred())
 
-		userPath = filepath.Join(testPath, "wlp")
-		Expect(os.MkdirAll(filepath.Join(userPath, "usr", "servers", "defaultServer", "apps"), 0755)).To(Succeed())
-		Expect(os.MkdirAll(filepath.Join(userPath, "usr", "servers", "defaultServer", "dropins"), 0755)).To(Succeed())
+		wlpPath = filepath.Join(testPath, "wlp")
+		Expect(os.MkdirAll(filepath.Join(wlpPath, "usr", "servers", "defaultServer", "apps"), 0755)).To(Succeed())
+		Expect(os.MkdirAll(filepath.Join(wlpPath, "usr", "servers", "defaultServer", "dropins"), 0755)).To(Succeed())
 	})
 
 	it.After(func() {
 		Expect(os.RemoveAll(testPath)).To(Succeed())
-		Expect(os.RemoveAll(filepath.Join(userPath, "usr", "servers", "defaultServer", "apps"))).To(Succeed())
-		Expect(os.RemoveAll(filepath.Join(userPath, "usr", "servers", "defaultServer", "dropins"))).To(Succeed())
+		Expect(os.RemoveAll(filepath.Join(wlpPath, "usr", "servers", "defaultServer", "apps"))).To(Succeed())
+		Expect(os.RemoveAll(filepath.Join(wlpPath, "usr", "servers", "defaultServer", "dropins"))).To(Succeed())
 	})
 
 	when("changing the server user directory", func() {
@@ -62,7 +68,7 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.MkdirAll(newServerDir, 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(newServerDir, "server.xml"), []byte{}, 0644)).To(Succeed())
 
-			Expect(server.SetUserDirectory(newUserDir, userPath, "defaultServer")).To(Succeed())
+			Expect(server.SetUserDirectory(newUserDir, wlpPath, "defaultServer")).To(Succeed())
 			newConfigPath, err := filepath.EvalSymlinks(server.GetServerConfigPath(newServerDir))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(newConfigPath).To(Equal(filepath.Join(newServerDir, "server.xml")))
@@ -78,21 +84,21 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.WriteFile(filepath.Join(newServerDir, "server.xml"), []byte{}, 0644)).To(Succeed())
 
 			// Create configDropins in original directory
-			configDropinsDir := filepath.Join(userPath, "servers", "defaultServer", "configDropins", "overrides")
+			configDropinsDir := filepath.Join(wlpPath, "servers", "defaultServer", "configDropins", "overrides")
 			Expect(os.MkdirAll(configDropinsDir, 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(configDropinsDir, "test-config.xml"), []byte{}, 0644)).To(Succeed())
 
-			Expect(server.SetUserDirectory(userPath, newUserDir, "defaultServer")).To(Succeed())
+			Expect(server.SetUserDirectory(wlpPath, newUserDir, "defaultServer")).To(Succeed())
 			Expect(filepath.Join(configDropinsDir, "test-config.xml")).To(BeARegularFile())
 
-			Expect(os.RemoveAll(userPath)).To(Succeed())
+			Expect(os.RemoveAll(wlpPath)).To(Succeed())
 			Expect(os.RemoveAll(newUserDir)).To(Succeed())
 		})
 	})
 
 	when("checking if a server has installed apps", func() {
 		it("finds war in apps directory", func() {
-			serverPath := filepath.Join(userPath, "servers", "defaultServer")
+			serverPath := filepath.Join(wlpPath, "servers", "defaultServer")
 			appPath := filepath.Join(serverPath, "apps", "test.war")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(server.HasInstalledApps(serverPath)).To(BeTrue())
@@ -100,7 +106,7 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("finds ear in apps directory", func() {
-			serverPath := filepath.Join(userPath, "servers", "defaultServer")
+			serverPath := filepath.Join(wlpPath, "servers", "defaultServer")
 			appPath := filepath.Join(serverPath, "apps", "test.ear")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(server.HasInstalledApps(serverPath)).To(BeTrue())
@@ -108,7 +114,7 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("finds war in dropins directory", func() {
-			serverPath := filepath.Join(userPath, "servers", "defaultServer")
+			serverPath := filepath.Join(wlpPath, "servers", "defaultServer")
 			appPath := filepath.Join(serverPath, "dropins", "test.war")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(server.HasInstalledApps(serverPath)).To(BeTrue())
@@ -116,7 +122,7 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("finds ear in dropins directory", func() {
-			serverPath := filepath.Join(userPath, "servers", "defaultServer")
+			serverPath := filepath.Join(wlpPath, "servers", "defaultServer")
 			appPath := filepath.Join(serverPath, "dropins", "test.ear")
 			Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
 			Expect(server.HasInstalledApps(serverPath)).To(BeTrue())
@@ -141,6 +147,107 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			serverList, err := server.GetServerList(testPath)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(serverList).To(Equal([]string{"defaultServer", "fooServer", "testServer"}))
+		})
+	})
+
+	when("loading iFixes", func() {
+		var (
+			iFixesPath string
+		)
+
+		it.Before(func() {
+			iFixesPath = filepath.Join(testPath, "ifixes")
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(iFixesPath)).To(Succeed())
+		})
+
+		it("loads iFixes", func() {
+			Expect(os.MkdirAll(iFixesPath, 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-1.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-2.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, ".DS_Store"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "foo.txt"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-3.jar"), []byte{}, 0644)).To(Succeed())
+
+			fixes, err := server.LoadIFixesList(iFixesPath)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(fixes).To(HaveLen(3))
+			Expect(fixes).To(ContainElements(HaveSuffix("fix-1.jar"), HaveSuffix("fix-2.jar"), HaveSuffix("fix-3.jar")))
+		})
+
+		it("loads nothing", func() {
+			Expect(os.RemoveAll(iFixesPath)).To(Succeed())
+
+			fixes, err := server.LoadIFixesList(iFixesPath)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(fixes).To(HaveLen(0))
+		})
+
+	})
+
+	when("installing iFixes", func() {
+		var (
+			iFixesPath string
+			executor   = &mocks.Executor{}
+		)
+
+		it.Before(func() {
+			iFixesPath = filepath.Join(testPath, "ifixes")
+			Expect(os.MkdirAll(iFixesPath, 0755)).To(Succeed())
+			executor.On("Execute", mock.Anything).Return(nil)
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(iFixesPath)).To(Succeed())
+		})
+
+		it("does not install anything if there are no iFixes", func() {
+			Expect(server.InstallIFixes(wlpPath, []string{}, executor, bard.NewLogger(io.Discard))).To(Succeed())
+			Expect(executor.Calls).To(BeEmpty())
+		})
+
+		it("works", func() {
+			ifixes := []string{
+				filepath.Join(iFixesPath, "210012-wlp-archive-ifph42489.jar"),
+				filepath.Join(iFixesPath, "210012-wlp-archive-ifph12345.jar"),
+			}
+			Expect(os.WriteFile(ifixes[0], []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(ifixes[1], []byte{}, 0644)).To(Succeed())
+			Expect(server.InstallIFixes(wlpPath, ifixes, executor, bard.NewLogger(io.Discard))).To(Succeed())
+
+			execution := executor.Calls[0].Arguments[0].(effect.Execution)
+			Expect(execution.Command).To(Equal("java"))
+			Expect(execution.Args).To(Equal([]string{"-jar", ifixes[0], "--installLocation", wlpPath}))
+
+			execution = executor.Calls[1].Arguments[0].(effect.Execution)
+			Expect(execution.Command).To(Equal("java"))
+			Expect(execution.Args).To(Equal([]string{"-jar", ifixes[1], "--installLocation", wlpPath}))
+		})
+	})
+
+	when("installing features", func() {
+		it("works", func() {
+			executor := &mocks.Executor{}
+			executor.On("Execute", mock.Anything).Return(nil)
+			features := []string{"foo", "bar", "baz"}
+			Expect(server.InstallFeatures(wlpPath, features, executor, bard.NewLogger(io.Discard)))
+
+			execution := executor.Calls[0].Arguments[0].(effect.Execution)
+			Expect(execution.Command).To(Equal(filepath.Join(wlpPath, "bin", "featureUtility")))
+			Expect(execution.Args).To(Equal([]string{"installFeature", "foo", "bar", "baz", "--acceptLicense"}))
+		})
+
+		it("doesn't run if there are no features", func() {
+			executor := &mocks.Executor{}
+			executor.On("Execute", mock.Anything).Return(nil)
+			features := []string{}
+			Expect(server.InstallFeatures(wlpPath, features, executor, bard.NewLogger(io.Discard)))
+
+			Expect(executor.Calls).To(HaveLen(0))
 		})
 	})
 }

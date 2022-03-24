@@ -19,11 +19,15 @@ package liberty
 import (
 	"fmt"
 
+	"strings"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
+	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
 )
 
 const (
@@ -33,10 +37,12 @@ const (
 	openLibertyStackRuntimeRoot = "/opt/ol"
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
 	javaAppServerLiberty        = "liberty"
+	ifixesRoot                  = "/ifixes"
 )
 
 type Build struct {
-	Logger bard.Logger
+	Executor effect.Executor
+	Logger   bard.Logger
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
@@ -152,10 +158,22 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
+	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
+	base.Logger = b.Logger
+	result.Layers = append(result.Layers, base)
+
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
-		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path)
+		features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
+		featureList := strings.Fields(features)
+
+		ifixes, err := server.LoadIFixesList(ifixesRoot)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to load ifixes\n%w", err)
+		}
+
+		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path, featureList, ifixes, b.Executor)
 		distro.Logger = b.Logger
 
 		result.Layers = append(result.Layers, distro)
@@ -175,10 +193,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	} else {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
-
-	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
-	base.Logger = b.Logger
-	result.Layers = append(result.Layers, base)
 
 	return result, nil
 }

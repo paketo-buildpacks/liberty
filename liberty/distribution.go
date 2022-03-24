@@ -18,9 +18,12 @@ package liberty
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/paketo-buildpacks/liberty/internal/server"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libjvm/count"
@@ -31,21 +34,43 @@ import (
 )
 
 type Distribution struct {
-	ServerName       string
 	ApplicationPath  string
+	Executor         effect.Executor
+	Features         []string
+	IFixes           []string
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
+	ServerName       string
 }
 
-func NewDistribution(dependency libpak.BuildpackDependency, cache libpak.DependencyCache, serverName, applicationPath string) (Distribution, libcnb.BOMEntry) {
+func NewDistribution(
+	dependency libpak.BuildpackDependency,
+	cache libpak.DependencyCache,
+	serverName string,
+	applicationPath string,
+	features []string,
+	ifixes []string,
+	executor effect.Executor,
+) (Distribution, libcnb.BOMEntry) {
 	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
 		Cache:  true,
 		Launch: true,
 	})
+
+	contributor.ExpectedMetadata = map[string]interface{}{
+		"dependency":  dependency,
+		"server-name": serverName,
+		"features":    features,
+		"ifixes":      ifixes,
+	}
+
 	return Distribution{
-		ServerName:       serverName,
 		ApplicationPath:  applicationPath,
+		Executor:         executor,
+		Features:         features,
+		IFixes:           ifixes,
 		LayerContributor: contributor,
+		ServerName:       serverName,
 	}, entry
 }
 
@@ -58,15 +83,27 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("unable to expand Liberty Runtime\n%w", err)
 		}
 
-		executor := effect.NewExecutor()
-		if err := executor.Execute(effect.Execution{
+		writer := io.Discard
+		if d.Logger.IsDebugEnabled() {
+			writer = d.Logger.DebugWriter()
+		}
+
+		if err := d.Executor.Execute(effect.Execution{
 			Command: filepath.Join(layer.Path, "bin", "server"),
 			Args:    []string{"create", d.ServerName},
 			Dir:     layer.Path,
-			Stdout:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
+			Stdout:  bard.NewWriter(writer, bard.WithIndent(3)),
 			Stderr:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
 		}); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to create default server\n%w", err)
+		}
+
+		if err := server.InstallFeatures(layer.Path, d.Features, d.Executor, d.Logger); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to install features to distribution\n%w", err)
+		}
+
+		if err := server.InstallIFixes(layer.Path, d.IFixes, d.Executor, d.Logger); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to install iFixes to distribution\n%w", err)
 		}
 
 		libertyClasses, err := count.Classes(layer.Path)

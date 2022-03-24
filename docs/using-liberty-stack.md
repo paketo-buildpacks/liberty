@@ -1,21 +1,21 @@
 # Using a Liberty Runtime Provided in the Stack Run Image
 
-The Open Liberty buildpack can use an Open Liberty or WebShere Liberty runtime provided in the stack run image. This
-allows you to use configurations and optimizations provided by either the [openliberty/open-liberty](https://hub.docker.com/r/openliberty/open-liberty)
-or [ibmcom/websphere-liberty](https://hub.docker.com/r/ibmcom/websphere-liberty) UBI-based container images.
+The Liberty buildpack can use an Open Liberty or WebShere Liberty runtime provided in the stack run image. This
+allows you to use configurations and optimizations provided by either the [icr.io/appcafe/open-liberty](https://github.com/OpenLiberty/ci.docker/blob/master/docs/icr-images.md)
+or [icr.io/appcafe/websphere-liberty](https://github.com/WASdev/ci.docker/blob/master/docs/icr-images.md) UBI-based container images.
 
 Note that a custom builder is also required to be able to use a custom stack.
 
 ## Creating the Stack Image
 
-Either the [openliberty/open-liberty](https://hub.docker.com/r/openliberty/open-liberty) or [ibmcom/websphere-liberty](https://hub.docker.com/r/ibmcom/websphere-liberty)
+Either the [icr.io/appcafe/websphere-liberty](https://github.com/OpenLiberty/ci.docker/blob/master/docs/icr-images.md) or [icr.io/appcafe/websphere-liberty](https://github.com/WASdev/ci.docker/blob/master/docs/icr-images.md)
 container images can be used to provide the runtime used by the Open Liberty buildpack using one of the following templates.
 
 ### Open Liberty
 
 ```dockerfile
 # RUN IMAGE
-FROM openliberty/open-liberty:full-java11-openj9-ubi as run
+FROM icr.io/appcafe/open-liberty:kernel-slim-java11-openj9-ubi as run
 
 ENV CNB_USER_ID=1001
 ENV CNB_GROUP_ID=0
@@ -58,7 +58,7 @@ USER ${CNB_USER_ID}
 
 ```dockerfile
 # RUN IMAGE
-FROM ibmcom/websphere-liberty:21.0.0.9-full-java11-openj9-ubi as run
+FROM  icr.io/appcafe/websphere-liberty:22.0.0.3-full-java11-openj9-ubi as run
 
 ENV CNB_USER_ID=1001
 ENV CNB_GROUP_ID=0
@@ -102,15 +102,34 @@ USER ${CNB_USER_ID}
 Place iFix jar files in a directory named `interim-fixes` in the directory containing your Dockerfile.
 
 Add the following to your Dockerfile before the `RUN configure.sh`:
+
+For Open Liberty:
 ```console
 COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID}  interim-fixes /opt/ol/fixes/
+```
+Or for WebSphere Liberty:
+```console
+COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID}  interim-fixes /opt/ibm/fixes/
+```
+
+### Installing Open Liberty or WebSphere Liberty features
+
+Place a pre-configured `server.xml` in the directory containing your Dockerfile.
+
+Add the following to your Dockerfile before the `RUN configure.sh`:
+```console
+COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID} server.xml /config/
+```
+For Open Liberty only, add the following before the `RUN configure.sh`:
+```console
+RUN features.sh
 ```
 
 ### Selecting a Different Java Runtime
 
-The Java runtime can be configured by updating the tag in the `FROM` for the run image in the template above with the 
+The Java runtime can be configured by updating the tag in the `FROM` for the run image in the template above with the
 desired version. For example, if you require the Java 8 version of Open Liberty, update the `FROM` for the run image
-to use `openliberty/open-liberty:full-java8-openj9-ubi`.
+to use `icr.io/appcafe/open-liberty:full-java8-openj9-ubi`.
 
 ### Building the Stack Images
 

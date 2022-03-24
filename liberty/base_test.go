@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package liberty_test
 
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/sclevine/spec"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"testing"
 
 	. "github.com/onsi/gomega"
 )

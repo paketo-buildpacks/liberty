@@ -45,6 +45,7 @@ The buildpack will support all available profiles of the most recent versions of
 | `$BP_LIBERTY_PROFILE`          | The Liberty profile to use. Defaults to `full`.                                                                                                                                                                                                                     |
 | `$BP_LIBERTY_SERVER_NAME`      | Name of the server to use. Defaults to `defaultServer` when building an application. If building a packaged server and there is only one bundled server present, then the buildpack will use that.                                                                  |
 | `$BP_LIBERTY_CONTEXT_ROOT`     | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. |
+| `$BP_LIBERTY_FEATURES`         | Space separated list of Liberty features to be installed with the Liberty runtime.                                                                                                                                                                                  |
 | `$BP_LIBERTY_EXT_CONF_SHA256`  | The SHA256 hash of the external configuration package.                                                                                                                                                                                                              |
 | `$BP_LIBERTY_EXT_CONF_STRIP`   | The number of directory levels to strip from the external configuration package. Defaults to 0.                                                                                                                                                                     |
 | `$BP_LIBERTY_EXT_CONF_URI`     | The download URI of the external configuration package.                                                                                                                                                                                                             |
@@ -171,6 +172,10 @@ The packaged server can then be supplied to the build by using the `--path` argu
 ```console
 pack build --path <packaged-server-zip-path> myapp
 ```
+
+## Installing iFixes
+
+Liberty iFixes can be applied using a volume mount to `/ifixes`. [See the additional docs for details](docs/installing-ifixes.md). 
 
 ## License
 

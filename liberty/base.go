@@ -1,27 +1,44 @@
+/*
+ * Copyright 2018-2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package liberty
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strconv"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 type Base struct {
 	BuildpackPath                   string
-	ServerName                      string
-	LayerContributor                libpak.LayerContributor
 	ConfigurationResolver           libpak.ConfigurationResolver
 	DependencyCache                 libpak.DependencyCache
 	ExternalConfigurationDependency *libpak.BuildpackDependency
+	LayerContributor                libpak.LayerContributor
 	Logger                          bard.Logger
+	ServerName                      string
 }
 
 func NewBase(
@@ -40,11 +57,11 @@ func NewBase(
 
 	b := Base{
 		BuildpackPath:                   buildpackPath,
-		ServerName:                      serverName,
-		LayerContributor:                contributor,
 		ConfigurationResolver:           configurationResolver,
 		DependencyCache:                 cache,
 		ExternalConfigurationDependency: externalConfigurationDependency,
+		LayerContributor:                contributor,
+		ServerName:                      serverName,
 	}
 
 	return b
@@ -67,6 +84,7 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		if err := b.ContributeUserFeatures(layer); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to contribute user features\n%w", err)
 		}
+
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_BASE_ROOT", layer.Path)
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_SERVER_NAME", b.ServerName)
 
