@@ -19,7 +19,6 @@ package server
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -94,20 +93,7 @@ func GetServerList(userPath string) ([]string, error) {
 }
 
 func LoadIFixesList(ifixesPath string) ([]string, error) {
-	fileInfos, err := ioutil.ReadDir(ifixesPath)
-	if err != nil && !os.IsNotExist(err) {
-		return []string{}, fmt.Errorf("unable to read iFixes directory\n%w", err)
-	}
-	if os.IsNotExist(err) {
-		return []string{}, nil
-	}
-
-	ifixes := []string{}
-	for _, fileInfo := range fileInfos {
-		ifixes = append(ifixes, filepath.Join(ifixesPath, fileInfo.Name()))
-	}
-
-	return ifixes, nil
+	return filepath.Glob(fmt.Sprintf("%s/*.jar", ifixesPath))
 }
 
 func InstallIFixes(installRoot string, ifixes []string, executor effect.Executor, logger bard.Logger) error {
@@ -127,17 +113,23 @@ func InstallIFixes(installRoot string, ifixes []string, executor effect.Executor
 }
 
 func InstallFeatures(installRoot string, features []string, executor effect.Executor, logger bard.Logger) error {
-	for _, feature := range features {
-		logger.Bodyf("Installing feature %s\n", feature)
+	if len(features) > 0 {
+		logger.Bodyf("Installing features with arguments %s\n", features)
+
+		args := []string{"installFeature"}
+		args = append(args, features...)
+		args = append(args, "--acceptLicense")
+
 		if err := executor.Execute(effect.Execution{
 			Command: filepath.Join(installRoot, "bin", "featureUtility"),
-			Args:    []string{"installFeature", feature, "--acceptLicense"},
+			Args:    args,
 			Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
 			Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
 		}); err != nil {
-			return fmt.Errorf("unable to install feature '%s'\n%w", feature, err)
+			return fmt.Errorf("unable to install feature '%s'\n%w", features, err)
 		}
 	}
+
 	return nil
 }
 

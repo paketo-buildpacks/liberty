@@ -17,15 +17,16 @@
 package liberty_test
 
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/sclevine/spec"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"testing"
 
 	. "github.com/onsi/gomega"
 )
@@ -52,18 +53,11 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		srcTemplateDir := filepath.Join(ctx.Buildpack.Path, "templates")
 		Expect(os.Mkdir(srcTemplateDir, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(srcTemplateDir, "app.tmpl"), []byte{}, 0644)).To(Succeed())
-
-		srcIfixDir := filepath.Join(ctx.Buildpack.Path, "ifixes")
-		Expect(os.Mkdir(srcIfixDir, 0755)).To(Succeed())
-		Expect(os.WriteFile(filepath.Join(srcIfixDir, "210012-wlp-archive-ifph42489.jar"), []byte{}, 0644)).To(Succeed())
-
-		Expect(os.Setenv("BP_LIBERTY_PROFILE", "full")).To(Succeed())
 	})
 
 	it.After(func() {
 		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
 		Expect(os.RemoveAll(ctx.Buildpack.Path)).To(Succeed())
-		Expect(os.Unsetenv("BP_LIBERTY_PROFILE")).To(Succeed())
 	})
 
 	it("contributes configuration", func() {

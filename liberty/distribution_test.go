@@ -38,9 +38,9 @@ import (
 
 func testDistribution(t *testing.T, when spec.G, it spec.S) {
 	var (
-		Expect = NewWithT(t).Expect
-
-		ctx libcnb.BuildContext
+		Expect   = NewWithT(t).Expect
+		executor = &mocks.Executor{}
+		ctx      libcnb.BuildContext
 	)
 
 	it.Before(func() {
@@ -48,6 +48,8 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 
 		ctx.Layers.Path, err = ioutil.TempDir("", "home-layers")
 		Expect(err).NotTo(HaveOccurred())
+
+		executor.On("Execute", mock.Anything).Return(nil)
 	})
 
 	it.After(func() {
@@ -62,7 +64,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 
-		distro, be := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, []string{}, []string{}, effect.NewExecutor())
+		distro, be := liberty.NewDistribution(dep, dc, "defaultServer", ctx.Application.Path, []string{}, []string{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 		Expect(be.Name).To(Equal("open-liberty-runtime"))
 		Expect(be.Launch).To(BeTrue())
@@ -78,9 +80,12 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
+		Expect(executor.Calls).To(HaveLen(1))
+		Expect(executor.Calls[0].Arguments[0].(effect.Execution).Command).To(HaveSuffix("bin/server"))
+		Expect(executor.Calls[0].Arguments[0].(effect.Execution).Args).To(Equal([]string{"create", "defaultServer"}))
+
 		Expect(layer.Launch).To(BeTrue())
 		Expect(filepath.Join(layer.Path, "bin", "server")).To(BeARegularFile())
-		Expect(filepath.Join(layer.Path, "usr", "servers", "defaultServer", "apps")).To(BeADirectory())
 		Expect(layer.LaunchEnvironment["BPI_LIBERTY_RUNTIME_ROOT.default"]).To(Equal(layer.Path))
 	})
 
@@ -91,9 +96,6 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 			SHA256: "e71b55142699b277357d486eeb6244c71a0be3657a96a4286e30b27ceff34b17",
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-
-		executor := &mocks.Executor{}
-		executor.On("Execute", mock.Anything).Return(nil)
 
 		iFixesPath, err := ioutil.TempDir("", "ifixes")
 		Expect(err).NotTo(HaveOccurred())
@@ -157,11 +159,9 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		Expect(installLibertyExecution.Args).To(Equal([]string{"create", "defaultServer"}))
 		Expect(installLibertyExecution.Dir).To(Equal(layer.Path))
 
-		for i, call := range executor.Calls[1:] {
-			installFeatureExecution := call.Arguments[0].(effect.Execution)
-			Expect(installFeatureExecution.Command).To(Equal(filepath.Join(layer.Path, "bin", "featureUtility")))
-			Expect(installFeatureExecution.Args).To(Equal([]string{"installFeature", features[i], "--acceptLicense"}))
-		}
+		installFeatureExecution := executor.Calls[1].Arguments[0].(effect.Execution)
+		Expect(installFeatureExecution.Command).To(Equal(filepath.Join(layer.Path, "bin", "featureUtility")))
+		Expect(installFeatureExecution.Args).To(Equal([]string{"installFeature", "foo", "bar", "baz", "--acceptLicense"}))
 	})
 
 }

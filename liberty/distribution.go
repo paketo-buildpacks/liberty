@@ -93,7 +93,7 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			Args:    []string{"create", d.ServerName},
 			Dir:     layer.Path,
 			Stdout:  bard.NewWriter(writer, bard.WithIndent(3)),
-			Stderr:  bard.NewWriter(d.Logger.DebugWriter(), bard.WithIndent(3)),
+			Stderr:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
 		}); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to create default server\n%w", err)
 		}

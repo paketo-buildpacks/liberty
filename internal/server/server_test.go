@@ -150,6 +150,45 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
+	when("loading iFixes", func() {
+		var (
+			iFixesPath string
+		)
+
+		it.Before(func() {
+			iFixesPath = filepath.Join(testPath, "ifixes")
+		})
+
+		it.After(func() {
+			Expect(os.RemoveAll(iFixesPath)).To(Succeed())
+		})
+
+		it("loads iFixes", func() {
+			Expect(os.MkdirAll(iFixesPath, 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-1.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-2.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, ".DS_Store"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "foo.txt"), []byte{}, 0644)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-3.jar"), []byte{}, 0644)).To(Succeed())
+
+			fixes, err := server.LoadIFixesList(iFixesPath)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(fixes).To(HaveLen(3))
+			Expect(fixes).To(ContainElements(HaveSuffix("fix-1.jar"), HaveSuffix("fix-2.jar"), HaveSuffix("fix-3.jar")))
+		})
+
+		it("loads nothing", func() {
+			Expect(os.RemoveAll(iFixesPath)).To(Succeed())
+
+			fixes, err := server.LoadIFixesList(iFixesPath)
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(fixes).To(HaveLen(0))
+		})
+
+	})
+
 	when("installing iFixes", func() {
 		var (
 			iFixesPath string
@@ -196,11 +235,19 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			executor.On("Execute", mock.Anything).Return(nil)
 			features := []string{"foo", "bar", "baz"}
 			Expect(server.InstallFeatures(wlpPath, features, executor, bard.NewLogger(io.Discard)))
-			for i, call := range executor.Calls {
-				execution := call.Arguments[0].(effect.Execution)
-				Expect(execution.Command).To(Equal(filepath.Join(wlpPath, "bin", "featureUtility")))
-				Expect(execution.Args).To(Equal([]string{"installFeature", features[i], "--acceptLicense"}))
-			}
+
+			execution := executor.Calls[0].Arguments[0].(effect.Execution)
+			Expect(execution.Command).To(Equal(filepath.Join(wlpPath, "bin", "featureUtility")))
+			Expect(execution.Args).To(Equal([]string{"installFeature", "foo", "bar", "baz", "--acceptLicense"}))
+		})
+
+		it("doesn't run if there are no features", func() {
+			executor := &mocks.Executor{}
+			executor.On("Execute", mock.Anything).Return(nil)
+			features := []string{}
+			Expect(server.InstallFeatures(wlpPath, features, executor, bard.NewLogger(io.Discard)))
+
+			Expect(executor.Calls).To(HaveLen(0))
 		})
 	})
 }
