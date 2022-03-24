@@ -82,15 +82,19 @@ The buildpack accepts the following bindings:
 | --------------------- | ------- | ------------------------------------------------------------------------------------------------- |
 | `<dependency-digest>` | `<uri>` | If needed, the buildpack will fetch the dependency with digest `<dependency-digest>` from `<uri>` |
 
-## Using Custom Features
+## Installing Features
 
-Custom features can be configured on the server by supplying an external configuration package containing the feature
-JAR and manifest along with a feature descriptor.
+You can install features by setting `$BP_LIBERTY_FEATURES` to be a space separate list of the features you want to install. For example, `BP_LIBERTY_FEATURES='jdbc-4.3 el-3.0'`. You can see a full list of available features in the [Liberty documentation on Features](https://openliberty.io/docs/22.0.0.2/reference/feature/feature-overview.html).
 
-### Feature Manifest
+Features are by default downloaded from Maven Central. You can control this behavior using the [standard environment variables for controlling `featureUtility`](https://openliberty.io/docs/22.0.0.2/reference/command/featureUtility-modifications.html). For example, `FEATURE_REPO_URL`, `http_proxy` and `https_proxy`.
 
-The feature manifest is a TOML file called `features.toml` containing a list of `features` that should be installed on
-the server.
+### Using Custom Features
+
+Custom features can be configured on the server as well by supplying an external configuration package containing the feature JAR and manifest along with a feature descriptor.
+
+#### Feature Manifest
+
+The feature manifest is a TOML file called `features.toml` containing a list of `features` that should be installed on the server.
 
 A feature has the properties:
 
@@ -99,7 +103,7 @@ A feature has the properties:
 * `version`: Version of the feature.
 * `dependencies`: List of features that the custom feature depends on, if any.
 
-### Example Feature Manifest
+#### Example Feature Manifest
 
 This example shows how to configure a feature called `dummyCache` that has a dependency on the `distributedMap-1.0`
 feature.
