@@ -28,6 +28,7 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/sbom"
 )
 
 const (
@@ -41,8 +42,9 @@ const (
 )
 
 type Build struct {
-	Executor effect.Executor
-	Logger   bard.Logger
+	Executor    effect.Executor
+	Logger      bard.Logger
+	SBOMScanner sbom.SBOMScanner
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
@@ -127,6 +129,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
+	if b.SBOMScanner == nil {
+		b.SBOMScanner = sbom.NewSyftCLISBOMScanner(context.Layers, b.Executor, b.Logger)
+	}
+
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
 	profile, _ := cr.Resolve("BP_LIBERTY_PROFILE")
 
@@ -135,11 +141,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve dependency\n%w", err)
 	}
 
-	h, be := libpak.NewHelperLayer(context.Buildpack, "linker")
+	h, _ := libpak.NewHelperLayer(context.Buildpack, "linker")
 	h.Logger = b.Logger
 
 	result.Layers = append(result.Layers, h)
-	result.BOM.Entries = append(result.BOM.Entries, be)
 
 	var externalConfigurationDependency *libpak.BuildpackDependency
 	if uri, ok := cr.Resolve("BP_LIBERTY_EXT_CONF_URI"); ok {
@@ -173,17 +178,25 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to load ifixes\n%w", err)
 		}
 
-		distro, bomEntry := NewDistribution(dep, dc, serverName, context.Application.Path, featureList, ifixes, b.Executor)
+		distro := NewDistribution(dep, dc, serverName, context.Application.Path, featureList, ifixes, b.Executor)
 		distro.Logger = b.Logger
 
 		result.Layers = append(result.Layers, distro)
-		result.BOM.Entries = append(result.BOM.Entries, bomEntry)
 
 		process, err := createOpenLibertyRuntimeProcess(serverName)
 		if err != nil {
 			return libcnb.BuildResult{}, err
 		}
 		result.Processes = []libcnb.Process{process}
+
+		scanPath, err := detectedBuildSrc.AppPath()
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to find scan path\n%s", err)
+		}
+
+		if err := b.SBOMScanner.ScanLaunch(scanPath, libcnb.SyftJSON, libcnb.CycloneDXJSON); err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to create Launch SBoM \n%w", err)
+		}
 	} else if installType == noneInstall {
 		process, err := createStackRuntimeProcess(serverName)
 		if err != nil {

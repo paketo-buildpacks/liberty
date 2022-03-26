@@ -33,12 +33,18 @@ const (
 type BuildSource interface {
 	// Name is the name of the build source
 	Name() string
+
 	// Detect determines if this build source is the one that should be used
 	Detect() (bool, error)
+
 	// DefaultServerName returns the default server name that should be used for the build source
 	DefaultServerName() (string, error)
+
 	// ValidateAppProvider returns true if the `jvm-application-package` dependency is provided
 	ValidateApp() (bool, error)
+
+	// AppPaths returns the list of paths in which the build source contains applications
+	AppPath() (string, error)
 }
 
 // AppBuildSource is the default build source type for the Liberty buildpack
@@ -63,7 +69,7 @@ func (a AppBuildSource) Name() string {
 
 // Detect checks to make sure Main-Class is not defined in `META-INF/MANIFEST.MF`
 func (a AppBuildSource) Detect() (bool, error) {
-        // if user reqeuests an app server and it's not liberty then skip
+	// if user reqeuests an app server and it's not liberty then skip
 	if a.RequestedAppServer != "" && a.RequestedAppServer != JavaAppServerLiberty {
 		a.Logger.Debugf("failed to match requested app server of [%s], buildpack supports [%s]", a.RequestedAppServer, JavaAppServerLiberty)
 		return false, nil
@@ -96,6 +102,10 @@ func (a AppBuildSource) ValidateApp() (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (a AppBuildSource) AppPath() (string, error) {
+	return a.Root, nil
 }
 
 // ServerBuildSource is used when building a packaged server or Liberty server directory
@@ -172,6 +182,18 @@ func (s ServerBuildSource) ValidateApp() (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (s ServerBuildSource) AppPath() (string, error) {
+	serverPath, err := s.ServerPath()
+	if err != nil {
+		return "", fmt.Errorf("unable to validate packaged server app\n%w", err)
+	}
+	if serverPath == "" {
+		return "", nil
+	}
+
+	return serverPath, nil
 }
 
 func (s ServerBuildSource) ServerPath() (string, error) {

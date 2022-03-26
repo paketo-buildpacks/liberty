@@ -30,6 +30,7 @@ const (
 	PlanEntryJRE                   = "jre"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
 	PlanEntryJavaAppServer         = "java-app-server"
+	PlanEntrySyft                  = "syft"
 )
 
 type Detect struct {
@@ -91,6 +92,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 					{Name: PlanEntryJavaAppServer},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryLiberty},
+					{Name: PlanEntrySyft},
 				},
 			},
 		},
