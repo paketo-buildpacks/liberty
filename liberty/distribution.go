@@ -51,8 +51,8 @@ func NewDistribution(
 	features []string,
 	ifixes []string,
 	executor effect.Executor,
-) (Distribution, libcnb.BOMEntry) {
-	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
+) Distribution {
+	contributor, _ := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
 		Cache:  true,
 		Launch: true,
 	})
@@ -71,7 +71,7 @@ func NewDistribution(
 		IFixes:           ifixes,
 		LayerContributor: contributor,
 		ServerName:       serverName,
-	}, entry
+	}
 }
 
 func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {

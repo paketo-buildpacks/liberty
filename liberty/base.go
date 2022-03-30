@@ -28,6 +28,7 @@ import (
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/sbom"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
@@ -71,6 +72,8 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	b.LayerContributor.Logger = b.Logger
 
 	return b.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
+		var syftArtifacts []sbom.SyftArtifact
+
 		if err := b.ContributeConfigTemplates(layer); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to contribute config templates\n%w", err)
 		}
@@ -78,6 +81,11 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		if b.ExternalConfigurationDependency != nil {
 			if err := b.ContributeExternalConfiguration(layer); err != nil {
 				return libcnb.Layer{}, fmt.Errorf("unable to contribute external configuration\n%w", err)
+			}
+			if syftArtifact, err := b.ExternalConfigurationDependency.AsSyftArtifact(); err != nil {
+				return libcnb.Layer{}, fmt.Errorf("unable to get Syft Artifact for dependency: %s, \n%w", b.ExternalConfigurationDependency.Name, err)
+			} else {
+				syftArtifacts = append(syftArtifacts, syftArtifact)
 			}
 		}
 
@@ -87,6 +95,13 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_BASE_ROOT", layer.Path)
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_SERVER_NAME", b.ServerName)
+
+		sbomPath := layer.SBOMPath(libcnb.SyftJSON)
+		dep := sbom.NewSyftDependency(layer.Path, syftArtifacts)
+		b.Logger.Debugf("Writing Syft SBOM at %s: %+v", sbomPath, dep)
+		if err := dep.WriteTo(sbomPath); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to write SBOM\n%w", err)
+		}
 
 		return layer, nil
 	})
