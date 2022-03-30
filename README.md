@@ -138,14 +138,14 @@ The external configuration package can be provided to the build by providing the
 environment variables to the build. For example, if the external configuration is hosted on a web server, you can use:
 
 ```console
-pack build --path myapp --env BP_LIBERTY_EXT_CONF_URI=https://example.com/liberty-conf.tar.gz --env BP_LIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_LIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
+pack build --path myapp --env BP_JAVA_APP_SERVER=liberty --env BP_LIBERTY_EXT_CONF_URI=https://example.com/liberty-conf.tar.gz --env BP_LIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_LIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
 ```
 
 If you'd like to provide the configuration as a file, you can do so by mounting the external configuration in the
 container and then providing the path to the external configuration like so:
 
 ```console
-pack build --path myapp --env BP_LIBERTY_EXT_CONF_URI=file:///path/to/conf/liberty-conf.tar.gz --env BP_LIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_LIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
+pack build --path myapp --env BP_JAVA_APP_SERVER=liberty --env BP_LIBERTY_EXT_CONF_URI=file:///path/to/conf/liberty-conf.tar.gz --env BP_LIBERTY_EXT_CONF_VERSION=1.0.0 --env BP_LIBERTY_EXT_CONF_SHA256=953e665e4126b75fecb375c88c51a1ddcf4d12474d43576323862d422e625517 myapp
 ```
 
 ## Building from a Liberty Server
@@ -159,7 +159,7 @@ To build from a Liberty server installation, change your working directory to th
 directory and run
 
 ```console
-pack build myapp
+pack build --env BP_JAVA_APP_SERVER=liberty myapp
 ```
 
 ### Building from a Packaged Server
@@ -174,7 +174,7 @@ bin/server package defaultServer --include=usr
 The packaged server can then be supplied to the build by using the `--path` argument like so:
 
 ```console
-pack build --path <packaged-server-zip-path> myapp
+pack build --env BP_JAVA_APP_SERVER=liberty --path <packaged-server-zip-path> myapp
 ```
 
 ## Installing iFixes
