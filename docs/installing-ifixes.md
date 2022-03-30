@@ -14,23 +14,24 @@ Requirements to install ifixes:
  ifixes/220002-wlp-archive-ifph67890.jar
  ```
 
-Set specify the --volume parameter mapping your local `ifixes/` directory to `/ifixes` in the container:
+Specify the --volume parameter mapping your local `ifixes/` directory to `/ifixes` in the container:
 
 ```console
-pack build myapp --volume /path/to/ifixes:/ifixes
+pack build myapp --env BP_JAVA_APP_SERVER=liberty --volume /path/to/ifixes:/ifixes
 ```
 
 The build output will show the iFix being applied:
 
 ```console
-  Open Liberty (All Features) 22.0.3: Contributing to layer
-    Downloading from file:///bindings/dependency-mapping/binaries/openliberty-runtime-22.0.0.3.zip
-    Verifying checksum
-    Expanding to /layers/paketo-buildpacks_liberty/open-liberty-runtime-full
-    Installing iFix test-ifix.jar
-      Installing 210012-wlp-archive-ifph12345.jar
-      Applying fix to Liberty install directory at /layers/paketo-buildpacks_liberty/open-liberty-runtime-full now.
-        lib/com.ibm.ws.security.wim.adapter.ldap_1.0.59.cl211220220114-0527.jar
-      Fix has been applied successfully.
-      Successfully extracted all product files.
+[builder]   Open Liberty (All Features) 22.0.3: Contributing to layer
+[builder]     Downloading from https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/22.0.0.3/openliberty-runtime-22.0.0.3.zip
+[builder]     Verifying checksum
+[builder]     Expanding to /layers/paketo-buildpacks_liberty/open-liberty-runtime-full
+[builder]     Installing iFix 22003-wlp-archive-ifph44666.jar
+[builder]       Applying fix to Liberty install directory at /layers/paketo-buildpacks_liberty/open-liberty-runtime-full now.
+[builder]       	lib/com.ibm.ws.openapi.ui.private_1.0.62.cl220320220308-1516.jar
+[builder]       	lib/com.ibm.ws.openapi.ui_1.0.62.cl220320220308-1516.jar
+[builder]       	lib/com.ibm.ws.microprofile.openapi.ui_1.0.62.cl220320220308-1516.jar
+[builder]       Fix has been applied successfully.
+[builder]       Successfully extracted all product files.
 ```
