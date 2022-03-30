@@ -30,13 +30,15 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/sbom/mocks"
 	"github.com/sclevine/spec"
 )
 
 func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
-		Expect = NewWithT(t).Expect
-		ctx    libcnb.BuildContext
+		Expect      = NewWithT(t).Expect
+		ctx         libcnb.BuildContext
+		sbomScanner mocks.SBOMScanner
 	)
 
 	it.Before(func() {
@@ -64,6 +66,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
 		Expect(err).NotTo(HaveOccurred())
+
+		sbomScanner = mocks.SBOMScanner{}
+		sbomScanner.On("ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON).Return(nil)
+		sbomScanner.On("ScanLaunch", filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer"), libcnb.SyftJSON, libcnb.CycloneDXJSON).Return(nil)
 	})
 
 	it.After(func() {
@@ -74,13 +80,18 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("picks the latest full profile when no arguments are set", func() {
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
-		result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+		result, err := liberty.Build{
+			Logger:      bard.NewLogger(io.Discard),
+			SBOMScanner: &sbomScanner,
+		}.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(3))
 		Expect(result.Layers[0].Name()).To(Equal("helper"))
 		Expect(result.Layers[1].Name()).To(Equal("base"))
 		Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+
+		sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 	})
 
 	context("requested app server is not liberty", func() {
@@ -95,12 +106,17 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		it("should not run if liberty is not the requested java app server", func() {
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 
-			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(0))
 			Expect(result.Unmet).To(HaveLen(1))
 			Expect(result.Unmet[0].Name).To(Equal("liberty"))
+
+			Expect(sbomScanner.Calls).To(HaveLen(0))
 		})
 	})
 
@@ -121,26 +137,36 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			it("doesn't run", func() {
 				buf := &bytes.Buffer{}
-				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := liberty.Build{
+					Logger:      bard.NewLogger(buf),
+					SBOMScanner: &sbomScanner,
+				}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
 
 				Expect(buf.String()).To(ContainSubstring("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build\n"))
+
+				Expect(sbomScanner.Calls).To(HaveLen(0))
 			})
 		})
 
 		context("missing WEB-INF and application.xml", func() {
 			it("doesn't run", func() {
 				buf := &bytes.Buffer{}
-				result, err := liberty.Build{Logger: bard.NewLogger(buf)}.Build(ctx)
+				result, err := liberty.Build{
+					Logger:      bard.NewLogger(buf),
+					SBOMScanner: &sbomScanner,
+				}.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
 
 				Expect(buf.String()).To(ContainSubstring("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
+
+				Expect(sbomScanner.Calls).To(HaveLen(0))
 			})
 		})
 	})
@@ -159,13 +185,18 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("honors user set configuration values", func() {
-			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
 			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-microProfile4"))
+
+			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 	})
 
@@ -205,7 +236,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}
 			ctx.StackID = "test-stack-id"
 
-			result, err := liberty.Build{}.Build(ctx)
+			result, err := liberty.Build{
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(3))
@@ -220,6 +253,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				SHA256:  "test-sha256",
 				Stacks:  []string{ctx.StackID},
 			}))
+
+			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 	})
 
@@ -239,21 +274,31 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("should discover the app", func() {
-			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
 			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 			Expect(result.Unmet).To(HaveLen(0))
+
+			sbomScanner.AssertCalled(t, "ScanLaunch", filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer"), libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 
 		it("should not run if no apps are installed", func() {
 			Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer", "apps", "test.war"))).To(Succeed())
-			result, err := liberty.Build{Logger: bard.NewLogger(io.Discard)}.Build(ctx)
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Unmet).To(HaveLen(1))
 			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
+
+			Expect(sbomScanner.Calls).To(HaveLen(0))
 		})
 	})
 }
