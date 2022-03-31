@@ -48,8 +48,6 @@ type Build struct {
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
-	b.Logger.Title(context.Buildpack)
-
 	result := libcnb.NewBuildResult()
 
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil) // nil so we don't log config table
@@ -63,22 +61,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			result.Unmet = append(result.Unmet, libcnb.UnmetPlanEntry{Name: entry.Name})
 		}
 		return result, nil
-	}
-
-	dr, err := libpak.NewDependencyResolver(context)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
-	}
-
-	dc, err := libpak.NewDependencyCache(context)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
-	}
-	dc.Logger = b.Logger
-
-	cr, err = libpak.NewConfigurationResolver(context.Buildpack, &b.Logger) // recreate so that config table is logged after the title
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
 	serverName, _ := cr.Resolve("BP_LIBERTY_SERVER_NAME")
@@ -120,6 +102,24 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 		return result, nil
 	}
+
+	b.Logger.Title(context.Buildpack)
+
+	cr, err = libpak.NewConfigurationResolver(context.Buildpack, &b.Logger) // recreate so that config table is logged after the title
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
+	}
+
+	dr, err := libpak.NewDependencyResolver(context)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
+	}
+
+	dc, err := libpak.NewDependencyCache(context)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
+	}
+	dc.Logger = b.Logger
 
 	if serverName == "" {
 		serverName, err = detectedBuildSrc.DefaultServerName()
