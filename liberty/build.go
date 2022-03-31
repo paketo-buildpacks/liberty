@@ -50,6 +50,13 @@ type Build struct {
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result := libcnb.NewBuildResult()
 
+	pr := libpak.PlanEntryResolver{Plan: context.Plan}
+	if _, found, err := pr.Resolve(PlanEntryJavaAppServer); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve plan entry\n%w", err)
+	} else if !found {
+		return result, nil
+	}
+
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil) // nil so we don't log config table
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
