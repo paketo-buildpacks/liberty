@@ -60,9 +60,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}
 
-		ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "liberty", Metadata: map[string]interface{}{
-			"server-name": "defaultServer",
-		}}}
+		ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{
+			{Name: "liberty", Metadata: map[string]interface{}{"server-name": "defaultServer"}},
+			{Name: "java-app-server"},
+		}
 
 		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
 		Expect(err).NotTo(HaveOccurred())
@@ -113,11 +114,26 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(0))
-			Expect(result.Unmet).To(HaveLen(1))
+			Expect(result.Unmet).To(HaveLen(2))
 			Expect(result.Unmet[0].Name).To(Equal("liberty"))
+			Expect(result.Unmet[1].Name).To(Equal("java-app-server"))
 
 			Expect(sbomScanner.Calls).To(HaveLen(0))
 		})
+	})
+
+	it("does not contribute Liberty if java-app-server missing from buildplan", func() {
+		ctx.Plan.Entries = ctx.Plan.Entries[0:1] // remove second plan entry, java-app-server
+		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
+
+		result, err := liberty.Build{
+			Logger:      bard.NewLogger(io.Discard),
+			SBOMScanner: &sbomScanner,
+		}.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Layers).To(HaveLen(0))
+		Expect(sbomScanner.Calls).To(HaveLen(0))
 	})
 
 	context("missing required info", func() {
@@ -263,10 +279,16 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			usrPath := filepath.Join(ctx.Application.Path, "usr")
 			Expect(os.MkdirAll(filepath.Join(usrPath, "servers", "defaultServer", "apps", "test.war"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(usrPath, "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
-			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{{Name: "liberty", Metadata: map[string]interface{}{
-				"server-name":              "defaultServer",
-				"packaged-server-usr-path": usrPath,
-			}}}
+			ctx.Plan.Entries = []libcnb.BuildpackPlanEntry{
+				{
+					Name: "liberty",
+					Metadata: map[string]interface{}{
+						"server-name":              "defaultServer",
+						"packaged-server-usr-path": usrPath,
+					},
+				},
+				{Name: "java-app-server"},
+			}
 		})
 
 		it.After(func() {
@@ -278,6 +300,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Logger:      bard.NewLogger(io.Discard),
 				SBOMScanner: &sbomScanner,
 			}.Build(ctx)
+
 			Expect(err).NotTo(HaveOccurred())
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
@@ -294,9 +317,11 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Logger:      bard.NewLogger(io.Discard),
 				SBOMScanner: &sbomScanner,
 			}.Build(ctx)
+
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Unmet).To(HaveLen(1))
+			Expect(result.Unmet).To(HaveLen(2))
 			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
+			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "java-app-server"}))
 
 			Expect(sbomScanner.Calls).To(HaveLen(0))
 		})
