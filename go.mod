@@ -3,7 +3,7 @@ module github.com/paketo-buildpacks/liberty
 go 1.17
 
 require (
-	github.com/BurntSushi/toml v1.0.0
+	github.com/BurntSushi/toml v1.1.0
 	github.com/buildpacks/libcnb v1.25.5
 	github.com/heroku/color v0.0.6
 	github.com/onsi/gomega v1.19.0
