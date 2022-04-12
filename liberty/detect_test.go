@@ -75,8 +75,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
-							"build":  true,
-							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -106,8 +104,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
-							"build":  true,
-							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -138,8 +134,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
-							"build":  true,
-							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -171,8 +165,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 							"launch": true,
-							"build":  true,
-							"cache":  true,
 						}},
 						{Name: liberty.PlanEntryJavaAppServer},
 						{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -234,8 +226,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []libcnb.BuildPlanRequire{
 							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
-								"build":  true,
-								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -267,8 +257,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []libcnb.BuildPlanRequire{
 							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
-								"build":  true,
-								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -310,8 +298,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Requires: []libcnb.BuildPlanRequire{
 								{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 									"launch": true,
-									"build":  true,
-									"cache":  true,
 								}},
 								{Name: liberty.PlanEntryJavaAppServer},
 								{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -357,8 +343,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []libcnb.BuildPlanRequire{
 							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
-								"build":  true,
-								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -397,8 +381,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []libcnb.BuildPlanRequire{
 							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
-								"build":  true,
-								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -430,8 +412,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []libcnb.BuildPlanRequire{
 							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
-								"build":  true,
-								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
@@ -459,8 +439,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []libcnb.BuildPlanRequire{
 							{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{
 								"launch": true,
-								"build":  true,
-								"cache":  true,
 							}},
 							{Name: liberty.PlanEntryJavaAppServer},
 							{Name: liberty.PlanEntryJVMApplicationPackage},
