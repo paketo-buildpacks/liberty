@@ -108,28 +108,28 @@ api = "0.7"
     name = "BP_LIBERTY_FEATURES"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.3:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.4:*:*:*:liberty:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:maven/io.openliberty/openliberty-runtime@22.0.0.3"
-    sha256 = "40fa60ce33245f74476eac0f5f31ca2d4101ade3af96f30ccd1ac7ffb70e278c"
+    purl = "pkg:maven/io.openliberty/openliberty-runtime@22.0.0.4"
+    sha256 = "984a6e4d500d492f5f993142399b06efc5ab4940d93c7902ed3667f1393a4ef0"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/22.0.0.3/openliberty-runtime-22.0.0.3.zip"
-    version = "22.0.3"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/22.0.0.4/openliberty-runtime-22.0.0.4.zip"
+    version = "22.0.4"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.3:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.4:*:*:*:liberty:*:*:*"]
     id = "open-liberty-runtime-jakartaee9"
     name = "Open Liberty (Jakarta EE9)"
-    purl = "pkg:maven/io.openliberty/openliberty-jakartaee9@22.0.0.3"
-    sha256 = "2a9733dd6d65f20ac44ed7149657ce6895c1744eaf001804da0af19eb9fb0be6"
+    purl = "pkg:maven/io.openliberty/openliberty-jakartaee9@22.0.0.4"
+    sha256 = "aacb0ebb83ddd8bb04294b986bcbf3065c1888862f483c3588ef15974d42b695"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/22.0.0.3/openliberty-jakartaee9-22.0.0.3.zip"
-    version = "22.0.3"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/22.0.0.4/openliberty-jakartaee9-22.0.0.4.zip"
+    version = "22.0.4"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
