@@ -316,4 +316,14 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			})
 		})
 	})
+
+	when("building an app source with server config", func() {
+		it("works", func() {
+			Expect(os.WriteFile(filepath.Join(testPath, "test.war"), []byte{}, 0644)).To(Succeed())
+			appBuildSource := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			ok, err := appBuildSource.Detect()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(ok).To(BeTrue())
+		})
+	})
 }

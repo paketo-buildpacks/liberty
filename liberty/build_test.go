@@ -180,7 +180,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				Expect(result.Layers).To(HaveLen(0))
 				Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "liberty"}))
 
-				Expect(buf.String()).To(ContainSubstring("No `WEB-INF/` or `META-INF/application.xml` found, skipping build\n"))
+				Expect(buf.String()).To(ContainSubstring("No `WEB-INF/` or `META-INF/application.xml` found\n"))
 
 				Expect(sbomScanner.Calls).To(HaveLen(0))
 			})
@@ -324,6 +324,25 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Unmet).To(ContainElement(libcnb.UnmetPlanEntry{Name: "java-app-server"}))
 
 			Expect(sbomScanner.Calls).To(HaveLen(0))
+		})
+	})
+
+	context("when building a compiled artifact and server config", func() {
+		it("should discover the app", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "test.war"), []byte{}, 0644)).To(Succeed())
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Unmet).To(HaveLen(0))
+
+			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 	})
 }

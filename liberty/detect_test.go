@@ -171,6 +171,33 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		}))
 	})
 
+	it("passes when building a compiled artifact", func() {
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "test.war"), []byte{}, 0644)).To(Succeed())
+		result, err := detect.Detect(ctx)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(Equal(libcnb.DetectResult{
+			Pass: true,
+			Plans: []libcnb.BuildPlan{
+				{
+					Provides: []libcnb.BuildPlanProvide{
+						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntryJavaAppServer},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
+					},
+
+					Requires: []libcnb.BuildPlanRequire{
+						{Name: liberty.PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
+						{Name: liberty.PlanEntryJDK},
+						{Name: liberty.PlanEntryJavaAppServer},
+						{Name: liberty.PlanEntryJVMApplicationPackage},
+						{Name: liberty.PlanEntryLiberty},
+						{Name: liberty.PlanEntrySyft},
+					},
+				},
+			},
+		}))
+	})
+
 	it("fails if a Main-Class is present", func() {
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte("Main-Class: com.java.HelloWorld"), 0644)).To(Succeed())
 

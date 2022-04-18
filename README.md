@@ -19,10 +19,9 @@ When building a web application, this buildpack will participate if all the foll
 When building from a packaged Liberty server or from a Liberty root directory, the buildpack will participate if all the
 following conditions are met:
 
-* `<APPLICATION_ROOT>/wlp/usr/servers/defaultServer/server.xml` exists
-* At least one application is installed at either `<APPLICATION_ROOT>/wlp/usr/servers/defaultServer/apps` or
-  `<APPLICATION_ROOT>/wlp/usr/servers/defaultServer/dropins`
-
+* `<APPLICATION_ROOT>/wlp/usr/servers/$BP_LIBERTY_SERVER_NAME/server.xml` exists
+* At least one application is installed at either `<APPLICATION_ROOT>/wlp/usr/servers/$BP_LIBERTY_SERVER_NAME/apps` or
+  `<APPLICATION_ROOT>/wlp/usr/servers/$BP_LIBERTY_SERVER_NAME/dropins`
 
 The buildpack will do the following:
 
@@ -57,6 +56,31 @@ The buildpack will support all available profiles of the most recent versions of
 By default, the Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Open Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
 
 All of these defaults can be overridden by setting the appropriate properties found in Open Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
+
+## Including Server Configuration in the Application Image
+
+The following server configuration files can be included in the application image:
+
+* server.xml
+* server.env
+* bootstrap.properties
+* jvm.options
+
+At the moment, these files can only be included in the build by telling the Maven or Gradle buildpacks to provide them.
+For example, to provide server configuration in the `src/main/liberty/config`, set one of the following environment
+variables in your `pack build` command.
+
+### Including Server Configuration with Maven Applications
+
+```
+--env BP_MAVEN_BUILT_ARTIFACT="target/*.[ejw]ar src/main/liberty/config/*"
+```
+
+### Including Server Configuration with Gradle Applications
+
+```
+--env BP_GRADLE_BUILT_ARTIFACT="build/libs/*.[ejw]ar src/main/liberty/config/*"
+```
 
 ## Install Types
 
