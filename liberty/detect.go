@@ -28,6 +28,7 @@ import (
 const (
 	PlanEntryLiberty               = "liberty"
 	PlanEntryJRE                   = "jre"
+	PlanEntryJDK                   = "jdk"
 	PlanEntryJVMApplicationPackage = "jvm-application-package"
 	PlanEntryJavaAppServer         = "java-app-server"
 	PlanEntrySyft                  = "syft"
@@ -82,13 +83,9 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 					{Name: PlanEntryLiberty},
 					{Name: PlanEntryJavaAppServer},
 				},
-
 				Requires: []libcnb.BuildPlanRequire{
-					{Name: PlanEntryJRE, Metadata: map[string]interface{}{
-						"launch": true,
-						"build":  true,
-						"cache":  true},
-					},
+					{Name: PlanEntryJRE, Metadata: map[string]interface{}{"launch": true}},
+					{Name: PlanEntryJDK},
 					{Name: PlanEntryJavaAppServer},
 					{Name: PlanEntryJVMApplicationPackage},
 					{Name: PlanEntryLiberty},
