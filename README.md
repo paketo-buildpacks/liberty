@@ -64,7 +64,6 @@ The following server configuration files can be included in the application imag
 * server.xml
 * server.env
 * bootstrap.properties
-* jvm.options
 
 At the moment, these files can only be included in the build by telling the Maven or Gradle buildpacks to provide them.
 For example, to provide server configuration in the `src/main/liberty/config`, set one of the following environment

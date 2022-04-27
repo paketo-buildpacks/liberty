@@ -309,7 +309,6 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.WriteFile(filepath.Join(appDir, "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(appDir, "server.env"), []byte("TEST_ENV=foo"), 0644)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(appDir, "bootstrap.properties"), []byte("test.property=foo"), 0644)).To(Succeed())
-			Expect(os.WriteFile(filepath.Join(appDir, "jvm.options"), []byte("test.option=foo"), 0644)).To(Succeed())
 		})
 
 		it.After(func() {
@@ -332,7 +331,6 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 				"server.xml",
 				"server.env",
 				"bootstrap.properties",
-				"jvm.options",
 			} {
 				resolved, err := filepath.EvalSymlinks(filepath.Join(serverDir, file))
 				Expect(err).ToNot(HaveOccurred())

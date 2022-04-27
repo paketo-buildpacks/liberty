@@ -120,7 +120,6 @@ func (f FileLinker) Configure(workspacePath string) error {
 		"server.xml",
 		"server.env",
 		"bootstrap.properties",
-		"jvm.options",
 	}
 
 	for _, config := range configs {
