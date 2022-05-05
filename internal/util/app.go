@@ -60,6 +60,13 @@ func GetApps(path string) ([]string, error) {
 		return []string{}, nil
 	}
 
+	// Return the empty list for expanded EAR applications
+	if exists, err := FileExists(filepath.Join(path, "META-INF", "application.xml")); err != nil {
+		return []string{}, err
+	} else if exists {
+		return []string{}, nil
+	}
+
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return []string{}, err
