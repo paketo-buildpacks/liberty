@@ -65,6 +65,9 @@ The following server configuration files can be included in the application imag
 * server.env
 * bootstrap.properties
 
+**IMPORTANT NOTE:** Do not put secrets in any of these configuration files! The files will be included in the resulting
+image and can leak your secrets.
+
 At the moment, these files can only be included in the build by telling the Maven or Gradle buildpacks to provide them.
 For example, to provide server configuration in the `src/main/liberty/config`, set one of the following environment
 variables in your `pack build` command.

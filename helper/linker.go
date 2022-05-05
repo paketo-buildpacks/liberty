@@ -18,10 +18,13 @@ package helper
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
+	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/liberty/internal/server"
 	"github.com/paketo-buildpacks/libpak/crush"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -124,16 +127,15 @@ func (f FileLinker) Configure(workspacePath string) error {
 
 	for _, config := range configs {
 		configPath := filepath.Join(workspacePath, config)
-		configExists, err := util.FileExists(configPath)
+		toPath := filepath.Join(f.ServerRootPath, config)
+		err = util.DeleteAndLinkPath(configPath, toPath)
 		if err != nil {
-			return err
-		}
-		if configExists {
-			toPath := filepath.Join(f.ServerRootPath, config)
-			if err = util.DeleteAndLinkPath(configPath, toPath); err != nil {
+			if !errors.Is(err, fs.ErrNotExist) {
 				return fmt.Errorf("unable to copy config from workspace\n%w", err)
 			}
+			continue
 		}
+		f.Logger.Info(color.YellowString("Reminder: Do not put secrets in %s; this file is included in the resulting image which can leak secrets", config))
 	}
 
 	if hasBindings {
@@ -187,7 +189,9 @@ func (f FileLinker) ContributeApp(workspacePath string, config ServerConfig, bin
 	}
 
 	linkPath := filepath.Join(f.ServerRootPath, "apps", "app")
-	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
+	if err := os.Remove(linkPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("unable to remove app\n%w", err)
+	}
 
 	// Expand app if needed
 	isDir, err := util.DirExists(appPath)
@@ -314,7 +318,7 @@ func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) s
 func readServerConfig(configPath string) (ServerConfig, error) {
 	xmlFile, err := os.Open(configPath)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to open server.xml '%s'\n%w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to open server.xml\n%w", err)
 	}
 	defer xmlFile.Close()
 

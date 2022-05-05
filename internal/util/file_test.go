@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package util_test
 
 import (
+	"errors"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/sclevine/spec"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -88,7 +90,8 @@ func testFile(t *testing.T, when spec.G, it spec.S) {
 		it("should fail if source file does not exist", func() {
 			srcPath := filepath.Join(testPath, "test-src")
 			destPath := filepath.Join(testPath, "test-dest")
-			Expect(util.DeleteAndLinkPath(srcPath, destPath)).ToNot(Succeed())
+			err := util.DeleteAndLinkPath(srcPath, destPath)
+			Expect(errors.Is(err, fs.ErrNotExist)).To(BeTrue())
 			Expect(srcPath).ToNot(BeARegularFile())
 			Expect(destPath).ToNot(BeARegularFile())
 		})

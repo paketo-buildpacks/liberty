@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package util
 
 import (
@@ -28,7 +28,7 @@ import (
 // destination path.
 func DeleteAndLinkPath(src, dest string) error {
 	if _, err := os.Stat(src); err != nil {
-		return fmt.Errorf("unable to find src path '%s'\n%w", src, err)
+		return err
 	}
 	if err := os.RemoveAll(dest); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("unable to delete original destination path '%s'\n%w", dest, err)
