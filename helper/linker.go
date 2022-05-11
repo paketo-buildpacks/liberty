@@ -135,7 +135,7 @@ func (f FileLinker) Configure(workspacePath string) error {
 			}
 			continue
 		}
-		f.Logger.Info(color.YellowString("Reminder: Do not put secrets in %s; this file is included in the resulting image which can leak secrets", config))
+		f.Logger.Info(color.YellowString("Reminder: Do not include secrets in %s; this file has been included in the image and that can leak your secrets", config))
 	}
 
 	if hasBindings {
