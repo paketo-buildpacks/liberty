@@ -89,9 +89,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 				fmt.Errorf("unable to detect build source '%s'\n%w", buildSrc.Name(), err)
 		}
 		if !ok {
+			b.Logger.Debugf("Detect failed for '%s' -- skipping", buildSrc.Name())
 			continue
 		}
 
+		b.Logger.Debugf("Validating app for build source '%s'", buildSrc.Name())
 		validApp, err := buildSrc.ValidateApp()
 		if err != nil {
 			return libcnb.BuildResult{},
@@ -100,6 +102,8 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		if validApp {
 			detectedBuildSrc = buildSrc
 			break
+		} else {
+			b.Logger.Debugf("Validation failed for '%s' -- skipping", buildSrc.Name())
 		}
 	}
 
@@ -180,12 +184,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 		featureList := strings.Fields(features)
 
-		ifixes, err := server.LoadIFixesList(ifixesRoot)
+		iFixes, err := server.LoadIFixesList(ifixesRoot)
 		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to load ifixes\n%w", err)
+			return libcnb.BuildResult{}, fmt.Errorf("unable to load iFixes\n%w", err)
 		}
 
-		distro := NewDistribution(dep, dc, serverName, context.Application.Path, featureList, ifixes, b.Executor)
+		distro := NewDistribution(dep, dc, serverName, context.Application.Path, featureList, iFixes, b.Executor)
 		distro.Logger = b.Logger
 
 		result.Layers = append(result.Layers, distro)

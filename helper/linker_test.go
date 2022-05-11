@@ -17,6 +17,7 @@
 package helper_test
 
 import (
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -44,15 +45,26 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 
 		appDir, err = ioutil.TempDir("", "execd-helper-apps")
 		Expect(err).NotTo(HaveOccurred())
+		appDir, err = filepath.EvalSymlinks(appDir)
+		Expect(err).ToNot(HaveOccurred())
 
 		layerDir, err = ioutil.TempDir("", "execd-helper-layers")
 		Expect(err).NotTo(HaveOccurred())
+		layerDir, err = filepath.EvalSymlinks(layerDir)
+		Expect(err).ToNot(HaveOccurred())
 
 		baseLayerDir, err = ioutil.TempDir("", "base-layer")
 		Expect(err).NotTo(HaveOccurred())
+		baseLayerDir, err = filepath.EvalSymlinks(baseLayerDir)
+		Expect(err).ToNot(HaveOccurred())
 
 		configDir = filepath.Join(baseLayerDir, "conf")
 		Expect(os.MkdirAll(configDir, 0755)).To(Succeed())
+
+		templatesDir := filepath.Join(baseLayerDir, "templates")
+		Expect(os.MkdirAll(templatesDir, 0755)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(templatesDir, "app.tmpl"), []byte{}, 0644)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(templatesDir, "default-http-endpoint.tmpl"), []byte{}, 0644)).To(Succeed())
 	})
 
 	it.After(func() {
@@ -99,10 +111,6 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(os.WriteFile(filepath.Join(layerDir, "usr", "servers", "defaultServer", "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
 
-			templatesDir := filepath.Join(baseLayerDir, "templates")
-			Expect(os.MkdirAll(templatesDir, 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(templatesDir, "app.tmpl"), []byte{}, 0644)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(templatesDir, "default-http-endpoint.tmpl"), []byte{}, 0644)).To(Succeed())
 		})
 
 		it.After(func() {
@@ -286,6 +294,48 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 			Expect(filepath.Join(layerDir, "usr", "extension", "lib", "test.feature_1.0.0.jar")).To(BeARegularFile())
 			Expect(filepath.Join(layerDir, "usr", "extension", "lib", "features", "test.feature_1.0.0.mf")).To(BeARegularFile())
 			Expect(filepath.Join(layerDir, "usr", "servers", "defaultServer", "configDropins", "defaults", "features.xml")).To(BeARegularFile())
+		})
+	})
+
+	context("when building a compiled artifact with server config", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BPI_LIBERTY_DROPIN_DIR", appDir)).To(Succeed())
+			Expect(os.Setenv("BPI_LIBERTY_RUNTIME_ROOT", layerDir)).To(Succeed())
+			Expect(os.Setenv("BPI_LIBERTY_BASE_ROOT", baseLayerDir)).To(Succeed())
+			Expect(os.Setenv("BPI_LIBERTY_SERVER_NAME", "defaultServer")).To(Succeed())
+
+			Expect(os.MkdirAll(filepath.Join(layerDir, "usr", "servers", "defaultServer"), 0755)).To(Succeed())
+			Expect(util.CopyFile(filepath.Join("testdata", "test.war"), filepath.Join(appDir, "test.war"))).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(appDir, "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(appDir, "server.env"), []byte("TEST_ENV=foo"), 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(appDir, "bootstrap.properties"), []byte("test.property=foo"), 0644)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BPI_LIBERTY_DROPIN_DIR")).To(Succeed())
+			Expect(os.Unsetenv("BPI_LIBERTY_RUNTIME_ROOT")).To(Succeed())
+			Expect(os.Unsetenv("BPI_LIBERTY_BASE_ROOT")).To(Succeed())
+			Expect(os.Unsetenv("BPI_LIBERTY_SERVER_NAME")).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(layerDir, "usr"))).To(Succeed())
+		})
+
+		it("works", func() {
+			_, err := linker.Execute()
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps", "app")).To(BeADirectory())
+			Expect(filepath.Join(layerDir, "usr", "servers", "defaultServer", "apps", "app", "index.html")).To(BeAnExistingFile())
+
+			serverDir := filepath.Join(layerDir, "usr", "servers", "defaultServer")
+			for _, file := range []string{
+				"server.xml",
+				"server.env",
+				"bootstrap.properties",
+			} {
+				resolved, err := filepath.EvalSymlinks(filepath.Join(serverDir, file))
+				Expect(err).ToNot(HaveOccurred())
+				Expect(resolved).To(Equal(filepath.Join(appDir, file)))
+			}
 		})
 	})
 }

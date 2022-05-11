@@ -69,7 +69,7 @@ func (a AppBuildSource) Name() string {
 
 // Detect checks to make sure Main-Class is not defined in `META-INF/MANIFEST.MF`
 func (a AppBuildSource) Detect() (bool, error) {
-	// if user reqeuests an app server and it's not liberty then skip
+	// If user requests an app server, and it is not `liberty` then skip
 	if a.RequestedAppServer != "" && a.RequestedAppServer != JavaAppServerLiberty {
 		a.Logger.Debugf("failed to match requested app server of [%s], buildpack supports [%s]", a.RequestedAppServer, JavaAppServerLiberty)
 		return false, nil
@@ -84,6 +84,7 @@ func (a AppBuildSource) Detect() (bool, error) {
 		a.Logger.Debug("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build")
 		return false, nil
 	}
+
 	return true, nil
 }
 
@@ -92,16 +93,25 @@ func (a AppBuildSource) DefaultServerName() (string, error) {
 }
 
 func (a AppBuildSource) ValidateApp() (bool, error) {
-	isJvmAppPackage, err := util.IsJvmApplicationPackage(a.Root)
+	isAppPackage, err := util.IsJvmApplicationPackage(a.Root)
 	if err != nil {
 		return false, err
 	}
-	if !isJvmAppPackage {
-		a.Logger.Debug("No `WEB-INF/` or `META-INF/application.xml` found, skipping build")
-		return false, nil
+	if isAppPackage {
+		return true, nil
+	} else {
+		a.Logger.Debug("No `WEB-INF/` or `META-INF/application.xml` found")
 	}
 
-	return true, nil
+	// Check if there is a compiled artifact provided
+	hasApps, err := util.HasCompiledArtifacts(a.Root)
+	if err != nil {
+		return false, nil
+	}
+	if !hasApps {
+		a.Logger.Debug("No compiled artifacts found")
+	}
+	return hasApps, nil
 }
 
 func (a AppBuildSource) AppPath() (string, error) {
@@ -172,16 +182,7 @@ func (s ServerBuildSource) ValidateApp() (bool, error) {
 		return false, nil
 	}
 
-	hasApps, err := server.HasInstalledApps(serverPath)
-	if err != nil {
-		return false, err
-	}
-	if !hasApps {
-		s.Logger.Debug("No apps found in packaged server, skipping build")
-		return false, nil
-	}
-
-	return true, nil
+	return server.HasInstalledApps(serverPath)
 }
 
 func (s ServerBuildSource) AppPath() (string, error) {

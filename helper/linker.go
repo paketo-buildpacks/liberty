@@ -18,12 +18,17 @@ package helper
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
+	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/libpak/crush"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/paketo-buildpacks/liberty/internal/util"
@@ -55,6 +60,10 @@ type ServerConfig struct {
 		XMLName xml.Name `xml:"application"`
 		Name    string   `xml:"name,attr"`
 	} `xml:"application"`
+	HTTPEndpoint struct {
+		XMLName xml.Name `xml:"httpEndpoint"`
+		Host    string   `xml:"host,attr"`
+	} `xml:"httpEndpoint"`
 }
 
 func (f FileLinker) Execute() (map[string]string, error) {
@@ -77,7 +86,7 @@ func (f FileLinker) Execute() (map[string]string, error) {
 	return map[string]string{}, nil
 }
 
-func (f FileLinker) Configure(appDir string) error {
+func (f FileLinker) Configure(workspacePath string) error {
 	b, hasBindings, err := bindings.ResolveOne(f.Bindings, bindings.OfType("liberty"))
 	if err != nil {
 		return fmt.Errorf("unable to resolve bindings\n%w", err)
@@ -92,7 +101,7 @@ func (f FileLinker) Configure(appDir string) error {
 	f.BaseLayerPath = sherpa.GetEnvWithDefault("BPI_LIBERTY_BASE_ROOT", "/layers/paketo-buildpacks_liberty/base")
 
 	// Check if we are contributing a packaged server
-	serverBuildSource := core.NewServerBuildSource(appDir, serverName, f.Logger)
+	serverBuildSource := core.NewServerBuildSource(workspacePath, serverName, f.Logger)
 	isPackagedServer, err := serverBuildSource.Detect()
 	if err != nil {
 		return fmt.Errorf("unable to check package server directory\n%w", err)
@@ -106,45 +115,42 @@ func (f FileLinker) Configure(appDir string) error {
 		if err := server.SetUserDirectory(usrPath, destUserPath, serverName); err != nil {
 			return fmt.Errorf("unable to contribute packaged server\n%w", err)
 		}
-	} else {
-		if err = f.ContributeApp(appDir, f.RuntimeRootPath, serverName, b); err != nil {
-			return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
-		}
-
-		if err = f.ContributeDefaultHttpEndpoint(f.RuntimeRootPath, serverName, b); err != nil {
-			return fmt.Errorf("unable to contribute default http endpoint\n%w", err)
-		}
-
-		if err = f.ContributeUserFeatures(serverName, f.getConfigTemplate(b, "features.tmpl")); err != nil {
-			return fmt.Errorf("unable to contribute user features\n%w", err)
-		}
+		return nil
 	}
 
-	configPath := filepath.Join(f.ServerRootPath, "server.xml")
+	// Contribute server config files if found in workspace
+	configs := []string{
+		"server.xml",
+		"server.env",
+		"bootstrap.properties",
+	}
+
+	for _, config := range configs {
+		configPath := filepath.Join(workspacePath, config)
+		toPath := filepath.Join(f.ServerRootPath, config)
+		err = util.DeleteAndLinkPath(configPath, toPath)
+		if err != nil {
+			if !errors.Is(err, fs.ErrNotExist) {
+				return fmt.Errorf("unable to copy config from workspace\n%w", err)
+			}
+			continue
+		}
+		f.Logger.Info(color.YellowString("Reminder: Do not include secrets in %s; this file has been included in the image and that can leak your secrets", config))
+	}
+
 	if hasBindings {
 		if bindingXML, ok := b.SecretFilePath("server.xml"); ok {
-			if err = util.DeleteAndLinkPath(bindingXML, configPath); err != nil {
+			if err = util.DeleteAndLinkPath(bindingXML, filepath.Join(f.ServerRootPath, "server.xml")); err != nil {
 				return fmt.Errorf("unable to replace server.xml\n%w", err)
 			}
 		}
 
 		if bootstrapProperties, ok := b.SecretFilePath("bootstrap.properties"); ok {
-			existingBSP := filepath.Join(f.RuntimeRootPath, "usr", "servers", serverName, "bootstrap.properties")
+			existingBSP := filepath.Join(f.ServerRootPath, "bootstrap.properties")
 			if err = util.DeleteAndLinkPath(bootstrapProperties, existingBSP); err != nil {
 				return fmt.Errorf("unable to replace bootstrap.properties\n%w", err)
 			}
 		}
-	}
-
-	return nil
-}
-
-func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, binding libcnb.Binding) error {
-	linkPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "apps", "app")
-	_ = os.Remove(linkPath) // we don't care if this succeeds or fails necessarily, we just want to try to remove anything in the way of the relinking
-
-	if err := os.Symlink(appPath, linkPath); err != nil {
-		return fmt.Errorf("unable to symlink application to '%s'\n%w", linkPath, err)
 	}
 
 	// Skip contributing app config if already defined in the server.xml
@@ -152,6 +158,59 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, bindi
 	config, err := readServerConfig(configPath)
 	if err != nil {
 		return fmt.Errorf("unable to read server config\n%w", err)
+	}
+
+	if err = f.ContributeApp(workspacePath, config, b); err != nil {
+		return fmt.Errorf("unable to contribute app and config to runtime root\n%w", err)
+	}
+
+	if err = f.ContributeDefaultHttpEndpoint(config, b); err != nil {
+		return fmt.Errorf("unable to contribute default http endpoint\n%w", err)
+	}
+
+	if err = f.ContributeUserFeatures(serverName, f.getConfigTemplate(b, "features.tmpl")); err != nil {
+		return fmt.Errorf("unable to contribute user features\n%w", err)
+	}
+
+	return nil
+}
+
+func (f FileLinker) ContributeApp(workspacePath string, config ServerConfig, binding libcnb.Binding) error {
+	// Determine app path
+	var appPath string
+	if appPaths, err := util.GetApps(workspacePath); err != nil {
+		return fmt.Errorf("unable to determine apps to contribute\n%w", err)
+	} else if len(appPaths) == 0 {
+		appPath = workspacePath
+	} else if len(appPaths) == 1 {
+		appPath = appPaths[0]
+	} else {
+		return fmt.Errorf("expected one app but found several: %s", strings.Join(appPaths, ","))
+	}
+
+	linkPath := filepath.Join(f.ServerRootPath, "apps", "app")
+	if err := os.Remove(linkPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("unable to remove app\n%w", err)
+	}
+
+	// Expand app if needed
+	isDir, err := util.DirExists(appPath)
+	if err != nil {
+		return fmt.Errorf("unable to check if app path is a directory\n%w", err)
+	}
+	if isDir {
+		if err := os.Symlink(appPath, linkPath); err != nil {
+			return fmt.Errorf("unable to symlink application to '%s'\n%w", linkPath, err)
+		}
+	} else {
+		compiledArtifact, err := os.Open(appPath)
+		if err != nil {
+			return fmt.Errorf("unable to open compiled artifact\n%w", err)
+		}
+		err = crush.Extract(compiledArtifact, linkPath, 0)
+		if err != nil {
+			return fmt.Errorf("unable to extract compiled artifact\n%w", err)
+		}
 	}
 
 	if config.Application.Name == "app" {
@@ -177,7 +236,7 @@ func (f FileLinker) ContributeApp(appPath, runtimeRoot, serverName string, bindi
 		return fmt.Errorf("unable to create app template\n%w", err)
 	}
 
-	configOverridesPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "configDropins", "overrides")
+	configOverridesPath := filepath.Join(f.ServerRootPath, "configDropins", "overrides")
 	if err := os.MkdirAll(configOverridesPath, 0755); err != nil {
 		return fmt.Errorf("unable to make config overrides directory\n%w", err)
 	}
@@ -232,8 +291,12 @@ func (f FileLinker) ContributeUserFeatures(serverName, configTemplatePath string
 	return nil
 }
 
-func (f FileLinker) ContributeDefaultHttpEndpoint(runtimeRoot, serverName string, binding libcnb.Binding) error {
-	configDefaultsPath := filepath.Join(runtimeRoot, "usr", "servers", serverName, "configDropins", "defaults")
+func (f FileLinker) ContributeDefaultHttpEndpoint(config ServerConfig, binding libcnb.Binding) error {
+	if config.HTTPEndpoint.Host != "" {
+		f.Logger.Debugf("server.xml already has an httpEndpoint defined; skipping contribution of default HTTP endpoint config snippet...")
+		return nil
+	}
+	configDefaultsPath := filepath.Join(f.ServerRootPath, "configDropins", "defaults")
 	if err := os.MkdirAll(configDefaultsPath, 0755); err != nil {
 		return fmt.Errorf("unable to make config defaults directory\n%w", err)
 	}
@@ -255,7 +318,7 @@ func (f FileLinker) getConfigTemplate(binding libcnb.Binding, template string) s
 func readServerConfig(configPath string) (ServerConfig, error) {
 	xmlFile, err := os.Open(configPath)
 	if err != nil {
-		return ServerConfig{}, fmt.Errorf("unable to open server.xml '%s'\n%w", configPath, err)
+		return ServerConfig{}, fmt.Errorf("unable to open server.xml\n%w", err)
 	}
 	defer xmlFile.Close()
 

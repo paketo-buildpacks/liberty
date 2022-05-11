@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package util_test
 
 import (
@@ -94,6 +94,33 @@ func testApp(t *testing.T, when spec.G, it spec.S) {
 			hasManifestDefined, err := util.ManifestHasMainClassDefined(testPath)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(hasManifestDefined).To(BeFalse())
+		})
+	})
+
+	when("checking a path for compiled artifacts", func() {
+		it("finds a war", func() {
+			Expect(os.WriteFile(filepath.Join(testPath, "app.war"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "server.xml"), []byte{}, 0644)).To(Succeed())
+			appList, err := util.GetApps(testPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(appList).To(Equal([]string{filepath.Join(testPath, "app.war")}))
+		})
+
+		it("finds an ear", func() {
+			Expect(os.WriteFile(filepath.Join(testPath, "app.ear"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "server.xml"), []byte{}, 0644)).To(Succeed())
+			appList, err := util.GetApps(testPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(appList).To(Equal([]string{filepath.Join(testPath, "app.ear")}))
+		})
+
+		it("returns the empty list if path looks like an expanded EAR", func() {
+			Expect(os.Mkdir(filepath.Join(testPath, "META-INF"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "app.war"), []byte{}, 0644)).To(Succeed())
+			appList, err := util.GetApps(testPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(appList).To(BeEmpty())
 		})
 	})
 }

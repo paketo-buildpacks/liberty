@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- package util
+
+package util
 
 import (
 	"fmt"
 	"github.com/paketo-buildpacks/libjvm"
+	"io/ioutil"
 	"path/filepath"
+	"strings"
 )
 
 // IsJvmApplicationPackage will return true if `META-INF/application.xml` or `WEB-INF/` exists, which happens when a
@@ -49,4 +51,41 @@ func ManifestHasMainClassDefined(appPath string) (bool, error) {
 
 	_, ok := m.Get("Main-Class")
 	return ok, nil
+}
+
+func GetApps(path string) ([]string, error) {
+	if exists, err := DirExists(path); err != nil {
+		return []string{}, err
+	} else if !exists {
+		return []string{}, nil
+	}
+
+	// Return the empty list for expanded EAR applications
+	if exists, err := FileExists(filepath.Join(path, "META-INF", "application.xml")); err != nil {
+		return []string{}, err
+	} else if exists {
+		return []string{}, nil
+	}
+
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var apps []string
+	for _, file := range files {
+		if name := file.Name(); strings.HasSuffix(name, ".war") || strings.HasSuffix(name, ".ear") {
+			apps = append(apps, filepath.Join(path, name))
+		}
+	}
+	return apps, nil
+}
+
+// HasCompiledArtifacts checks if the given directory has any web or enterprise archives.
+func HasCompiledArtifacts(path string) (bool, error) {
+	apps, err := GetApps(path)
+	if err != nil {
+		return false, err
+	}
+	return len(apps) > 0, nil
 }
