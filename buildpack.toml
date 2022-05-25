@@ -119,7 +119,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
@@ -133,7 +133,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
@@ -147,7 +147,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
@@ -161,7 +161,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
@@ -175,7 +175,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
@@ -189,7 +189,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
@@ -203,7 +203,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
@@ -217,7 +217,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/master/LICENSE"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
 [[stacks]]
   id = "io.buildpacks.stacks.bionic"
