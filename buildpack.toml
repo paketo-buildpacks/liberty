@@ -192,14 +192,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.6:*:*:*:liberty:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile4@22.0.0.5"
-    sha256 = "824be8903abcf2a968069f445c2bc594f957beb5653cf533039f46c860698645"
+    purl = "pkg:maven/io.openliberty/openliberty-microProfile4@22.0.0.6"
+    sha256 = "ace1819a4f173678fe3ac651b5e6084d80aae4d59c306b351dbad21b6de47558"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/22.0.0.5/openliberty-microProfile4-22.0.0.5.zip"
-    version = "22.0.5"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/22.0.0.6/openliberty-microProfile4-22.0.0.6.zip"
+    version = "22.0.6"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
