@@ -122,14 +122,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.5:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.6:*:*:*:liberty:*:*:*"]
     id = "open-liberty-runtime-jakartaee9"
     name = "Open Liberty (Jakarta EE9)"
-    purl = "pkg:maven/io.openliberty/openliberty-jakartaee9@22.0.0.5"
-    sha256 = "4bb207fecaf9424224f66908cdbe2127588b8c534b564ada2e7a990cee7d0448"
+    purl = "pkg:maven/io.openliberty/openliberty-jakartaee9@22.0.0.6"
+    sha256 = "17b2890a52ff13f9f8426dd9ce99314399e0903a6aa3b653472b1f4610e00b91"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/22.0.0.5/openliberty-jakartaee9-22.0.0.5.zip"
-    version = "22.0.5"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/22.0.0.6/openliberty-jakartaee9-22.0.0.6.zip"
+    version = "22.0.6"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
