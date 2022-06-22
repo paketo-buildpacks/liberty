@@ -233,21 +233,11 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 		it("works", func() {
 			executor := &mocks.Executor{}
 			executor.On("Execute", mock.Anything).Return(nil)
-			features := []string{"foo", "bar", "baz"}
-			Expect(server.InstallFeatures(wlpPath, features, executor, bard.NewLogger(io.Discard)))
+			Expect(server.InstallFeatures(wlpPath, "testServer", executor, bard.NewLogger(io.Discard)))
 
 			execution := executor.Calls[0].Arguments[0].(effect.Execution)
 			Expect(execution.Command).To(Equal(filepath.Join(wlpPath, "bin", "featureUtility")))
-			Expect(execution.Args).To(Equal([]string{"installFeature", "foo", "bar", "baz", "--acceptLicense"}))
-		})
-
-		it("doesn't run if there are no features", func() {
-			executor := &mocks.Executor{}
-			executor.On("Execute", mock.Anything).Return(nil)
-			features := []string{}
-			Expect(server.InstallFeatures(wlpPath, features, executor, bard.NewLogger(io.Discard)))
-
-			Expect(executor.Calls).To(HaveLen(0))
+			Expect(execution.Args).To(Equal([]string{"installServerFeatures", "--acceptLicense", "--noCache", "testServer"}))
 		})
 	})
 }

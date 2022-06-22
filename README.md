@@ -28,9 +28,9 @@ The buildpack will do the following:
 * Requests that a JRE be installed
 * Contribute an Open Liberty or WebSphere Liberty runtime and create a server called `defaultServer`
 * Contributes `web` process type
-* If a web application was built, it will be symlink `<APPLICATION_ROOT>` to `defaultServer/apps/<APPLICATION_ROOT_BASENAME>`
-  at launch time
-* If a Liberty server was built, it will symlink `<APPLICATION_ROOT>` to `<RUNTIME_ROOT>/usr`
+* Create a server.xml with the default features for the profile selected
+* If a web application was built, it will symlink `<APPLICATION_ROOT>` to `<WLP_USR_DIR>/servers/<SERVER_NAME>/apps/app`
+* If a Liberty server was built, it will symlink `<APPLICATION_ROOT>` to `<WLP_USR_DIR>`
 
 The buildpack will support all available profiles of the most recent versions of the Open Liberty runtime. Because the Liberty versioning scheme is not conformant to semantic versioning, an Liberty version like `22.0.0.2` is defined here as `22.0.2`, and should be referenced as such.
 

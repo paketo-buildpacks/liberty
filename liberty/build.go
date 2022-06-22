@@ -18,7 +18,6 @@ package liberty
 
 import (
 	"fmt"
-
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -152,11 +151,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve dependency\n%w", err)
 	}
 
-	h, _ := libpak.NewHelperLayer(context.Buildpack, "linker")
-	h.Logger = b.Logger
-
-	result.Layers = append(result.Layers, h)
-
 	var externalConfigurationDependency *libpak.BuildpackDependency
 	if uri, ok := cr.Resolve("BP_LIBERTY_EXT_CONF_URI"); ok {
 		v, _ := cr.Resolve("BP_LIBERTY_EXT_CONF_VERSION")
@@ -174,16 +168,15 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
-	base := NewBase(context.Buildpack.Path, serverName, externalConfigurationDependency, cr, dc)
+	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
+	featureList := strings.Fields(features)
+	base := NewBase(context.Application.Path, context.Buildpack.Path, serverName, profile, featureList, externalConfigurationDependency, cr, dc, context.Platform.Bindings)
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)
 
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	if installType == openLibertyInstall {
 		// Provide the OL distribution
-		features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
-		featureList := strings.Fields(features)
-
 		iFixes, err := server.LoadIFixesList(ifixesRoot)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to load iFixes\n%w", err)
@@ -237,7 +230,7 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 	} else if olExists {
 		return libcnb.Process{
 			Type:      "open-liberty-stack",
-			Command:   "docker-server.sh",
+			Command:   "bootstrap.sh",
 			Arguments: []string{"server", "run", serverName},
 			Default:   true,
 			Direct:    true,
@@ -249,7 +242,7 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 	} else if wlpExists {
 		return libcnb.Process{
 			Type:      "websphere-liberty-stack",
-			Command:   "docker-server.sh",
+			Command:   "bootstrap.sh",
 			Arguments: []string{"server", "run", serverName},
 			Default:   true,
 			Direct:    true,
