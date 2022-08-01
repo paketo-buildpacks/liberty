@@ -24,8 +24,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/libpak"
-
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/liberty/liberty"
@@ -258,15 +256,6 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Layers).To(HaveLen(2))
 			Expect(result.Layers[0].Name()).To(Equal("base"))
 			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
-			Expect(result.Layers[0].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
-				ID:      "open-liberty-external-configuration",
-				Name:    "Open Liberty External Configuration",
-				Version: "test-version",
-				URI:     "test-uri",
-				SHA256:  "test-sha256",
-				Stacks:  []string{ctx.StackID},
-			}))
-
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 	})

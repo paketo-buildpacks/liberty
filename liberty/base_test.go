@@ -17,7 +17,6 @@
 package liberty_test
 
 import (
-	"fmt"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io/ioutil"
 	"os"
@@ -26,7 +25,6 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/liberty"
-	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/sclevine/spec"
 
@@ -88,8 +86,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.Mkdir(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "WEB-INF", "web.xml"), []byte{}, 0644))
 
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, nil, libpak.ConfigurationResolver{}, dc, nil)
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -119,8 +116,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("contributes a default server.xml", func() {
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, nil, libpak.ConfigurationResolver{}, dc, nil)
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -134,7 +130,6 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 
 		bytes, err := ioutil.ReadAll(xmlFile)
 		Expect(err).ToNot(HaveOccurred())
-		fmt.Println(string(bytes))
 		Expect(string(bytes)).To(Equal(`<?xml version="1.0" encoding="UTF-8"?>
 <server>
   <featureManager>
@@ -146,8 +141,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("contributes features to server.xml", func() {
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", []string{"jaxrs-2.1", "cdi-2.0"}, nil, libpak.ConfigurationResolver{}, dc, nil)
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", []string{"jaxrs-2.1", "cdi-2.0"}, &liberty.FeatureDescriptor{}, nil)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -161,7 +155,6 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 
 		bytes, err := ioutil.ReadAll(xmlFile)
 		Expect(err).ToNot(HaveOccurred())
-		fmt.Println(string(bytes))
 		Expect(string(bytes)).To(Equal(`<?xml version="1.0" encoding="UTF-8"?>
 <server>
   <featureManager>
@@ -174,32 +167,6 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 </server>`))
 	})
 
-	it("contributes server.xml from external configuration", func() {
-		externalConfigurationDep := libpak.BuildpackDependency{
-			ID:     "open-liberty-external-configuration",
-			URI:    "https://localhost/stub-external-configuration-with-directory.tar.gz",
-			SHA256: "6be374a1c3eeda98effb66fe7f9feb48ffcf325492237bc717c77794566f8ce0",
-			PURL:   "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64",
-			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"},
-		}
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &externalConfigurationDep, libpak.ConfigurationResolver{}, dc, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
-		layer, err := ctx.Layers.Layer("test-layer")
-		Expect(err).NotTo(HaveOccurred())
-
-		layer, err = base.Contribute(layer)
-		Expect(err).ToNot(HaveOccurred())
-
-		xmlFile, err := os.Open(filepath.Join(layer.Path, "conf", "external-configuration", "server.xml"))
-		Expect(err).ToNot(HaveOccurred())
-		defer xmlFile.Close()
-
-		bytes, err := ioutil.ReadAll(xmlFile)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(string(bytes)).To(Equal("<server description=\"stub server\"/>\n"))
-	})
-
 	it("contributes server.xml and compiled artifact", func() {
 		// Set up app and server config
 		Expect(util.CopyFile(filepath.Join("testdata", "test.war"), filepath.Join(ctx.Application.Path, "test.war"))).To(Succeed())
@@ -207,8 +174,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.env"), []byte("TEST_ENV=foo"), 0644)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "bootstrap.properties"), []byte("test.property=foo"), 0644)).To(Succeed())
 
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, nil, libpak.ConfigurationResolver{}, dc, nil)
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -237,8 +203,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.MkdirAll(serverSourcePath, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(serverSourcePath, "server.xml"), []byte("<server />"), 0644))
 
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, nil, libpak.ConfigurationResolver{}, dc, nil)
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -259,8 +224,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.MkdirAll(serverSourcePath, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(serverSourcePath, "server.xml"), []byte("<server />"), 0644))
 
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, nil, libpak.ConfigurationResolver{}, dc, nil)
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -281,8 +245,7 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.MkdirAll(serverSourcePath, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(serverSourcePath, "server.xml"), []byte("<server />"), 0644))
 
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "testServer", "kernel", nil, nil, libpak.ConfigurationResolver{}, dc, nil)
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "testServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
 		base.Logger = bard.NewLogger(os.Stdout)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -309,21 +272,27 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
                          </server>`
 		Expect(os.WriteFile(filepath.Join(ctx.Buildpack.Path, "templates", "features.tmpl"), []byte(template), 0644)).To(Succeed())
 
+		featuresRoot := filepath.Join(ctx.Layers.Path, "features")
+		Expect(os.MkdirAll(featuresRoot, 0755)).To(Succeed())
+
+		featureConf := `[[features]]
+                        name = "testFeature"
+                        uri = "file:///test.feature_1.0.0.jar"
+                        version = "1.0.0"
+                        dependencies = ["test-1.0"]`
+		Expect(os.WriteFile(filepath.Join(featuresRoot, "features.toml"), []byte(featureConf), 0644)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(featuresRoot, "test.feature_1.0.0.jar"), []byte{}, 0644)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(featuresRoot, "test.feature_1.0.0.mf"), []byte{}, 0644)).To(Succeed())
+
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		externalConfigurationDep := libpak.BuildpackDependency{
-			ID:     "open-liberty-external-configuration",
-			URI:    "https://localhost/stub-user-feature-configuration.tar.gz",
-			SHA256: "ea4dfc314869b9b6969b5e0122c038d2c0ec87bd8c3f0b3ff39ad27e73fee336",
-			PURL:   "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64",
-			CPEs:   []string{"cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"},
-		}
-
 		// Contribute the layer
-		dc := libpak.DependencyCache{CachePath: "testdata"}
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &externalConfigurationDep, libpak.ConfigurationResolver{}, dc, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		logger := bard.NewLogger(os.Stdout)
+		userFeatureDescriptor, err := liberty.ReadFeatureDescriptor(featuresRoot, logger)
+		Expect(err).ToNot(HaveOccurred())
+		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, userFeatureDescriptor, nil)
+		base.Logger = logger
 
 		layer, err = base.Contribute(layer)
 		Expect(err).ToNot(HaveOccurred())

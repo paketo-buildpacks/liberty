@@ -67,6 +67,7 @@ func ReadFeatureDescriptor(configRoot string, logger bard.Logger) (*FeatureDescr
 }
 
 func (d *FeatureDescriptor) ResolveFeatures() error {
+	d.Logger.Debug("Resolved user features:")
 	for i, feature := range d.Features {
 		featureUrl, err := url.Parse(feature.URI)
 		if err != nil {
@@ -76,6 +77,7 @@ func (d *FeatureDescriptor) ResolveFeatures() error {
 			if err := d.resolveFileFeature(d.Features[i]); err != nil {
 				return err
 			}
+			d.Logger.Debugf("%s:%s -> %s", feature.Name, feature.Version, feature.ResolvedPath)
 		} else {
 			return fmt.Errorf("unable to resolve feature '%s': %s scheme unsupported", feature.Name, featureUrl.Scheme)
 		}
@@ -155,7 +157,7 @@ func (i FeatureInstaller) Install() error {
 func (i FeatureInstaller) installJar(feature Feature) error {
 	runtimeLibsPath := filepath.Join(i.RuntimeRootPath, "usr", "extension", "lib")
 	featureBase := filepath.Base(feature.ResolvedPath)
-	if err := util.DeleteAndLinkPath(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
+	if err := util.CopyFile(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
 		return fmt.Errorf("unable to link feature '%s'\n%w", feature.Name, err)
 	}
 
@@ -164,7 +166,7 @@ func (i FeatureInstaller) installJar(feature Feature) error {
 	}
 
 	manifestBase := filepath.Base(feature.ManifestPath)
-	if err := util.DeleteAndLinkPath(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
+	if err := util.CopyFile(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
 		return fmt.Errorf("unable to link feature manifest for '%s'\n%w", feature.Name, err)
 	}
 

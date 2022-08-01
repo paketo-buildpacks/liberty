@@ -1,7 +1,0 @@
-id = "open-liberty-external-configuration"
-uri = "https://localhost/stub-user-feature-configuration.tar.gz"
-sha256 = "ea4dfc314869b9b6969b5e0122c038d2c0ec87bd8c3f0b3ff39ad27e73fee336"
-purl = "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64"
-cpes = [
-    "cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"
-]

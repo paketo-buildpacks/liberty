@@ -28,7 +28,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"text/template"
 
@@ -37,24 +36,21 @@ import (
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/sbom"
 )
 
 type Base struct {
-	ApplicationPath                 string
-	BuildpackPath                   string
-	ConfigurationResolver           libpak.ConfigurationResolver
-	DependencyCache                 libpak.DependencyCache
-	ExternalConfigurationDependency *libpak.BuildpackDependency
-	LayerContributor                libpak.LayerContributor
-	Logger                          bard.Logger
-	ServerName                      string
-	ServerProfile                   string
-	Features                        []string
-	Bindings                        libcnb.Bindings
+	ApplicationPath       string
+	BuildpackPath         string
+	LayerContributor      libpak.LayerContributor
+	Logger                bard.Logger
+	ServerName            string
+	ServerProfile         string
+	Features              []string
+	UserFeatureDescriptor *FeatureDescriptor
+	Bindings              libcnb.Bindings
 }
 
-func NewBase(appPath string, buildpackPath string, serverName string, serverProfile string, features []string, externalConfigurationDependency *libpak.BuildpackDependency, configurationResolver libpak.ConfigurationResolver, cache libpak.DependencyCache, binds libcnb.Bindings) Base {
+func NewBase(appPath string, buildpackPath string, serverName string, serverProfile string, features []string, userFeatureDescriptor *FeatureDescriptor, binds libcnb.Bindings) Base {
 	contributor := libpak.NewLayerContributor(
 		"Open Liberty Config",
 		map[string]interface{}{},
@@ -63,16 +59,14 @@ func NewBase(appPath string, buildpackPath string, serverName string, serverProf
 		})
 
 	b := Base{
-		ApplicationPath:                 appPath,
-		BuildpackPath:                   buildpackPath,
-		ConfigurationResolver:           configurationResolver,
-		DependencyCache:                 cache,
-		ExternalConfigurationDependency: externalConfigurationDependency,
-		LayerContributor:                contributor,
-		ServerName:                      serverName,
-		ServerProfile:                   serverProfile,
-		Features:                        features,
-		Bindings:                        binds,
+		ApplicationPath:       appPath,
+		BuildpackPath:         buildpackPath,
+		LayerContributor:      contributor,
+		ServerName:            serverName,
+		ServerProfile:         serverProfile,
+		Features:              features,
+		UserFeatureDescriptor: userFeatureDescriptor,
+		Bindings:              binds,
 	}
 
 	return b
@@ -91,7 +85,6 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 }
 
 func (b Base) contribute(layer libcnb.Layer) error {
-	var syftArtifacts []sbom.SyftArtifact
 
 	serverBuildSource := core.NewServerBuildSource(b.ApplicationPath, b.ServerName, b.Logger)
 	isPackagedServer, err := serverBuildSource.Detect()
@@ -144,17 +137,6 @@ func (b Base) contribute(layer libcnb.Layer) error {
 		b.Logger.Info(color.YellowString("Reminder: Do not include secrets in %s; this file has been included in the image and that can leak your secrets", config))
 	}
 
-	if b.ExternalConfigurationDependency != nil {
-		if err := b.contributeExternalConfiguration(layer); err != nil {
-			return fmt.Errorf("unable to contribute external configuration\n%w", err)
-		}
-		if syftArtifact, err := b.ExternalConfigurationDependency.AsSyftArtifact(); err != nil {
-			return fmt.Errorf("unable to get Syft Artifact for dependency: %s, \n%w", b.ExternalConfigurationDependency.Name, err)
-		} else {
-			syftArtifacts = append(syftArtifacts, syftArtifact)
-		}
-	}
-
 	binding, _, err := bindings.ResolveOne(b.Bindings, bindings.OfType("liberty"))
 
 	err = b.contributeConfig(serverPath, layer, binding)
@@ -175,13 +157,6 @@ func (b Base) contribute(layer libcnb.Layer) error {
 	err = b.contributeApp(layer, config, binding)
 	if err != nil {
 		return fmt.Errorf("unable to contribute config\n%w", err)
-	}
-
-	sbomPath := layer.SBOMPath(libcnb.SyftJSON)
-	dep := sbom.NewSyftDependency(layer.Path, syftArtifacts)
-	b.Logger.Debugf("Writing Syft SBOM at %s: %+v", sbomPath, dep)
-	if err := dep.WriteTo(sbomPath); err != nil {
-		return fmt.Errorf("unable to write SBOM\n%w", err)
 	}
 
 	return nil
@@ -322,36 +297,6 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config, binding li
 	return nil
 }
 
-func (b Base) contributeExternalConfiguration(layer libcnb.Layer) error {
-	b.Logger.Headerf(color.BlueString("%s %s", b.ExternalConfigurationDependency.Name, b.ExternalConfigurationDependency.Version))
-
-	artifact, err := b.DependencyCache.Artifact(*b.ExternalConfigurationDependency)
-	if err != nil {
-		return fmt.Errorf("unable to get dependency %s\n%w", b.ExternalConfigurationDependency.ID, err)
-	}
-	defer artifact.Close()
-
-	confPath := filepath.Join(layer.Path, "conf")
-	if err := os.MkdirAll(confPath, 0755); err != nil {
-		return fmt.Errorf("unable to make external config directory\n%w", err)
-	}
-
-	b.Logger.Bodyf("Expanding to %s", confPath)
-
-	c := 0
-	if s, ok := b.ConfigurationResolver.Resolve("BP_LIBERTY_EXT_CONF_STRIP"); ok {
-		if c, err = strconv.Atoi(s); err != nil {
-			return fmt.Errorf("unable to parse %s to integer\n%w", s, err)
-		}
-	}
-
-	if err := util.Extract(artifact, confPath, c); err != nil {
-		return fmt.Errorf("unable to expand external configuration\n%w", err)
-	}
-
-	return nil
-}
-
 func (b Base) contributeConfigTemplates(layer libcnb.Layer) error {
 	// Create config templates directory
 	templateDir := filepath.Join(layer.Path, "templates")
@@ -390,12 +335,7 @@ func (b Base) contributeConfigTemplates(layer libcnb.Layer) error {
 }
 
 func (b Base) contributeUserFeatures(layer libcnb.Layer) error {
-	featureDescriptor, err := ReadFeatureDescriptor(filepath.Join(layer.Path, "conf"), b.Logger)
-	if err != nil {
-		return err
-	}
-
-	if len(featureDescriptor.Features) <= 0 {
+	if len(b.UserFeatureDescriptor.Features) <= 0 {
 		b.Logger.Debug("No user features found; skipping...")
 		return nil
 	}
@@ -406,7 +346,7 @@ func (b Base) contributeUserFeatures(layer libcnb.Layer) error {
 		return err
 	}
 
-	if err = featureDescriptor.ResolveFeatures(); err != nil {
+	if err := b.UserFeatureDescriptor.ResolveFeatures(); err != nil {
 		return err
 	}
 
@@ -414,7 +354,7 @@ func (b Base) contributeUserFeatures(layer libcnb.Layer) error {
 		filepath.Join(layer.Path, "wlp"),
 		b.ServerName,
 		filepath.Join(layer.Path, "templates", "features.tmpl"),
-		featureDescriptor.Features)
+		b.UserFeatureDescriptor.Features)
 
 	if err := featureInstaller.Install(); err != nil {
 		return err

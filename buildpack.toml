@@ -53,27 +53,6 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
-    description = "The SHA256 hash of the external configuration archive"
-    name = "BP_LIBERTY_EXT_CONF_SHA256"
-
-  [[metadata.configurations]]
-    build = true
-    default = "0"
-    description = "The number of directory components to strip from the external configuration archive"
-    name = "BP_LIBERTY_EXT_CONF_STRIP"
-
-  [[metadata.configurations]]
-    build = true
-    description = "The download location of the external configuration"
-    name = "BP_LIBERTY_EXT_CONF_URI"
-
-  [[metadata.configurations]]
-    build = true
-    description = "The version of the Liberty configuration"
-    name = "BP_LIBERTY_EXT_CONF_VERSION"
-
-  [[metadata.configurations]]
-    build = true
     default = "full"
     description = "The Liberty profile to install"
     launch = false

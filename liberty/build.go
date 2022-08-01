@@ -38,6 +38,7 @@ const (
 	webSphereLibertyRuntimeRoot = "/opt/ibm"
 	javaAppServerLiberty        = "liberty"
 	ifixesRoot                  = "/ifixes"
+	featuresRoot                = "/features"
 )
 
 type Build struct {
@@ -151,26 +152,13 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve dependency\n%w", err)
 	}
 
-	var externalConfigurationDependency *libpak.BuildpackDependency
-	if uri, ok := cr.Resolve("BP_LIBERTY_EXT_CONF_URI"); ok {
-		v, _ := cr.Resolve("BP_LIBERTY_EXT_CONF_VERSION")
-		s, _ := cr.Resolve("BP_LIBERTY_EXT_CONF_SHA256")
-
-		externalConfigurationDependency = &libpak.BuildpackDependency{
-			ID:      "open-liberty-external-configuration",
-			Name:    "Open Liberty External Configuration",
-			Version: v,
-			URI:     uri,
-			SHA256:  s,
-			Stacks:  []string{context.StackID},
-			CPEs:    nil,
-			PURL:    "",
-		}
-	}
-
 	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 	featureList := strings.Fields(features)
-	base := NewBase(context.Application.Path, context.Buildpack.Path, serverName, profile, featureList, externalConfigurationDependency, cr, dc, context.Platform.Bindings)
+	userFeatureDescriptor, err := ReadFeatureDescriptor(featuresRoot, b.Logger)
+	if err != nil {
+		return libcnb.BuildResult{}, err
+	}
+	base := NewBase(context.Application.Path, context.Buildpack.Path, serverName, profile, featureList, userFeatureDescriptor, context.Platform.Bindings)
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)
 
