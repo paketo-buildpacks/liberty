@@ -1,6 +1,6 @@
 id = "open-liberty-external-configuration"
 uri = "https://localhost/stub-external-configuration-with-directory.tar.gz"
-sha256 = "060818cbcdc2008563f0f9e2428ecf4a199a5821c5b8b1dcd11a67666c1e2cd6"
+sha256 = "6be374a1c3eeda98effb66fe7f9feb48ffcf325492237bc717c77794566f8ce0"
 purl = "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64"
 cpes = [
     "cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*"

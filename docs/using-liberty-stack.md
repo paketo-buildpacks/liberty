@@ -11,6 +11,36 @@ Note that a custom builder is also required to be able to use a custom stack.
 Either the [icr.io/appcafe/websphere-liberty](https://github.com/OpenLiberty/ci.docker/blob/master/docs/icr-images.md) or [icr.io/appcafe/websphere-liberty](https://github.com/WASdev/ci.docker/blob/master/docs/icr-images.md)
 container images can be used to provide the runtime used by the Open Liberty buildpack using one of the following templates.
 
+### Bootstrap Script
+
+A script is necessary to be able to grab the configuration and application created by the buildpacks. Create the following script:
+
+```bash
+#!/usr/bin/env bash
+
+main() {
+  readonly LIBERTY_USR_DIRS=(
+    "/workspace/wlp/usr"
+    "/workspace/usr"
+    "/layers/paketo-buildpacks_liberty/base/wlp/usr"
+  )
+
+  for liberty_usr_dir in "${LIBERTY_USR_DIRS[@]}"; do
+    if [[ -d "${liberty_usr_dir}" ]]; then
+      local usr_dir="${liberty_usr_dir}"
+      break
+    fi
+  done
+
+  cp -rf "${usr_dir}/." "${BPI_LIBERTY_RUNTIME_ROOT}/usr/"
+
+  # Call Liberty runtime's bootstrap script
+  docker-server.sh "${@}"
+}
+
+main "${@}"
+```
+
 ### Open Liberty
 
 ```dockerfile
@@ -26,6 +56,7 @@ LABEL io.buildpacks.stack.id="io.buildpacks.stacks.liberty"
 ENV SERVICE_BINDING_ROOT=/platform/bindings
 ENV BPI_LIBERTY_ROOT=/opt/ol
 ENV BPI_LIBERTY_RUNTIME_ROOT=${BPI_LIBERTY_ROOT}/wlp
+ENV WLP_USER_DIR=${BPI_LIBERTY_RUNTIME_ROOT}/usr
 ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${PATH}
 
 # Set user and group (as declared in the base image)
@@ -33,6 +64,8 @@ USER ${CNB_USER_ID}
 
 # This script will add the requested server configurations (optionally), apply any interim fixes (optionally) and populate caches to optimize runtime
 RUN configure.sh
+
+COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID} bootstrap.sh ${BPI_LIBERTY_ROOT}/helpers/runtime/
 
 FROM registry.access.redhat.com/ubi8/ubi:8.5 as build
 
@@ -52,6 +85,8 @@ RUN yum -y install git wget jq && wget https://github.com/sclevine/yj/releases/d
 
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
+
+COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID} bootstrap.sh ${BPI_LIBERTY_ROOT}/helpers/runtime/
 ```
 
 ### WebSphere Liberty
@@ -69,6 +104,7 @@ LABEL io.buildpacks.stack.id="io.buildpacks.stacks.liberty"
 ENV SERVICE_BINDING_ROOT=/platform/bindings
 ENV BPI_LIBERTY_ROOT=/opt/ibm
 ENV BPI_LIBERTY_RUNTIME_ROOT=${BPI_LIBERTY_ROOT}/wlp
+ENV WLP_USER_DIR=${BPI_LIBERTY_RUNTIME_ROOT}/usr
 ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${PATH}
 
 # Set user and group (as declared in the base image)

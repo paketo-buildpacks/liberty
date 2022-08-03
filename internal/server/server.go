@@ -17,11 +17,13 @@
 package server
 
 import (
+	"encoding/xml"
 	"fmt"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
@@ -110,23 +112,56 @@ func InstallIFixes(installRoot string, ifixes []string, executor effect.Executor
 	return nil
 }
 
-func InstallFeatures(installRoot string, features []string, executor effect.Executor, logger bard.Logger) error {
-	if len(features) > 0 {
-		logger.Bodyf("Installing features with arguments %s\n", features)
+func InstallFeatures(installRoot string, serverName string, executor effect.Executor, logger bard.Logger) error {
+	logger.Bodyf("Installing features...")
 
-		args := []string{"installFeature"}
-		args = append(args, features...)
-		args = append(args, "--acceptLicense")
+	args := []string{
+		"installServerFeatures",
+		"--acceptLicense",
+		"--noCache",
+		serverName,
+	}
 
-		if err := executor.Execute(effect.Execution{
-			Command: filepath.Join(installRoot, "bin", "featureUtility"),
-			Args:    args,
-			Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
-			Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
-		}); err != nil {
-			return fmt.Errorf("unable to install feature '%s'\n%w", features, err)
-		}
+	if err := executor.Execute(effect.Execution{
+		Command: filepath.Join(installRoot, "bin", "featureUtility"),
+		Args:    args,
+		Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+		Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
+	}); err != nil {
+		return fmt.Errorf("unable to install feature\n%w", err)
 	}
 
 	return nil
+}
+
+type Config struct {
+	XMLName     xml.Name `xml:"server"`
+	Application struct {
+		XMLName xml.Name `xml:"application"`
+		Name    string   `xml:"name,attr"`
+	} `xml:"application"`
+	HTTPEndpoint struct {
+		XMLName xml.Name `xml:"httpEndpoint"`
+		Host    string   `xml:"host,attr"`
+	} `xml:"httpEndpoint"`
+}
+
+func ReadServerConfig(configPath string) (Config, error) {
+	xmlFile, err := os.Open(configPath)
+	if err != nil {
+		return Config{}, fmt.Errorf("unable to open server.xml\n%w", err)
+	}
+	defer xmlFile.Close()
+
+	bytes, err := ioutil.ReadAll(xmlFile)
+	if err != nil {
+		return Config{}, fmt.Errorf("unable to read server.xml '%s'\n%w", configPath, err)
+	}
+
+	var config Config
+	err = xml.Unmarshal(bytes, &config)
+	if err != nil {
+		return Config{}, fmt.Errorf("unable to unmarshal server.xml: '%s'\n%w", configPath, err)
+	}
+	return config, nil
 }
