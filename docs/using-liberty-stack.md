@@ -62,10 +62,10 @@ ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${P
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
 
+COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID} bootstrap.sh ${BPI_LIBERTY_ROOT}/helpers/runtime/
+
 # This script will add the requested server configurations (optionally), apply any interim fixes (optionally) and populate caches to optimize runtime
 RUN configure.sh
-
-COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID} bootstrap.sh ${BPI_LIBERTY_ROOT}/helpers/runtime/
 
 FROM registry.access.redhat.com/ubi8/ubi:8.5 as build
 
@@ -85,8 +85,6 @@ RUN yum -y install git wget jq && wget https://github.com/sclevine/yj/releases/d
 
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
-
-COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID} bootstrap.sh ${BPI_LIBERTY_ROOT}/helpers/runtime/
 ```
 
 ### WebSphere Liberty
@@ -109,6 +107,8 @@ ENV PATH=${BPI_LIBERTY_ROOT}/helpers/runtime:${BPI_LIBERTY_RUNTIME_ROOT}/bin:${P
 
 # Set user and group (as declared in the base image)
 USER ${CNB_USER_ID}
+
+COPY --chown=${CNB_USER_ID}:${CNB_GROUP_ID} bootstrap.sh ${BPI_LIBERTY_ROOT}/helpers/runtime/
 
 # This script will add the requested server configurations (optionally), apply any interim fixes (optionally) and populate caches to optimize runtime
 RUN configure.sh
