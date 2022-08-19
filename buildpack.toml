@@ -28,7 +28,7 @@ api = "0.7"
     uri = "https://github.com/paketo-buildpacks/liberty/blob/main/LICENSE"
 
 [metadata]
-  include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "bin/helper", "buildpack.toml", "templates/app.tmpl", "templates/features.tmpl", "templates/default-http-endpoint.tmpl"]
+  include-files = ["LICENSE", "NOTICE", "README.md", "bin/build", "bin/detect", "bin/main", "buildpack.toml", "templates/server.tmpl", "templates/app.tmpl", "templates/features.tmpl", "templates/expose-default-endpoint.xml"]
   pre-package = "scripts/build.sh"
 
   [[metadata.configurations]]
@@ -50,27 +50,6 @@ api = "0.7"
     description = "Which version of the Liberty runtime to install"
     launch = false
     name = "BP_LIBERTY_VERSION"
-
-  [[metadata.configurations]]
-    build = true
-    description = "The SHA256 hash of the external configuration archive"
-    name = "BP_LIBERTY_EXT_CONF_SHA256"
-
-  [[metadata.configurations]]
-    build = true
-    default = "0"
-    description = "The number of directory components to strip from the external configuration archive"
-    name = "BP_LIBERTY_EXT_CONF_STRIP"
-
-  [[metadata.configurations]]
-    build = true
-    description = "The download location of the external configuration"
-    name = "BP_LIBERTY_EXT_CONF_URI"
-
-  [[metadata.configurations]]
-    build = true
-    description = "The version of the Liberty configuration"
-    name = "BP_LIBERTY_EXT_CONF_VERSION"
 
   [[metadata.configurations]]
     build = true

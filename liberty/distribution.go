@@ -18,7 +18,6 @@ package liberty
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -35,12 +34,12 @@ import (
 
 type Distribution struct {
 	ApplicationPath  string
+	ServerName       string
 	Executor         effect.Executor
 	Features         []string
 	IFixes           []string
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
-	ServerName       string
 }
 
 func NewDistribution(
@@ -66,45 +65,36 @@ func NewDistribution(
 
 	return Distribution{
 		ApplicationPath:  applicationPath,
+		ServerName:       serverName,
 		Executor:         executor,
 		Features:         features,
 		IFixes:           ifixes,
 		LayerContributor: contributor,
-		ServerName:       serverName,
 	}
 }
 
 func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	d.LayerContributor.Logger = d.Logger
-
 	return d.LayerContributor.Contribute(layer, func(artifact *os.File) (libcnb.Layer, error) {
 		d.Logger.Bodyf("Expanding to %s", layer.Path)
 		if err := crush.ExtractZip(artifact, layer.Path, 1); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to expand Liberty Runtime\n%w", err)
 		}
 
-		writer := io.Discard
-		if d.Logger.IsDebugEnabled() {
-			writer = d.Logger.DebugWriter()
-		}
-
-		if err := d.Executor.Execute(effect.Execution{
-			Command: filepath.Join(layer.Path, "bin", "server"),
-			Args:    []string{"create", d.ServerName},
-			Dir:     layer.Path,
-			Stdout:  bard.NewWriter(writer, bard.WithIndent(3)),
-			Stderr:  bard.NewWriter(d.Logger.InfoWriter(), bard.WithIndent(3)),
-		}); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to create default server\n%w", err)
-		}
-
-		if err := server.InstallFeatures(layer.Path, d.Features, d.Executor, d.Logger); err != nil {
+		if err := server.InstallFeatures(layer.Path, d.ServerName, d.Executor, d.Logger); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to install features to distribution\n%w", err)
 		}
 
 		if err := server.InstallIFixes(layer.Path, d.IFixes, d.Executor, d.Logger); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to install iFixes to distribution\n%w", err)
 		}
+
+		// Create the output directory for Liberty
+		outputDir := filepath.Join(layer.Path, "output")
+		if err := createOutputDirectory(outputDir); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to create output directory\n%w", err)
+		}
+		layer.LaunchEnvironment.Override("WLP_OUTPUT_DIR", outputDir)
 
 		libertyClasses, err := count.Classes(layer.Path)
 		if err != nil {
@@ -113,8 +103,7 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		layer.LaunchEnvironment.Default("BPL_JVM_CLASS_ADJUSTMENT", strconv.Itoa(libertyClasses))
 
-		// these are used by the exec.d helper to successfully create the symlink to the dropin app
-		layer.LaunchEnvironment.Default("BPI_LIBERTY_DROPIN_DIR", d.ApplicationPath)
+		// Used by exec.d helper
 		layer.LaunchEnvironment.Default("BPI_LIBERTY_RUNTIME_ROOT", layer.Path)
 
 		// set logging to write to the console. Using `server run` instead of `server start` ensures that
@@ -135,4 +124,14 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 func (d Distribution) Name() string {
 	return d.LayerContributor.LayerName()
+}
+
+func createOutputDirectory(path string) error {
+	if err := os.Mkdir(path, 0774); err != nil {
+		return fmt.Errorf("unable to create Liberty output directory\n%w", err)
+	}
+	if err := os.Chmod(path, 0774); err != nil {
+		return fmt.Errorf("unable to chown Liberty output directory\n%w", err)
+	}
+	return nil
 }

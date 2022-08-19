@@ -78,10 +78,6 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(executor.Calls).To(HaveLen(1))
-		Expect(executor.Calls[0].Arguments[0].(effect.Execution).Command).To(HaveSuffix("bin/server"))
-		Expect(executor.Calls[0].Arguments[0].(effect.Execution).Args).To(Equal([]string{"create", "defaultServer"}))
-
 		Expect(layer.Launch).To(BeTrue())
 		Expect(filepath.Join(layer.Path, "bin", "server")).To(BeARegularFile())
 		Expect(layer.LaunchEnvironment["BPI_LIBERTY_RUNTIME_ROOT.default"]).To(Equal(layer.Path))
@@ -116,10 +112,9 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
-		installLibertyExecution := executor.Calls[0].Arguments[0].(effect.Execution)
-		Expect(installLibertyExecution.Command).To(Equal(filepath.Join(layer.Path, "bin", "server")))
-		Expect(installLibertyExecution.Args).To(Equal([]string{"create", "defaultServer"}))
-		Expect(installLibertyExecution.Dir).To(Equal(layer.Path))
+		installFeatureExecution := executor.Calls[0].Arguments[0].(effect.Execution)
+		Expect(installFeatureExecution.Command).To(Equal(filepath.Join(layer.Path, "bin", "featureUtility")))
+		Expect(installFeatureExecution.Args).To(Equal([]string{"installServerFeatures", "--acceptLicense", "--noCache", "defaultServer"}))
 
 		installIFixExecution := executor.Calls[1].Arguments[0].(effect.Execution)
 		Expect(installIFixExecution.Command).To(Equal("java"))
@@ -152,14 +147,9 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
-		installLibertyExecution := executor.Calls[0].Arguments[0].(effect.Execution)
-		Expect(installLibertyExecution.Command).To(Equal(filepath.Join(layer.Path, "bin", "server")))
-		Expect(installLibertyExecution.Args).To(Equal([]string{"create", "defaultServer"}))
-		Expect(installLibertyExecution.Dir).To(Equal(layer.Path))
-
-		installFeatureExecution := executor.Calls[1].Arguments[0].(effect.Execution)
+		installFeatureExecution := executor.Calls[0].Arguments[0].(effect.Execution)
 		Expect(installFeatureExecution.Command).To(Equal(filepath.Join(layer.Path, "bin", "featureUtility")))
-		Expect(installFeatureExecution.Args).To(Equal([]string{"installFeature", "foo", "bar", "baz", "--acceptLicense"}))
+		Expect(installFeatureExecution.Args).To(Equal([]string{"installServerFeatures", "--acceptLicense", "--noCache", "defaultServer"}))
 	})
 
 }

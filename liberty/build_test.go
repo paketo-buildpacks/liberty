@@ -24,8 +24,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/paketo-buildpacks/libpak"
-
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/liberty/liberty"
@@ -87,10 +85,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Layers).To(HaveLen(3))
-		Expect(result.Layers[0].Name()).To(Equal("helper"))
-		Expect(result.Layers[1].Name()).To(Equal("base"))
-		Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+		Expect(result.Layers).To(HaveLen(2))
+		Expect(result.Layers[0].Name()).To(Equal("base"))
+		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
 
 		sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 	})
@@ -207,10 +204,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(3))
-			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-microProfile4"))
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-microProfile4"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
@@ -257,19 +253,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(3))
-			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
-			Expect(result.Layers[1].(liberty.Base).ExternalConfigurationDependency).To(Equal(&libpak.BuildpackDependency{
-				ID:      "open-liberty-external-configuration",
-				Name:    "Open Liberty External Configuration",
-				Version: "test-version",
-				URI:     "test-uri",
-				SHA256:  "test-sha256",
-				Stacks:  []string{ctx.StackID},
-			}))
-
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 	})
@@ -302,10 +288,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Layers).To(HaveLen(3))
-			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
 			Expect(result.Unmet).To(HaveLen(0))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer"), libcnb.SyftJSON, libcnb.CycloneDXJSON)
@@ -336,10 +321,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Layers).To(HaveLen(3))
-			Expect(result.Layers[0].Name()).To(Equal("helper"))
-			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
 			Expect(result.Unmet).To(HaveLen(0))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
