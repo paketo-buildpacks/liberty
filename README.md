@@ -32,26 +32,49 @@ The buildpack will do the following:
 * If a web application was built, it will symlink `<APPLICATION_ROOT>` to `<WLP_USR_DIR>/servers/<SERVER_NAME>/apps/app`
 * If a Liberty server was built, it will symlink `<APPLICATION_ROOT>` to `<WLP_USR_DIR>`
 
-The buildpack will support all available profiles of the most recent versions of the Open Liberty runtime. Because the Liberty versioning scheme is not conformant to semantic versioning, an Liberty version like `22.0.0.2` is defined here as `22.0.2`, and should be referenced as such.
+The buildpack will support all available profiles of the most recent versions of the Liberty runtime. Because the Liberty versioning scheme is not conformant to semantic versioning, a Liberty version like `22.0.0.2` is defined here as `22.0.2`, and should be referenced as such.
 
 ## Configuration
 
-| Environment Variable           | Description                                                                                                                                                                                                                                                                                                                                               |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `$BP_JAVA_APP_SERVER`          | The application server to use. It defaults to `` (empty string) which means that order dictates which Java application server is installed. The first Java application server buildpack to run will be picked.                                                                                                                                            |
-| `$BP_LIBERTY_INSTALL_TYPE`     | [Install type](#install-types) of Liberty. Valid options: `ol` and `none`. Defaults to `ol`.                                                                                                                                                                                                                                                              |
-| `$BP_LIBERTY_VERSION`          | The version of Liberty to install. Defaults to the latest version of the runtime. To see what version is available with your version of the buildpack, please see the [release notes](https://github.com/paketo-buildpacks/liberty/releases). At present, only the latest version is supported, and you need to use an older version of the buildpack if you want an older version of Open Liberty.               |
-| `$BP_LIBERTY_PROFILE`          | The Liberty profile to use. Defaults to `full`. Valid choices are `kernel`, `microProfile4`, `microProfile5`, `webProfile8`, `webProfile9`, `javaee8`, `jakartaee9` and `full`.                                                                                                                                                                           |
-| `$BP_LIBERTY_SERVER_NAME`      | Name of the server to use. Defaults to `defaultServer` when building an application. If building a packaged server and there is only one bundled server present, then the buildpack will use that.                                                                                                                                                        |
-| `$BP_LIBERTY_CONTEXT_ROOT`     | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. This setting is ignored if server.xml has an application named `app` already defined. |
-| `$BP_LIBERTY_FEATURES`         | Space separated list of Liberty features to be installed with the Liberty runtime. Supports any valid Liberty feature. See the [Liberty Documentation](https://openliberty.io/docs/latest/reference/feature/feature-overview.html) for available features.                                                                                                |
-| `$BPL_LIBERTY_LOG_LEVEL`       | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                                                                                                         |
+| Environment Variable       | Description                                                                                                                                                                                                                                                                                                                                                                                    |
+|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$BP_JAVA_APP_SERVER`      | The application server to use. It defaults to `` (empty string) which means that order dictates which Java application server is installed. The first Java application server buildpack to run will be picked.                                                                                                                                                                                 |
+| `$BP_LIBERTY_INSTALL_TYPE` | [Install type](#install-types) of Liberty. Valid options: `ol`, `wlp`, and `none`. Defaults to `ol`.                                                                                                                                                                                                                                                                                           |
+| `$BP_LIBERTY_VERSION`      | The version of Liberty to install. Defaults to the latest version of the runtime. To see what version is available with your version of the buildpack, please see the [release notes](https://github.com/paketo-buildpacks/liberty/releases). At present, only the latest version is supported, and you need to use an older version of the buildpack if you want an older version of Liberty. |
+| `$BP_LIBERTY_PROFILE`      | The Liberty profile to use. Defaults to `full` for Open Liberty and `kernel` for WebSphere Liberty.                                                                                                                                                                                                                                                                                            |
+| `$BP_LIBERTY_SERVER_NAME`  | Name of the server to use. Defaults to `defaultServer` when building an application. If building a packaged server and there is only one bundled server present, then the buildpack will use that.                                                                                                                                                                                             |
+| `$BP_LIBERTY_CONTEXT_ROOT` | If the [server.xml](#bindings) does not have an [application](https://openliberty.io/docs/latest/reference/config/application.html) named `app` defined, then the buildpack will generate one and use this value as the context root. Defaults to the value of `/`. This setting is ignored if server.xml has an application named `app` already defined.                                      |
+| `$BP_LIBERTY_FEATURES`     | Space separated list of Liberty features to be installed with the Liberty runtime. Supports any valid Liberty feature. See the [Liberty Documentation](https://openliberty.io/docs/latest/reference/feature/feature-overview.html) for available features.                                                                                                                                     |
+| `$BPL_LIBERTY_LOG_LEVEL`   | Sets the [logging](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html#configuaration) level. If not set, attempts to get the buildpack's log level. If unable, defaults to `INFO`                                                                                                                                                                                              |
 
-### Default Configurations that Vary from Open Liberty's Default
+### Profiles
 
-By default, the Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Open Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
+Valid profiles for Open Liberty are:
 
-All of these defaults can be overridden by setting the appropriate properties found in Open Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
+* full
+* kernel
+* jakartaee9
+* javaee8
+* webProfile9
+* webProfile8
+* microProfile5
+* microProfile4
+
+Valid profiles for WebSphere Liberty are:
+
+* kernel
+* jakartaee9
+* javaee8
+* javaee7
+* webProfile9
+* webProfile8
+* webProfile7
+
+### Default Configurations that Vary from Liberty's Default
+
+By default, the Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
+
+All of these defaults can be overridden by setting the appropriate properties found in Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
 
 ## Including Server Configuration in the Application Image
 
@@ -86,6 +109,7 @@ variables in your `pack build` command.
 The different installation types that can be configured are:
 
 * `ol`: This will download an Open Liberty runtime and use it when deploying the container.
+* `wlp`: This will download a WebSphere Liberty runtime and use it when deploying the container.
 * `none`: This will use the Liberty runtime provided in the stack run image. Requires a custom builder.
 
 ## Bindings
@@ -141,7 +165,7 @@ First create the feature descriptor `features.toml` with the following content:
   dependencies = ["distributedMap-1.0"]
 ```
 
-Using this feature description, the Open Liberty buildpack will look for the feature JAR in the volume mounted on
+Using this feature description, the Liberty buildpack will look for the feature JAR in the volume mounted on
 `/features` at the path `features/cache.dummy_1.0.0.jar`. The buildpack also assumes that the feature manifest file will
 be at the path `features/cache.dummy_1.0.0.mf`.
 
