@@ -18,6 +18,7 @@ package liberty
 
 import (
 	"fmt"
+	"github.com/heroku/color"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -148,6 +149,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	profile, _ := cr.Resolve("BP_LIBERTY_PROFILE")
 	if profile == "" {
 		if installType == openLibertyInstall {
+			b.Logger.Info(color.YellowString("Warning: The default profile for Open Liberty will change from 'full' to 'kernel' after 2022-11-01. To continue using the full profile, build with the argument '--env BP_LIBERTY_PROFILE=full'"))
 			profile = "full"
 		} else if installType == websphereLibertyInstall {
 			profile = "kernel"
