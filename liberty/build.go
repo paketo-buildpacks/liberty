@@ -18,6 +18,7 @@ package liberty
 
 import (
 	"fmt"
+	"github.com/heroku/color"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -144,14 +145,20 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		b.SBOMScanner = sbom.NewSyftCLISBOMScanner(context.Layers, b.Executor, b.Logger)
 	}
 
-	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
+	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	profile, _ := cr.Resolve("BP_LIBERTY_PROFILE")
-
-	dep, err := dr.Resolve(fmt.Sprintf("open-liberty-runtime-%s", profile), version)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve dependency\n%w", err)
+	if profile == "" {
+		if installType == openLibertyInstall {
+			b.Logger.Info(color.YellowString("Warning: The default profile for Open Liberty will change from 'full' to 'kernel' after 2022-11-01. To continue using the full profile, build with the argument '--env BP_LIBERTY_PROFILE=full'"))
+			profile = "full"
+		} else if installType == websphereLibertyInstall {
+			profile = "kernel"
+		}
 	}
-
+	if !isValidProfile(installType, profile) {
+		return libcnb.BuildResult{}, fmt.Errorf("invalid profile '%s' for BP_INSTALL_TYPE '%s'", profile, installType)
+	}
+	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
 	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 	featureList := strings.Fields(features)
 	userFeatureDescriptor, err := ReadFeatureDescriptor(featuresRoot, b.Logger)
@@ -162,39 +169,14 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	base.Logger = b.Logger
 	result.Layers = append(result.Layers, base)
 
-	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
-	if installType == openLibertyInstall {
-		// Provide the OL distribution
-		iFixes, err := server.LoadIFixesList(ifixesRoot)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to load iFixes\n%w", err)
-		}
-
-		distro := NewDistribution(dep, dc, serverName, context.Application.Path, featureList, iFixes, b.Executor)
-		distro.Logger = b.Logger
-
-		result.Layers = append(result.Layers, distro)
-
-		process, err := createOpenLibertyRuntimeProcess(serverName)
-		if err != nil {
+	if installType == openLibertyInstall || installType == websphereLibertyInstall {
+		if err := b.buildDistributionRuntime(profile, version, installType, serverName, context.Application.Path, featureList, detectedBuildSrc, dr, dc, &result); err != nil {
 			return libcnb.BuildResult{}, err
-		}
-		result.Processes = []libcnb.Process{process}
-
-		scanPath, err := detectedBuildSrc.AppPath()
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to find scan path\n%s", err)
-		}
-
-		if err := b.SBOMScanner.ScanLaunch(scanPath, libcnb.SyftJSON, libcnb.CycloneDXJSON); err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to create Launch SBoM \n%w", err)
 		}
 	} else if installType == noneInstall {
-		process, err := createStackRuntimeProcess(serverName)
-		if err != nil {
+		if err := b.buildStackRuntime(serverName, &result); err != nil {
 			return libcnb.BuildResult{}, err
 		}
-		result.Processes = []libcnb.Process{process}
 	} else {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
@@ -202,20 +184,78 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	return result, nil
 }
 
-func createOpenLibertyRuntimeProcess(serverName string) (libcnb.Process, error) {
-	return libcnb.Process{
-		Type:      "open-liberty",
-		Command:   "server",
-		Arguments: []string{"run", serverName},
-		Default:   true,
-		Direct:    true,
-	}, nil
+func (b Build) buildDistributionRuntime(
+	profile string,
+	version string,
+	installType string,
+	serverName string,
+	appPath string,
+	features []string,
+	buildSrc core.BuildSource,
+	dependencyResolver libpak.DependencyResolver,
+	cache libpak.DependencyCache,
+	result *libcnb.BuildResult) error {
+
+	var distType string
+
+	if installType == openLibertyInstall {
+		distType = "open-liberty-runtime"
+	} else if installType == websphereLibertyInstall {
+		distType = "websphere-liberty-runtime"
+	}
+
+	dep, err := dependencyResolver.Resolve(fmt.Sprintf("%s-%s", distType, profile), version)
+	if err != nil {
+		return fmt.Errorf("unable to resolve dependency\n%w", err)
+	}
+
+	// Provide the Liberty distribution
+	iFixes, err := server.LoadIFixesList(ifixesRoot)
+	if err != nil {
+		return fmt.Errorf("unable to load iFixes\n%w", err)
+	}
+
+	distro := NewDistribution(dep, cache, serverName, appPath, features, iFixes, b.Executor)
+	distro.Logger = b.Logger
+
+	result.Layers = append(result.Layers, distro)
+	result.Processes = []libcnb.Process{
+		{
+			Type:      distType,
+			Command:   "server",
+			Arguments: []string{"run", serverName},
+			Default:   true,
+			Direct:    true,
+		},
+	}
+
+	scanPath, err := buildSrc.AppPath()
+	if err != nil {
+		return fmt.Errorf("unable to find scan path\n%s", err)
+	}
+
+	if err := b.SBOMScanner.ScanLaunch(scanPath, libcnb.SyftJSON, libcnb.CycloneDXJSON); err != nil {
+		return fmt.Errorf("unable to create Launch SBoM \n%w", err)
+	}
+
+	return nil
+}
+
+func (b Build) buildStackRuntime(serverName string, result *libcnb.BuildResult) error {
+	process, err := createStackRuntimeProcess(serverName)
+	if err != nil {
+		return err
+	}
+	result.Processes = []libcnb.Process{process}
+	return nil
 }
 
 func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
-	if olExists, err := util.DirExists(openLibertyStackRuntimeRoot); err != nil {
+	olExists, err := util.DirExists(openLibertyStackRuntimeRoot)
+	if err != nil {
 		return libcnb.Process{}, fmt.Errorf("unable to check Open Liberty stack runtime root exists\n%w", err)
-	} else if olExists {
+	}
+	if olExists {
 		return libcnb.Process{
 			Type:      "open-liberty-stack",
 			Command:   "bootstrap.sh",
@@ -225,9 +265,11 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 		}, nil
 	}
 
-	if wlpExists, err := util.DirExists(webSphereLibertyRuntimeRoot); err != nil {
+	wlpExists, err := util.DirExists(webSphereLibertyRuntimeRoot)
+	if err != nil {
 		return libcnb.Process{}, fmt.Errorf("unable to WebSphere Open Liberty stack runtime root exists\n%w", err)
-	} else if wlpExists {
+	}
+	if wlpExists {
 		return libcnb.Process{
 			Type:      "websphere-liberty-stack",
 			Command:   "bootstrap.sh",
@@ -238,4 +280,29 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 	}
 
 	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
+}
+
+func isValidProfile(distType string, profile string) bool {
+	if distType == openLibertyInstall {
+		return profile == "full" ||
+			profile == "kernel" ||
+			profile == "jakartaee9" ||
+			profile == "javaee8" ||
+			profile == "webProfile9" ||
+			profile == "webProfile8" ||
+			profile == "microProfile5" ||
+			profile == "microProfile4"
+	}
+
+	if distType == websphereLibertyInstall {
+		return profile == "kernel" ||
+			profile == "jakartaee9" ||
+			profile == "javaee8" ||
+			profile == "javaee7" ||
+			profile == "webProfile9" ||
+			profile == "webProfile8" ||
+			profile == "webProfile7"
+	}
+
+	return true
 }

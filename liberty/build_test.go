@@ -48,13 +48,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		ctx.Buildpack.Metadata = map[string]interface{}{
 			"configurations": []map[string]interface{}{
 				{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
-				{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
+				{"name": "BP_LIBERTY_PROFILE", "default": "", "build": true},
 				{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
 				{"name": "BP_LIBERTY_SERVER_NAME", "default": "", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
-				{"id": "open-liberty-runtime-microProfile4", "version": "21.0.10"},
+				{"id": "websphere-liberty-runtime-kernel", "version": "21.0.11"},
+				{"id": "open-liberty-runtime-jakartaee9", "version": "21.0.11"},
 			},
 		}
 
@@ -76,20 +77,59 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
 	})
 
-	it("picks the latest full profile when no arguments are set", func() {
-		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
+	context("selecting the Liberty profile", func() {
+		it.Before(func() {
+			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
+		})
 
-		result, err := liberty.Build{
-			Logger:      bard.NewLogger(io.Discard),
-			SBOMScanner: &sbomScanner,
-		}.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
+		it.After(func() {
+			Expect(os.Unsetenv("BP_LIBERTY_INSTALL_TYPE")).To(Succeed())
+			Expect(os.Unsetenv("BP_LIBERTY_PROFILE")).To(Succeed())
+		})
 
-		Expect(result.Layers).To(HaveLen(2))
-		Expect(result.Layers[0].Name()).To(Equal("base"))
-		Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+		it("selects the latest full profile for Open Liberty by default", func() {
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
 
-		sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+
+			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
+		})
+
+		it("selects the latest kernel profile for WebSphere Liberty by default", func() {
+			Expect(os.Setenv("BP_LIBERTY_INSTALL_TYPE", "wlp")).To(Succeed())
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("websphere-liberty-runtime-kernel"))
+
+			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
+		})
+
+		it("selects the latest jakartaee9 profile for Open Liberty", func() {
+			Expect(os.Setenv("BP_LIBERTY_PROFILE", "jakartaee9")).To(Succeed())
+			result, err := liberty.Build{
+				Logger:      bard.NewLogger(io.Discard),
+				SBOMScanner: &sbomScanner,
+			}.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[0].Name()).To(Equal("base"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-jakartaee9"))
+
+			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
+		})
 	})
 
 	context("requested app server is not liberty", func() {
@@ -186,8 +226,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	context("user env config set", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_LIBERTY_VERSION", "21.0.10")).To(Succeed())
-			Expect(os.Setenv("BP_LIBERTY_PROFILE", "microProfile4")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_VERSION", "21.0.11")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_PROFILE", "jakartaee9")).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
 		})
@@ -206,56 +246,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(result.Layers).To(HaveLen(2))
 			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-microProfile4"))
+			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-jakartaee9"))
 
-			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
-		})
-	})
-
-	context("$BP_LIBERTY_EXT_CONF_URI", func() {
-		it.Before(func() {
-			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_SHA256", "test-sha256")).To(Succeed())
-			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_URI", "test-uri")).To(Succeed())
-			Expect(os.Setenv("BP_LIBERTY_EXT_CONF_VERSION", "test-version")).To(Succeed())
-		})
-
-		it.After(func() {
-			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_SHA256")).To(Succeed())
-			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_URI")).To(Succeed())
-			Expect(os.Unsetenv("BP_LIBERTY_EXT_CONF_VERSION")).To(Succeed())
-		})
-
-		it("contributes external configuration when $BP_LIBERTY_EXT_CONF_URI is set", func() {
-			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
-
-			ctx.Buildpack.Metadata = map[string]interface{}{
-				"configurations": []map[string]interface{}{
-					{"name": "BP_LIBERTY_VERSION", "default": "21.0.11", "build": true},
-					{"name": "BP_LIBERTY_PROFILE", "default": "full", "build": true},
-					{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
-					{"name": "BP_LIBERTY_SERVER_NAME", "default": "", "build": true},
-				},
-				"dependencies": []map[string]interface{}{
-					{
-						"cpes":    "cpe:2.3:a:ibm:liberty:21.0.0.11:*:*:*:*:*:*:*:*",
-						"id":      "open-liberty-runtime-full",
-						"name":    "Open Liberty (All Features)",
-						"purl":    "pkg:generic/ibm-open-libery-runtime-full@21.0.0.11?arch=amd64",
-						"stacks":  []interface{}{"test-stack-id"},
-						"version": "21.0.11",
-					},
-				},
-			}
-			ctx.StackID = "test-stack-id"
-
-			result, err := liberty.Build{
-				SBOMScanner: &sbomScanner,
-			}.Build(ctx)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 	})
