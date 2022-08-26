@@ -248,7 +248,7 @@ api = "0.7"
     sha256 = "adbe476fd1f50c26aff5750e5cb630f7f4a94cdd33f96712b39dd45997293dc3"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/22.0.0.8/wlp-javaee7-22.0.0.8.zip"
-    version = "21.0.8"
+    version = "22.0.8"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
