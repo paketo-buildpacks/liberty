@@ -290,7 +290,7 @@ api = "0.7"
     sha256 = "20b2f4642f9d77aab1cfbcd7f907f17b93fbb0edcd084748ef7a98760346c1ed"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/22.0.0.8/wlp-webProfile7-22.0.0.8.zip"
-    version = "21.0.8"
+    version = "22.0.8"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
