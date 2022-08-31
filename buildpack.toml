@@ -19,7 +19,7 @@ api = "0.7"
   homepage = "https://github.com/paketo-buildpacks/liberty"
   id = "paketo-buildpacks/liberty"
   keywords = ["java", "javaee", "liberty"]
-  name = "Paketo Liberty Buildpack"
+  name = "Paketo Buildpack for Liberty"
   sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
   version = "{{.version}}"
 
