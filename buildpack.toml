@@ -87,14 +87,14 @@ api = "0.7"
     name = "BP_LIBERTY_FEATURES"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.8:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.9:*:*:*:liberty:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:maven/io.openliberty/openliberty-runtime@22.0.0.8"
-    sha256 = "0a29c2842767fb4be432c5af4e404bce2f9f063c15e9d42b7c1a47dceebaba90"
+    purl = "pkg:maven/io.openliberty/openliberty-runtime@22.0.0.9"
+    sha256 = "640a828a9bba1c73c5200c2489de35e71fb204e58e5e10b4c3297381bd476927"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/22.0.0.8/openliberty-runtime-22.0.0.8.zip"
-    version = "22.0.8"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/22.0.0.9/openliberty-runtime-22.0.0.9.zip"
+    version = "22.0.9"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
