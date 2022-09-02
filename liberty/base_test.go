@@ -31,7 +31,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func testBase(t *testing.T, context spec.G, it spec.S) {
+func testBase(t *testing.T, _ spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
@@ -86,8 +86,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.Mkdir(filepath.Join(ctx.Application.Path, "WEB-INF"), 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "WEB-INF", "web.xml"), []byte{}, 0644))
 
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -116,8 +123,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("contributes a default server.xml", func() {
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -141,8 +155,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("contributes features to server.xml", func() {
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", []string{"jaxrs-2.1", "cdi-2.0"}, &liberty.FeatureDescriptor{}, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jaxrs-2.1", "cdi-2.0"},
+			&liberty.FeatureDescriptor{},
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -174,8 +195,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.env"), []byte("TEST_ENV=foo"), 0644)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "bootstrap.properties"), []byte("test.property=foo"), 0644)).To(Succeed())
 
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -203,8 +231,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.MkdirAll(serverSourcePath, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(serverSourcePath, "server.xml"), []byte("<server />"), 0644))
 
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -224,8 +259,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.MkdirAll(serverSourcePath, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(serverSourcePath, "server.xml"), []byte("<server />"), 0644))
 
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -245,8 +287,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.MkdirAll(serverSourcePath, 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(serverSourcePath, "server.xml"), []byte("<server />"), 0644))
 
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "testServer", "kernel", nil, &liberty.FeatureDescriptor{}, nil)
-		base.Logger = bard.NewLogger(os.Stdout)
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"testServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
@@ -291,8 +340,15 @@ func testBase(t *testing.T, context spec.G, it spec.S) {
 		logger := bard.NewLogger(os.Stdout)
 		userFeatureDescriptor, err := liberty.ReadFeatureDescriptor(featuresRoot, logger)
 		Expect(err).ToNot(HaveOccurred())
-		base := liberty.NewBase(ctx.Application.Path, ctx.Buildpack.Path, "defaultServer", "kernel", nil, userFeatureDescriptor, nil)
-		base.Logger = logger
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			userFeatureDescriptor,
+			nil,
+			bard.NewLogger(os.Stdout),
+		)
 
 		layer, err = base.Contribute(layer)
 		Expect(err).ToNot(HaveOccurred())

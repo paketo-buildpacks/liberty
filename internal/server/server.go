@@ -22,13 +22,118 @@ import (
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 )
 
 func GetServerConfigPath(serverPath string) string {
 	return filepath.Join(serverPath, "server.xml")
+}
+
+func GetServerConfigs(serverPath string) ([]string, error) {
+	configs := []string{}
+
+	serverConfigPath := GetServerConfigPath(serverPath)
+	exists, err := sherpa.FileExists(serverConfigPath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to check for server config\n%w", err)
+	}
+	if exists {
+		configs = append(configs, serverConfigPath)
+	}
+
+	defaultConfigs, err := util.GetFiles(filepath.Join(serverPath, "configDropins", "defaults"), "*.xml")
+	if err != nil {
+		return nil, fmt.Errorf("unable to list default configs\n%w", err)
+	}
+	configs = append(configs, defaultConfigs...)
+
+	overrideConfigs, err := util.GetFiles(filepath.Join(serverPath, "configDropins", "overrides"), "*.xml")
+	if err != nil {
+		return nil, fmt.Errorf("unable to list override configs\n%w", err)
+	}
+	configs = append(configs, overrideConfigs...)
+
+	return configs, nil
+}
+
+func GetFeatureList(profile string, serverPath string, additionalFeatures []string) ([]string, error) {
+	featureMap := make(map[string]bool, 0)
+
+	// Add any additional features
+	for _, feature := range additionalFeatures {
+		featureMap[feature] = true
+	}
+
+	configs, err := GetServerConfigs(serverPath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get server configs\n%w", err)
+	}
+	for _, configPath := range configs {
+		config, err := ReadServerConfig(configPath)
+		if err != nil {
+			return nil, fmt.Errorf("unable to read config\n%w", err)
+		}
+		for _, feature := range config.FeatureManager.Features {
+			featureMap[feature] = true
+		}
+	}
+
+	if len(featureMap) == 0 {
+		return GetDefaultFeatures(profile), nil
+	}
+
+	var features []string
+	for feature := range featureMap {
+		features = append(features, feature)
+	}
+
+	sort.Strings(features)
+	return features, nil
+}
+
+func IsValidOpenLibertyProfile(profile string) bool {
+	return profile == "full" ||
+		profile == "kernel" ||
+		profile == "jakartaee9" ||
+		profile == "javaee8" ||
+		profile == "webProfile9" ||
+		profile == "webProfile8" ||
+		profile == "microProfile5" ||
+		profile == "microProfile4"
+}
+
+func IsValidWebSphereLibertyProfile(profile string) bool {
+	return profile == "kernel" ||
+		profile == "jakartaee9" ||
+		profile == "javaee8" ||
+		profile == "javaee7" ||
+		profile == "webProfile9" ||
+		profile == "webProfile8" ||
+		profile == "webProfile7"
+}
+
+func GetDefaultFeatures(serverProfile string) []string {
+	switch serverProfile {
+	case "full", "kernel":
+		return []string{"jsp-2.3"}
+	case "jakartaee9":
+		return []string{"jakartaee-9.1"}
+	case "javaee8":
+		return []string{"javaee-8.0"}
+	case "webProfile9":
+		return []string{"webProfile-9.1"}
+	case "webProfile8":
+		return []string{"webProfile-8.0"}
+	case "microProfile5":
+		return []string{"microProfile-5.0"}
+	case "microProfile4":
+		return []string{"microProfile-4.1"}
+	}
+	return []string{}
 }
 
 // SetUserDirectory sets the server's user directory to the specified directory.
@@ -112,7 +217,7 @@ func InstallIFixes(installRoot string, ifixes []string, executor effect.Executor
 	return nil
 }
 
-func InstallFeatures(installRoot string, serverName string, executor effect.Executor, logger bard.Logger) error {
+func InstallFeatures(runtimePath string, serverName string, executor effect.Executor, logger bard.Logger) error {
 	logger.Bodyf("Installing features...")
 
 	args := []string{
@@ -123,7 +228,7 @@ func InstallFeatures(installRoot string, serverName string, executor effect.Exec
 	}
 
 	if err := executor.Execute(effect.Execution{
-		Command: filepath.Join(installRoot, "bin", "featureUtility"),
+		Command: filepath.Join(runtimePath, "bin", "featureUtility"),
 		Args:    args,
 		Stdout:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
 		Stderr:  bard.NewWriter(logger.InfoWriter(), bard.WithIndent(3)),
@@ -135,33 +240,34 @@ func InstallFeatures(installRoot string, serverName string, executor effect.Exec
 }
 
 type Config struct {
-	XMLName     xml.Name `xml:"server"`
+	XMLName        xml.Name `xml:"server"`
+	FeatureManager struct {
+		Features []string `xml:"feature"`
+	} `xml:"featureManager"`
 	Application struct {
-		XMLName xml.Name `xml:"application"`
-		Name    string   `xml:"name,attr"`
+		Name string `xml:"name,attr"`
 	} `xml:"application"`
 	HTTPEndpoint struct {
-		XMLName xml.Name `xml:"httpEndpoint"`
-		Host    string   `xml:"host,attr"`
+		Host string `xml:"host,attr"`
 	} `xml:"httpEndpoint"`
 }
 
 func ReadServerConfig(configPath string) (Config, error) {
 	xmlFile, err := os.Open(configPath)
 	if err != nil {
-		return Config{}, fmt.Errorf("unable to open server.xml\n%w", err)
+		return Config{}, fmt.Errorf("unable to open config '%s'\n%w", configPath, err)
 	}
 	defer xmlFile.Close()
 
 	bytes, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
-		return Config{}, fmt.Errorf("unable to read server.xml '%s'\n%w", configPath, err)
+		return Config{}, fmt.Errorf("unable to read config '%s'\n%w", configPath, err)
 	}
 
 	var config Config
 	err = xml.Unmarshal(bytes, &config)
 	if err != nil {
-		return Config{}, fmt.Errorf("unable to unmarshal server.xml: '%s'\n%w", configPath, err)
+		return Config{}, fmt.Errorf("unable to unmarshal config '%s'\n%w", configPath, err)
 	}
 	return config, nil
 }

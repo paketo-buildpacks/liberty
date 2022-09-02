@@ -18,6 +18,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io"
 	"io/ioutil"
 	"os"
@@ -110,4 +111,34 @@ func CopyFile(src, dest string) error {
 
 	_, err = io.Copy(destFile, srcFile)
 	return err
+}
+
+func GetFiles(root string, pattern string) ([]string, error) {
+	var files []string
+	if exists, err := sherpa.DirExists(root); err != nil {
+		return nil, err
+	} else if !exists {
+		return nil, nil
+	}
+
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		matched, err := filepath.Match(pattern, filepath.Base(path))
+		if err != nil {
+			return err
+		}
+		if matched {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
 }

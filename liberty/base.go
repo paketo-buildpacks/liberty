@@ -44,16 +44,29 @@ type Base struct {
 	LayerContributor      libpak.LayerContributor
 	Logger                bard.Logger
 	ServerName            string
-	ServerProfile         string
 	Features              []string
 	UserFeatureDescriptor *FeatureDescriptor
 	Bindings              libcnb.Bindings
 }
 
-func NewBase(appPath string, buildpackPath string, serverName string, serverProfile string, features []string, userFeatureDescriptor *FeatureDescriptor, binds libcnb.Bindings) Base {
+func NewBase(appPath string, buildpackPath string, serverName string, features []string, userFeatureDescriptor *FeatureDescriptor, binds libcnb.Bindings, logger bard.Logger) Base {
+	workspaceSum, err := sherpa.NewFileListingHash(appPath)
+	if err != nil {
+		logger.Infof(color.RedString("unable to calculate checksum of workspace directory\n%w", err))
+	}
+	var enabledUserFeatures []string
+	for _, feature := range userFeatureDescriptor.Features {
+		enabledUserFeatures = append(enabledUserFeatures, fmt.Sprintf("%s-%s", feature.Name, feature.Version))
+	}
+
 	contributor := libpak.NewLayerContributor(
 		"Open Liberty Config",
-		map[string]interface{}{},
+		map[string]interface{}{
+			"serverName":   serverName,
+			"features":     features,
+			"userFeatures": enabledUserFeatures,
+			"workspaceSum": workspaceSum,
+		},
 		libcnb.LayerTypes{
 			Launch: true,
 		})
@@ -63,10 +76,10 @@ func NewBase(appPath string, buildpackPath string, serverName string, serverProf
 		BuildpackPath:         buildpackPath,
 		LayerContributor:      contributor,
 		ServerName:            serverName,
-		ServerProfile:         serverProfile,
 		Features:              features,
 		UserFeatureDescriptor: userFeatureDescriptor,
 		Bindings:              binds,
+		Logger:                logger,
 	}
 
 	return b
@@ -104,7 +117,11 @@ func (b Base) contribute(layer libcnb.Layer) error {
 		return nil
 	}
 
-	if err := b.contributeConfigTemplates(layer); err != nil {
+	binding, _, err := bindings.ResolveOne(b.Bindings, bindings.OfType("liberty"))
+	if err != nil {
+		return fmt.Errorf("unable to resolve liberty bindings\n%w", err)
+	}
+	if err := b.contributeConfigTemplates(layer, binding); err != nil {
 		return fmt.Errorf("unable to contribute config templates\n%w", err)
 	}
 
@@ -138,9 +155,7 @@ func (b Base) contribute(layer libcnb.Layer) error {
 		b.Logger.Info(color.YellowString("Reminder: Do not include secrets in %s; this file has been included in the image and that can leak your secrets", config))
 	}
 
-	binding, _, err := bindings.ResolveOne(b.Bindings, bindings.OfType("liberty"))
-
-	err = b.contributeConfig(serverPath, layer, binding)
+	err = b.contributeConfig(serverPath, layer)
 	if err != nil {
 		return fmt.Errorf("unable to contribute config\n%w", err)
 	}
@@ -155,7 +170,7 @@ func (b Base) contribute(layer libcnb.Layer) error {
 		return fmt.Errorf("unable to read server config\n%w", err)
 	}
 
-	err = b.contributeApp(layer, config, binding)
+	err = b.contributeApp(layer, config)
 	if err != nil {
 		return fmt.Errorf("unable to contribute config\n%w", err)
 	}
@@ -182,14 +197,14 @@ func (b Base) createServerDirectory(layer libcnb.Layer) error {
 	})
 }
 
-func (b Base) contributeConfig(serverPath string, layer libcnb.Layer, binding libcnb.Binding) error {
+func (b Base) contributeConfig(serverPath string, layer libcnb.Layer) error {
 	serverConfigPath := filepath.Join(serverPath, "server.xml")
 	exists, err := util.FileExists(serverConfigPath)
 	if err != nil {
 		return fmt.Errorf("unable to check if server.xml exists\n%w", err)
 	}
 	if !exists {
-		templatePath := b.getConfigTemplate(binding, layer.Path, "server.tmpl")
+		templatePath := b.getConfigTemplate(layer.Path, "server.tmpl")
 		t, err := template.New("server.tmpl").ParseFiles(templatePath)
 		if err != nil {
 			return fmt.Errorf("unable to create server template\n%w", err)
@@ -200,13 +215,7 @@ func (b Base) contributeConfig(serverPath string, layer libcnb.Layer, binding li
 			return fmt.Errorf("unable to create file '%s'\n%w", serverConfigPath, err)
 		}
 		defer file.Close()
-		var features []string
-		if len(b.Features) > 0 {
-			features = b.Features
-		} else {
-			features = getDefaultFeatures(b.ServerProfile)
-		}
-		err = t.Execute(file, features)
+		err = t.Execute(file, b.Features)
 		if err != nil {
 			return fmt.Errorf("unable to execute template\n%w", err)
 		}
@@ -221,7 +230,7 @@ func (b Base) contributeConfig(serverPath string, layer libcnb.Layer, binding li
 	return nil
 }
 
-func (b Base) contributeApp(layer libcnb.Layer, config server.Config, binding libcnb.Binding) error {
+func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 	// Determine app path
 	var appPath string
 	if appPaths, err := util.GetApps(b.ApplicationPath); err != nil {
@@ -278,7 +287,7 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config, binding li
 		Type:        appType,
 	}
 
-	templatePath := b.getConfigTemplate(binding, layer.Path, "app.tmpl")
+	templatePath := b.getConfigTemplate(layer.Path, "app.tmpl")
 	t, err := template.New("app.tmpl").ParseFiles(templatePath)
 	if err != nil {
 		return fmt.Errorf("unable to create app template\n%w", err)
@@ -298,7 +307,7 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config, binding li
 	return nil
 }
 
-func (b Base) contributeConfigTemplates(layer libcnb.Layer) error {
+func (b Base) contributeConfigTemplates(layer libcnb.Layer, binding libcnb.Binding) error {
 	// Create config templates directory
 	templateDir := filepath.Join(layer.Path, "templates")
 	if err := os.MkdirAll(templateDir, 0755); err != nil {
@@ -314,6 +323,13 @@ func (b Base) contributeConfigTemplates(layer libcnb.Layer) error {
 	for _, entry := range entries {
 		err := func() error {
 			srcPath := filepath.Join(srcDir, entry.Name())
+
+			// Check if a custom template was provided in a binding
+			if binding, ok := binding.SecretFilePath(entry.Name()); ok {
+				b.Logger.Bodyf("Using custom template: %s", binding)
+				srcPath = binding
+			}
+
 			b.Logger.Bodyf("Copying %v", srcPath)
 			destPath := filepath.Join(templateDir, entry.Name())
 			in, err := os.Open(srcPath)
@@ -377,32 +393,6 @@ type ApplicationConfig struct {
 	Type        string
 }
 
-func getDefaultFeatures(serverProfile string) []string {
-	switch serverProfile {
-	case "full", "kernel":
-		return []string{"jsp-2.3"}
-	case "jakartaee9":
-		return []string{"jakartaee-9.1"}
-	case "javaee8":
-		return []string{"javaee-8.0"}
-	case "webProfile9":
-		return []string{"webProfile-9.1"}
-	case "webProfile8":
-		return []string{"webProfile-8.0"}
-	case "microProfile5":
-		return []string{"microProfile-5.0"}
-	case "microProfile4":
-		return []string{"microProfile-4.1"}
-	}
-	return []string{}
-}
-
-func (b Base) getConfigTemplate(binding libcnb.Binding, layerPath string, template string) string {
-	// Get customized template if it has been provided
-	if binding, ok := binding.SecretFilePath(template); ok {
-		b.Logger.Bodyf("Using custom template: %s", binding)
-		return binding
-	}
-	// Use default config template
+func (b Base) getConfigTemplate(layerPath string, template string) string {
 	return filepath.Join(layerPath, "templates", template)
 }

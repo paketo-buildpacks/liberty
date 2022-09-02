@@ -159,18 +159,41 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			profile = "kernel"
 		}
 	}
-	if !isValidProfile(installType, profile) {
+
+	isValidProfile := true
+	if installType == openLibertyInstall {
+		isValidProfile = server.IsValidOpenLibertyProfile(profile)
+	} else if installType == websphereLibertyInstall {
+		isValidProfile = server.IsValidWebSphereLibertyProfile(profile)
+	}
+	if !isValidProfile {
 		return libcnb.BuildResult{}, fmt.Errorf("invalid profile '%s' for BP_INSTALL_TYPE '%s'", profile, installType)
 	}
+
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
 	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 	featureList := strings.Fields(features)
+	appPath, err := detectedBuildSrc.AppPath()
+	if err != nil {
+		return libcnb.BuildResult{}, err
+	}
+	featureList, err = server.GetFeatureList(profile, appPath, featureList)
+	if err != nil {
+		return libcnb.BuildResult{}, err
+	}
 	userFeatureDescriptor, err := ReadFeatureDescriptor(featuresRoot, b.Logger)
 	if err != nil {
 		return libcnb.BuildResult{}, err
 	}
-	base := NewBase(context.Application.Path, context.Buildpack.Path, serverName, profile, featureList, userFeatureDescriptor, context.Platform.Bindings)
-	base.Logger = b.Logger
+	base := NewBase(
+		context.Application.Path,
+		context.Buildpack.Path,
+		serverName,
+		featureList,
+		userFeatureDescriptor,
+		context.Platform.Bindings,
+		b.Logger,
+	)
 	result.Layers = append(result.Layers, base)
 
 	if installType == openLibertyInstall || installType == websphereLibertyInstall {
@@ -284,29 +307,4 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 	}
 
 	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
-}
-
-func isValidProfile(distType string, profile string) bool {
-	if distType == openLibertyInstall {
-		return profile == "full" ||
-			profile == "kernel" ||
-			profile == "jakartaee9" ||
-			profile == "javaee8" ||
-			profile == "webProfile9" ||
-			profile == "webProfile8" ||
-			profile == "microProfile5" ||
-			profile == "microProfile4"
-	}
-
-	if distType == websphereLibertyInstall {
-		return profile == "kernel" ||
-			profile == "jakartaee9" ||
-			profile == "javaee8" ||
-			profile == "javaee7" ||
-			profile == "webProfile9" ||
-			profile == "webProfile8" ||
-			profile == "webProfile7"
-	}
-
-	return true
 }
