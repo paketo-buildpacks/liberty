@@ -87,7 +87,7 @@ api = "0.7"
     name = "BP_LIBERTY_FEATURES"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
     purl = "pkg:maven/io.openliberty/openliberty-runtime@22.0.0.12"
@@ -101,7 +101,7 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-jakartaee9"
     name = "Open Liberty (Jakarta EE9)"
     purl = "pkg:maven/io.openliberty/openliberty-jakartaee9@22.0.0.12"
@@ -115,7 +115,7 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-javaee8"
     name = "Open Liberty (Java EE8)"
     purl = "pkg:maven/io.openliberty/openliberty-javaee8@22.0.0.12"
@@ -129,7 +129,7 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile9"
     name = "Open Liberty (Web Profile 9)"
     purl = "pkg:maven/io.openliberty/openliberty-webProfile9@22.0.0.12"
@@ -143,7 +143,7 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile8"
     name = "Open Liberty (Web Profile 8)"
     purl = "pkg:maven/io.openliberty/openliberty-webProfile8@22.0.0.12"
@@ -157,7 +157,7 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile5"
     name = "Open Liberty (Micro Profile 5)"
     purl = "pkg:maven/io.openliberty/openliberty-microProfile5@22.0.0.12"
@@ -171,7 +171,7 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
     purl = "pkg:maven/io.openliberty/openliberty-microProfile4@22.0.0.12"
@@ -185,7 +185,7 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
     purl = "pkg:maven/io.openliberty/openliberty-kernel@22.0.0.12"
