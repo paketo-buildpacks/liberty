@@ -141,11 +141,11 @@ func SetUserDirectory(srcUserPath string, destUserPath string, serverName string
 	// Copy the configDropins directory to the new user directory. This is needed by Liberty runtimes provided in the
 	// stack run image
 	configDropinsDir := filepath.Join(destUserPath, "servers", "defaultServer", "configDropins")
-	if configDropinsFound, err := util.DirExists(configDropinsDir); err != nil {
+	if configDropinsFound, err := sherpa.DirExists(configDropinsDir); err != nil {
 		return fmt.Errorf("unable to read configDropins directory\n%w", err)
 	} else if configDropinsFound {
 		newConfigDropinsDir := filepath.Join(srcUserPath, "servers", serverName, "configDropins")
-		if err := util.CopyDir(configDropinsDir, newConfigDropinsDir); err != nil {
+		if err := sherpa.CopyDir(configDropinsDir, newConfigDropinsDir); err != nil {
 			return fmt.Errorf("unable to copy configDropins to new user directory\n%w", err)
 		}
 	}
@@ -176,7 +176,7 @@ func HasInstalledApps(serverPath string) (bool, error) {
 func GetServerList(userPath string) ([]string, error) {
 	serversPath := filepath.Join(userPath, "servers")
 
-	serversExists, err := util.FileExists(serversPath)
+	serversExists, err := sherpa.DirExists(serversPath)
 	if err != nil {
 		return []string{}, err
 	}

@@ -18,6 +18,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"path/filepath"
 
 	"github.com/paketo-buildpacks/liberty/internal/server"
@@ -149,7 +150,7 @@ func (s ServerBuildSource) Detect() (bool, error) {
 		return false, nil
 	}
 
-	return util.FileExists(filepath.Join(serverPath, "server.xml"))
+	return sherpa.FileExists(filepath.Join(serverPath, "server.xml"))
 }
 
 func (s ServerBuildSource) DefaultServerName() (string, error) {
@@ -224,7 +225,7 @@ func (s ServerBuildSource) UserPath() (string, error) {
 	}
 	for _, dir := range dirs {
 		path := filepath.Join(s.InstallRoot, dir)
-		exists, err := util.DirExists(path)
+		exists, err := sherpa.DirExists(path)
 		if err != nil {
 			return "", nil
 		}

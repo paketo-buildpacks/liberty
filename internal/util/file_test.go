@@ -97,90 +97,36 @@ func testFile(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
-	when("checking a file exists", func() {
-		it("should return true if path is a file", func() {
-			path := filepath.Join(testPath, "test-file")
-			Expect(os.WriteFile(path, []byte{}, 0644)).To(Succeed())
-			exists, err := util.FileExists(path)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(exists).To(BeTrue())
+	when("getting files", func() {
+		it("should return only xml files", func() {
+			Expect(os.MkdirAll(filepath.Join(testPath, "foo"), 0755)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(testPath, "bar", "baz"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "foo", "foo.xml"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "bar", "baz", "bar-baz.xml"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "bar", "baz", "bar-baz.txt"), []byte{}, 0644)).To(Succeed())
+			files, err := util.GetFiles(testPath, "*.xml")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(files).To(Equal([]string{
+				filepath.Join(testPath, "bar", "baz", "bar-baz.xml"),
+				filepath.Join(testPath, "foo", "foo.xml"),
+			}))
 		})
 
-		it("should return true if path is a directory", func() {
-			path := filepath.Join(testPath, "test-dir")
-			Expect(os.Mkdir(path, 0755)).To(Succeed())
-			exists, err := util.FileExists(path)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(exists).To(BeTrue())
+		it("should return empty list of files for non-matching extension", func() {
+			Expect(os.MkdirAll(filepath.Join(testPath, "foo"), 0755)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(testPath, "bar", "baz"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "foo", "foo.xml"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "bar", "baz", "bar-baz.xml"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(testPath, "bar", "baz", "bar-baz.txt"), []byte{}, 0644)).To(Succeed())
+			files, err := util.GetFiles(testPath, "*.dne")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(files).To(BeEmpty())
 		})
 
-		it("should return false if path does not exist", func() {
-			exists, err := util.FileExists(filepath.Join(testPath, "does-not-exist"))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(exists).To(BeFalse())
-		})
-	})
-
-	when("checking a directory exists", func() {
-		it("should return true if path is a directory", func() {
-			path := filepath.Join(testPath, "test-dir")
-			Expect(os.Mkdir(path, 0755)).To(Succeed())
-			exists, err := util.DirExists(path)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(exists).To(BeTrue())
-		})
-
-		it("should return false if path is a file", func() {
-			path := filepath.Join(testPath, "test-file")
-			Expect(os.WriteFile(path, []byte{}, 0644)).To(Succeed())
-			exists, err := util.DirExists(path)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(exists).To(BeFalse())
-		})
-
-		it("should return false if path does not exist", func() {
-			exists, err := util.FileExists(filepath.Join(testPath, "does-not-exist"))
-			Expect(err).ToNot(HaveOccurred())
-			Expect(exists).To(BeFalse())
-		})
-	})
-
-	when("copying a directory", func() {
-		it("works", func() {
-			srcDir := filepath.Join(testPath, "src-dir")
-			Expect(os.MkdirAll(filepath.Join(srcDir, "one", "two"), 0755)).To(Succeed())
-			testFiles := []string{
-				"file-root",
-				filepath.Join("one", "file-one"),
-				filepath.Join("one", "two", "file-two"),
-			}
-			for _, file := range testFiles {
-				Expect(os.WriteFile(filepath.Join(srcDir, file), []byte(file), 0644)).To(Succeed())
-			}
-			destDir := filepath.Join(testPath, "dest-dir")
-			Expect(os.Mkdir(destDir, 0755)).To(Succeed())
-			Expect(util.CopyDir(srcDir, destDir)).To(Succeed())
-			for _, file := range testFiles {
-				destFile := filepath.Join(destDir, file)
-				Expect(destFile).To(BeARegularFile())
-				contents, err := ioutil.ReadFile(destFile)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(contents).To(Equal([]byte(file)))
-			}
-		})
-	})
-
-	when("copying a file", func() {
-		it("works", func() {
-			srcFile := filepath.Join(testPath, "src-file")
-			payload := []byte("foo bar baz")
-			Expect(os.WriteFile(srcFile, payload, 0644)).To(Succeed())
-			destFile := filepath.Join(testPath, "dest-file")
-			Expect(util.CopyFile(srcFile, destFile)).To(Succeed())
-			Expect(destFile).To(BeARegularFile())
-			contents, err := ioutil.ReadFile(destFile)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(contents).To(Equal(payload))
+		it("should handle non-existent root", func() {
+			files, err := util.GetFiles("dne", "*.dne")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(files).To(BeEmpty())
 		})
 	})
 }

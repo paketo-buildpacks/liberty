@@ -19,12 +19,12 @@ package liberty
 import (
 	"fmt"
 	"github.com/heroku/color"
+	sherpa "github.com/paketo-buildpacks/libpak/sherpa"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/liberty/internal/server"
-	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
@@ -278,7 +278,7 @@ func (b Build) buildStackRuntime(serverName string, result *libcnb.BuildResult) 
 }
 
 func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
-	olExists, err := util.DirExists(openLibertyStackRuntimeRoot)
+	olExists, err := sherpa.DirExists(openLibertyStackRuntimeRoot)
 	if err != nil {
 		return libcnb.Process{}, fmt.Errorf("unable to check Open Liberty stack runtime root exists\n%w", err)
 	}
@@ -292,7 +292,7 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 		}, nil
 	}
 
-	wlpExists, err := util.DirExists(webSphereLibertyRuntimeRoot)
+	wlpExists, err := sherpa.DirExists(webSphereLibertyRuntimeRoot)
 	if err != nil {
 		return libcnb.Process{}, fmt.Errorf("unable to WebSphere Open Liberty stack runtime root exists\n%w", err)
 	}

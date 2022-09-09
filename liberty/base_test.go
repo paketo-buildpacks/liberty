@@ -17,7 +17,7 @@
 package liberty_test
 
 import (
-	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -190,7 +190,9 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 
 	it("contributes server.xml and compiled artifact", func() {
 		// Set up app and server config
-		Expect(util.CopyFile(filepath.Join("testdata", "test.war"), filepath.Join(ctx.Application.Path, "test.war"))).To(Succeed())
+		file, err := os.Open(filepath.Join("testdata", "test.war"))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(sherpa.CopyFile(file, filepath.Join(ctx.Application.Path, "test.war"))).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.xml"), []byte("<server/>"), 0644)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.env"), []byte("TEST_ENV=foo"), 0644)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "bootstrap.properties"), []byte("test.property=foo"), 0644)).To(Succeed())

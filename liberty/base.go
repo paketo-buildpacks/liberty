@@ -199,7 +199,7 @@ func (b Base) createServerDirectory(layer libcnb.Layer) error {
 
 func (b Base) contributeConfig(serverPath string, layer libcnb.Layer) error {
 	serverConfigPath := filepath.Join(serverPath, "server.xml")
-	exists, err := util.FileExists(serverConfigPath)
+	exists, err := sherpa.FileExists(serverConfigPath)
 	if err != nil {
 		return fmt.Errorf("unable to check if server.xml exists\n%w", err)
 	}
@@ -219,11 +219,13 @@ func (b Base) contributeConfig(serverPath string, layer libcnb.Layer) error {
 		if err != nil {
 			return fmt.Errorf("unable to execute template\n%w", err)
 		}
-	} else {
 	}
 
-	err = util.CopyFile(filepath.Join(b.BuildpackPath, "templates", "expose-default-endpoint.xml"),
-		filepath.Join(serverPath, "configDropins", "defaults", "expose-default-endpoint.xml"))
+	file, err := os.Open(filepath.Join(b.BuildpackPath, "templates", "expose-default-endpoint.xml"))
+	if err != nil {
+		return fmt.Errorf("unable to open endpoint config\n%w", err)
+	}
+	err = sherpa.CopyFile(file, filepath.Join(serverPath, "configDropins", "defaults", "expose-default-endpoint.xml"))
 	if err != nil {
 		return fmt.Errorf("unable to copy endpoint config\n%w", err)
 	}
@@ -251,7 +253,7 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 	}
 
 	// Expand app if needed
-	isDir, err := util.DirExists(appPath)
+	isDir, err := sherpa.DirExists(appPath)
 	if err != nil {
 		return fmt.Errorf("unable to check if app path is a directory\n%w", err)
 	}
