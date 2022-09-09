@@ -133,6 +133,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 	dc.Logger = b.Logger
 
+	h := libpak.NewHelperLayerContributor(context.Buildpack, "linker")
+	h.Logger = b.Logger
+	result.Layers = append(result.Layers, h)
+
 	if serverName == "" {
 		serverName, err = detectedBuildSrc.DefaultServerName()
 		if err != nil {

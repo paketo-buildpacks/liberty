@@ -24,7 +24,7 @@ import (
 )
 
 func TestUnit(t *testing.T) {
-	suite := spec.New("openliberty-helper", spec.Report(report.Terminal{}))
+	suite := spec.New("liberty-helper", spec.Report(report.Terminal{}))
 	suite("Link", testLink)
 	suite.Run(t)
 }
