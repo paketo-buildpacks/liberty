@@ -92,7 +92,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"defaultServer",
 			[]string{"jsp-2.3"},
 			&liberty.FeatureDescriptor{},
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -102,12 +102,6 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(layer.Launch).To(BeTrue())
-
-		// Check for templates
-		Expect(filepath.Join(layer.Path, "templates")).To(BeADirectory())
-		Expect(filepath.Join(layer.Path, "templates", "app.tmpl")).To(BeARegularFile())
-		Expect(filepath.Join(layer.Path, "templates", "expose-default-endpoint.xml")).To(BeARegularFile())
-		Expect(filepath.Join(layer.Path, "templates", "server.tmpl")).To(BeARegularFile())
 
 		// Check app
 		appPath, err := filepath.EvalSymlinks(filepath.Join(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "apps", "app")))
@@ -129,7 +123,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"defaultServer",
 			[]string{"jsp-2.3"},
 			&liberty.FeatureDescriptor{},
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -161,7 +155,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"defaultServer",
 			[]string{"jaxrs-2.1", "cdi-2.0"},
 			&liberty.FeatureDescriptor{},
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -203,7 +197,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"defaultServer",
 			[]string{"jsp-2.3"},
 			&liberty.FeatureDescriptor{},
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -239,7 +233,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"defaultServer",
 			[]string{"jsp-2.3"},
 			&liberty.FeatureDescriptor{},
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -267,7 +261,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"defaultServer",
 			[]string{"jsp-2.3"},
 			&liberty.FeatureDescriptor{},
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -295,7 +289,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"testServer",
 			[]string{"jsp-2.3"},
 			&liberty.FeatureDescriptor{},
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -348,7 +342,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			"defaultServer",
 			[]string{"jsp-2.3"},
 			userFeatureDescriptor,
-			nil,
+			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
 		)
 
