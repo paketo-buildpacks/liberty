@@ -94,9 +94,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
@@ -109,9 +110,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("websphere-liberty-runtime-kernel"))
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("websphere-liberty-runtime-kernel"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
@@ -124,9 +126,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-jakartaee9"))
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-jakartaee9"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
@@ -244,9 +247,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-jakartaee9"))
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-jakartaee9"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
@@ -280,9 +284,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 			Expect(result.Unmet).To(HaveLen(0))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer"), libcnb.SyftJSON, libcnb.CycloneDXJSON)
@@ -313,9 +318,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			}.Build(ctx)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[0].Name()).To(Equal("base"))
-			Expect(result.Layers[1].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[0].Name()).To(Equal("helper"))
+			Expect(result.Layers[1].Name()).To(Equal("base"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
 			Expect(result.Unmet).To(HaveLen(0))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)

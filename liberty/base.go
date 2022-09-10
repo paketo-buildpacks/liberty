@@ -85,6 +85,7 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 }
 
 func (b Base) contribute(layer libcnb.Layer) error {
+	layer.LaunchEnvironment.Default("BPI_LIBERTY_SERVER_NAME", b.ServerName)
 
 	serverBuildSource := core.NewServerBuildSource(b.ApplicationPath, b.ServerName, b.Logger)
 	isPackagedServer, err := serverBuildSource.Detect()
