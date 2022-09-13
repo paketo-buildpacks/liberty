@@ -85,7 +85,8 @@ The following server configuration files can be included in the application imag
 * bootstrap.properties
 
 **IMPORTANT NOTE:** Do not put secrets in any of these configuration files! The files will be included in the resulting
-image and can leak your secrets.
+image and can leak your secrets. See [Configuring Secrets](#configuring-secrets) for information on how to provide
+secrets in your configuration.
 
 At the moment, these files can only be included in the build by telling the Maven or Gradle buildpacks to provide them. Thus this method of including server configuration can only be performed when building from source code, it will not work when building with a pre-compiled WAR file.
 
@@ -103,6 +104,23 @@ variables in your `pack build` command.
 ```
 --env BP_GRADLE_BUILT_ARTIFACT="build/libs/*.[ejw]ar src/main/liberty/config/*"
 ```
+
+## Configuring Secrets
+
+Sensitive data should not be included in any of the configuration files provided during the build. The files will be
+included in the application image which can leak your secrets.
+
+Instead, set the secrets in your `bootstrap.properties` file and provide it to the application container as a binding.
+
+For example, to configure a custom password for Liberty's default keystore, you can add the following line to your
+`server.xml`:
+
+```xml
+<keyStore id="defaultKeyStore" password="${keystore.password}" />
+```
+
+The property `keystore.password` can then be configured in the application image via a binding of type `liberty` under
+the `bootstrap.properties` key.
 
 ## Install Types
 
