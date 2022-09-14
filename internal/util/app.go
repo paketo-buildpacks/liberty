@@ -19,6 +19,7 @@ package util
 import (
 	"fmt"
 	"github.com/paketo-buildpacks/libjvm"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -27,13 +28,13 @@ import (
 // IsJvmApplicationPackage will return true if `META-INF/application.xml` or `WEB-INF/` exists, which happens when a
 // compiled artifact is supplied.
 func IsJvmApplicationPackage(appPath string) (bool, error) {
-	if appXMLPresent, err := FileExists(filepath.Join(appPath, "META-INF", "application.xml")); err != nil {
+	if appXMLPresent, err := sherpa.FileExists(filepath.Join(appPath, "META-INF", "application.xml")); err != nil {
 		return false, fmt.Errorf("unable to check application.xml\n%w", err)
 	} else if appXMLPresent {
 		return true, nil
 	}
 
-	if webInfPresent, err := DirExists(filepath.Join(appPath, "WEB-INF")); err != nil {
+	if webInfPresent, err := sherpa.DirExists(filepath.Join(appPath, "WEB-INF")); err != nil {
 		return false, fmt.Errorf("unable to check WEB-INF\n%w", err)
 	} else if webInfPresent {
 		return true, nil
@@ -54,14 +55,14 @@ func ManifestHasMainClassDefined(appPath string) (bool, error) {
 }
 
 func GetApps(path string) ([]string, error) {
-	if exists, err := DirExists(path); err != nil {
+	if exists, err := sherpa.DirExists(path); err != nil {
 		return []string{}, err
 	} else if !exists {
 		return []string{}, nil
 	}
 
 	// Return the empty list for expanded EAR applications
-	if exists, err := FileExists(filepath.Join(path, "META-INF", "application.xml")); err != nil {
+	if exists, err := sherpa.FileExists(filepath.Join(path, "META-INF", "application.xml")); err != nil {
 		return []string{}, err
 	} else if exists {
 		return []string{}, nil

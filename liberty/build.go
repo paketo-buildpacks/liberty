@@ -19,12 +19,13 @@ package liberty
 import (
 	"fmt"
 	"github.com/heroku/color"
+	"github.com/paketo-buildpacks/libpak/bindings"
+	sherpa "github.com/paketo-buildpacks/libpak/sherpa"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
 	"github.com/paketo-buildpacks/liberty/internal/server"
-	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
@@ -159,18 +160,45 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			profile = "kernel"
 		}
 	}
-	if !isValidProfile(installType, profile) {
+
+	isValidProfile := true
+	if installType == openLibertyInstall {
+		isValidProfile = server.IsValidOpenLibertyProfile(profile)
+	} else if installType == websphereLibertyInstall {
+		isValidProfile = server.IsValidWebSphereLibertyProfile(profile)
+	}
+	if !isValidProfile {
 		return libcnb.BuildResult{}, fmt.Errorf("invalid profile '%s' for BP_INSTALL_TYPE '%s'", profile, installType)
 	}
+
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
 	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 	featureList := strings.Fields(features)
+	appPath, err := detectedBuildSrc.AppPath()
+	if err != nil {
+		return libcnb.BuildResult{}, err
+	}
+	featureList, err = server.GetFeatureList(profile, appPath, featureList)
+	if err != nil {
+		return libcnb.BuildResult{}, err
+	}
 	userFeatureDescriptor, err := ReadFeatureDescriptor(featuresRoot, b.Logger)
 	if err != nil {
 		return libcnb.BuildResult{}, err
 	}
-	base := NewBase(context.Application.Path, context.Buildpack.Path, serverName, profile, featureList, userFeatureDescriptor, context.Platform.Bindings)
-	base.Logger = b.Logger
+	binding, _, err := bindings.ResolveOne(context.Platform.Bindings, bindings.OfType("liberty"))
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve liberty bindings\n%w", err)
+	}
+	base := NewBase(
+		context.Application.Path,
+		context.Buildpack.Path,
+		serverName,
+		featureList,
+		userFeatureDescriptor,
+		binding,
+		b.Logger,
+	)
 	result.Layers = append(result.Layers, base)
 
 	if installType == openLibertyInstall || installType == websphereLibertyInstall {
@@ -255,7 +283,7 @@ func (b Build) buildStackRuntime(serverName string, result *libcnb.BuildResult) 
 }
 
 func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
-	olExists, err := util.DirExists(openLibertyStackRuntimeRoot)
+	olExists, err := sherpa.DirExists(openLibertyStackRuntimeRoot)
 	if err != nil {
 		return libcnb.Process{}, fmt.Errorf("unable to check Open Liberty stack runtime root exists\n%w", err)
 	}
@@ -269,7 +297,7 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 		}, nil
 	}
 
-	wlpExists, err := util.DirExists(webSphereLibertyRuntimeRoot)
+	wlpExists, err := sherpa.DirExists(webSphereLibertyRuntimeRoot)
 	if err != nil {
 		return libcnb.Process{}, fmt.Errorf("unable to WebSphere Open Liberty stack runtime root exists\n%w", err)
 	}
@@ -284,29 +312,4 @@ func createStackRuntimeProcess(serverName string) (libcnb.Process, error) {
 	}
 
 	return libcnb.Process{}, fmt.Errorf("unable to find server in the stack image")
-}
-
-func isValidProfile(distType string, profile string) bool {
-	if distType == openLibertyInstall {
-		return profile == "full" ||
-			profile == "kernel" ||
-			profile == "jakartaee9" ||
-			profile == "javaee8" ||
-			profile == "webProfile9" ||
-			profile == "webProfile8" ||
-			profile == "microProfile5" ||
-			profile == "microProfile4"
-	}
-
-	if distType == websphereLibertyInstall {
-		return profile == "kernel" ||
-			profile == "jakartaee9" ||
-			profile == "javaee8" ||
-			profile == "javaee7" ||
-			profile == "webProfile9" ||
-			profile == "webProfile8" ||
-			profile == "webProfile7"
-	}
-
-	return true
 }
