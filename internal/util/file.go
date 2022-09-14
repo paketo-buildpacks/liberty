@@ -18,8 +18,7 @@ package util
 
 import (
 	"fmt"
-	"io"
-	"io/ioutil"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"os"
 	"path/filepath"
 )
@@ -39,75 +38,32 @@ func DeleteAndLinkPath(src, dest string) error {
 	return nil
 }
 
-// FileExists returns true if the path exists.
-func FileExists(path string) (bool, error) {
-	if _, err := os.Stat(path); err == nil {
-		return true, nil
-	} else if os.IsNotExist(err) {
-		return false, nil
-	} else {
-		return false, err
-	}
-}
-
-// DirExists returns true if the path exists and is a directory.
-func DirExists(path string) (bool, error) {
-	if stat, err := os.Stat(path); err == nil {
-		return stat.IsDir(), nil
-	} else if os.IsNotExist(err) {
-		return false, nil
-	} else {
-		return false, err
-	}
-}
-
-// CopyDir copies a directory and all of its contents from the source path to the destination.
-func CopyDir(src, dest string) error {
-	entries, err := ioutil.ReadDir(src)
-	if err != nil {
-		return err
+func GetFiles(root string, pattern string) ([]string, error) {
+	var files []string
+	if exists, err := sherpa.DirExists(root); err != nil {
+		return nil, err
+	} else if !exists {
+		return nil, nil
 	}
 
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		destPath := filepath.Join(dest, entry.Name())
-
-		fileInfo, err := os.Stat(srcPath)
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-
-		switch fileInfo.Mode() & os.ModeType {
-		case os.ModeDir:
-			if err := os.MkdirAll(destPath, 0755); err != nil {
-				return err
-			}
-			if err := CopyDir(srcPath, destPath); err != nil {
-				return err
-			}
-		default:
-			if err := CopyFile(srcPath, destPath); err != nil {
-				return err
-			}
+		if info.IsDir() {
+			return nil
 		}
-	}
-	return nil
-}
-
-// CopyFile copies a file from the source path to the destination path.
-func CopyFile(src, dest string) error {
-	srcFile, err := os.Open(src)
-	defer srcFile.Close()
+		matched, err := filepath.Match(pattern, filepath.Base(path))
+		if err != nil {
+			return err
+		}
+		if matched {
+			files = append(files, path)
+		}
+		return nil
+	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	destFile, err := os.Create(dest)
-	if err != nil {
-		return err
-	}
-	defer destFile.Close()
-
-	_, err = io.Copy(destFile, srcFile)
-	return err
+	return files, nil
 }

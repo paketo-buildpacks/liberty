@@ -18,6 +18,7 @@ package liberty
 
 import (
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -25,7 +26,6 @@ import (
 	"text/template"
 
 	"github.com/BurntSushi/toml"
-	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bard"
 )
 
@@ -157,8 +157,13 @@ func (i FeatureInstaller) Install() error {
 func (i FeatureInstaller) installJar(feature Feature) error {
 	runtimeLibsPath := filepath.Join(i.RuntimeRootPath, "usr", "extension", "lib")
 	featureBase := filepath.Base(feature.ResolvedPath)
-	if err := util.CopyFile(feature.ResolvedPath, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
-		return fmt.Errorf("unable to link feature '%s'\n%w", feature.Name, err)
+
+	jarFile, err := os.Open(feature.ResolvedPath)
+	if err != nil {
+		return fmt.Errorf("unable to open feature jar '%s'\n%w", feature.Name, err)
+	}
+	if err := sherpa.CopyFile(jarFile, filepath.Join(runtimeLibsPath, featureBase)); err != nil {
+		return fmt.Errorf("unable to copy feature jar '%s'\n%w", feature.Name, err)
 	}
 
 	if feature.ManifestPath == "" {
@@ -166,7 +171,11 @@ func (i FeatureInstaller) installJar(feature Feature) error {
 	}
 
 	manifestBase := filepath.Base(feature.ManifestPath)
-	if err := util.CopyFile(feature.ManifestPath, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
+	manifestFile, err := os.Open(feature.ManifestPath)
+	if err != nil {
+		return fmt.Errorf("unable to open feature manifest for '%s'\n%w", feature.Name, err)
+	}
+	if err := sherpa.CopyFile(manifestFile, filepath.Join(filepath.Join(runtimeLibsPath, "features", manifestBase))); err != nil {
 		return fmt.Errorf("unable to link feature manifest for '%s'\n%w", feature.Name, err)
 	}
 
