@@ -19,6 +19,7 @@ package liberty
 import (
 	"fmt"
 	"github.com/heroku/color"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bindings"
 	sherpa "github.com/paketo-buildpacks/libpak/sherpa"
 	"strings"
@@ -190,6 +191,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve liberty bindings\n%w", err)
 	}
+	jvmName, err := util.DetectJVMName(b.Executor)
+	if err != nil {
+		return libcnb.BuildResult{}, err
+	}
 	base := NewBase(
 		context.Application.Path,
 		context.Buildpack.Path,
@@ -198,6 +203,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		userFeatureDescriptor,
 		binding,
 		b.Logger,
+		jvmName,
 	)
 	result.Layers = append(result.Layers, base)
 
