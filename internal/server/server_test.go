@@ -148,6 +148,7 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.MkdirAll(filepath.Join(serversDir, ".logs"), 0755)).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(serversDir, ".pid"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(serversDir, ".testFile"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(serversDir, "testFile"), []byte{}, 0644)).To(Succeed())
 			serverList, err := server.GetServerList(testPath)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(serverList).To(Equal([]string{"defaultServer", "fooServer", "testServer"}))

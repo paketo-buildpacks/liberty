@@ -192,7 +192,7 @@ func GetServerList(userPath string) ([]string, error) {
 
 	var servers []string
 	for _, dir := range serverDirs {
-		if !strings.HasPrefix(dir.Name(), ".") {
+		if !strings.HasPrefix(dir.Name(), ".") && dir.IsDir() {
 			servers = append(servers, dir.Name())
 		}
 	}
