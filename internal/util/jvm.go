@@ -18,44 +18,34 @@ package util
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/paketo-buildpacks/libpak/effect"
-	"io"
 	"strings"
 )
 
 func DetectJVMName(executor effect.Executor) (string, error) {
-	pr, pw := io.Pipe()
-	defer pr.Close()
-	defer pw.Close()
-
-	resultCh := make(chan string, 1)
-	go func() {
-		scanner := bufio.NewScanner(pr)
-		for scanner.Scan() {
-			line := scanner.Text()
-			if strings.Contains(line, "java.vm.name") {
-				if strings.Contains(line, "OpenJ9") {
-					resultCh <- "OpenJ9"
-				} else if strings.Contains(line, "OpenJDK") {
-					resultCh <- "OpenJDK"
-				} else {
-					resultCh <- ""
-				}
-				return
-			}
-		}
-		resultCh <- ""
-	}()
+	buf := &bytes.Buffer{}
 
 	if err := executor.Execute(effect.Execution{
 		Command: "java",
 		Args:    []string{"-XshowSettings:properties", "-version"},
-		Stderr:  pw,
+		Stdout:  buf,
 	}); err != nil {
-		return "", fmt.Errorf("unable to detect JVM name")
+		return "", fmt.Errorf("unable to detect JVM name\n%w", err)
 	}
 
-	pw.Close()
-	return <-resultCh, nil
+	scanner := bufio.NewScanner(buf)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, "java.vm.name") {
+			if strings.Contains(line, "OpenJ9") {
+				return "OpenJ9", nil
+			} else if strings.Contains(line, "OpenJDK") {
+				return "OpenJDK", nil
+			}
+			break
+		}
+	}
+	return "", nil
 }

@@ -37,7 +37,7 @@ func testJVM(t *testing.T, when spec.G, it spec.S) {
 			executor := &mocks.Executor{}
 			executor.On("Execute", mock.Anything).Run(func(args mock.Arguments) {
 				arg := args.Get(0).(effect.Execution)
-				_, err := arg.Stderr.Write([]byte(`
+				_, err := arg.Stdout.Write([]byte(`
 						java.vendor = IBM Corporation
 						java.vendor.url = https://www.ibm.com/semeru-runtimes
 						java.vendor.url.bug = https://github.com/ibmruntimes/Semeru-Runtimes/issues
@@ -57,7 +57,7 @@ func testJVM(t *testing.T, when spec.G, it spec.S) {
 			executor := &mocks.Executor{}
 			executor.On("Execute", mock.Anything).Run(func(args mock.Arguments) {
 				arg := args.Get(0).(effect.Execution)
-				_, err := arg.Stderr.Write([]byte(`
+				_, err := arg.Stdout.Write([]byte(`
 						java.vendor = BellSoft
 						java.vendor.url = https://bell-sw.com/
 						java.vendor.url.bug = https://bell-sw.com/support
