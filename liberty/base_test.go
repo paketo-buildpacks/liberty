@@ -94,6 +94,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -125,6 +126,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -157,6 +159,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -199,6 +202,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -235,6 +239,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -263,6 +268,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -291,6 +297,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
@@ -344,6 +351,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			userFeatureDescriptor,
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
+			"OpenJDK",
 		)
 
 		layer, err = base.Contribute(layer)
@@ -354,5 +362,43 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 		Expect(filepath.Join(usrPath, "extension", "lib", "test.feature_1.0.0.jar")).To(BeARegularFile())
 		Expect(filepath.Join(usrPath, "extension", "lib", "features", "test.feature_1.0.0.mf")).To(BeARegularFile())
 		Expect(filepath.Join(usrPath, "servers", "defaultServer", "configDropins", "defaults", "features.xml")).To(BeARegularFile())
+	})
+
+	it("appends verbosegc to JAVA_TOOL_OPTIONS if the OpenJ9 JVM is provided", func() {
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			libcnb.Binding{},
+			bard.NewLogger(os.Stdout),
+			"OpenJ9",
+		)
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = base.Contribute(layer)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(layer.LaunchEnvironment["JAVA_TOOL_OPTIONS.append"]).To(Equal("-Xverbosegclog:verbosegc.%pid.%seq.log,5,10000"))
+	})
+
+	it("does not append verbosegc to JAVA_TOOL_OPTIONS if a non-OpenJ9 JVM is provided", func() {
+		base := liberty.NewBase(
+			ctx.Application.Path,
+			ctx.Buildpack.Path,
+			"defaultServer",
+			[]string{"jsp-2.3"},
+			&liberty.FeatureDescriptor{},
+			libcnb.Binding{},
+			bard.NewLogger(os.Stdout),
+			"OpenJDK",
+		)
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = base.Contribute(layer)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(layer.LaunchEnvironment["JAVA_TOOL_OPTIONS.append"]).To(BeEmpty())
 	})
 }

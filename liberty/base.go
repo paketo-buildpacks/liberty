@@ -45,6 +45,7 @@ type Base struct {
 	Features              []string
 	UserFeatureDescriptor *FeatureDescriptor
 	LibertyBinding        libcnb.Binding
+	JVM                   string
 }
 
 func NewBase(
@@ -55,6 +56,7 @@ func NewBase(
 	userFeatureDescriptor *FeatureDescriptor,
 	libertyBinding libcnb.Binding,
 	logger bard.Logger,
+	jvmName string,
 ) Base {
 	workspaceSum, err := sherpa.NewFileListingHash(appPath)
 	if err != nil {
@@ -98,6 +100,7 @@ func NewBase(
 		UserFeatureDescriptor: userFeatureDescriptor,
 		LibertyBinding:        libertyBinding,
 		Logger:                logger,
+		JVM:                   jvmName,
 	}
 }
 
@@ -115,6 +118,13 @@ func (b Base) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 func (b Base) contribute(layer libcnb.Layer) error {
 	layer.LaunchEnvironment.Default("BPI_LIBERTY_SERVER_NAME", b.ServerName)
+
+	// OpenJ9 only:
+	// Enable verbose GC logging by default as strongly recommended by Liberty support. It is low overhead and helps
+	// diagnose any high heap issues.
+	if b.JVM == "OpenJ9" {
+		layer.LaunchEnvironment.Appendf("JAVA_TOOL_OPTIONS", " ", "-Xverbosegclog:verbosegc.%%pid.%%seq.log,5,10000")
+	}
 
 	serverBuildSource := core.NewServerBuildSource(b.ApplicationPath, b.ServerName, b.Logger)
 	isPackagedServer, err := serverBuildSource.Detect()
