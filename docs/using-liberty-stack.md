@@ -8,12 +8,12 @@ Note that a custom builder is also required to be able to use a custom stack.
 
 ## Creating the Stack Image
 
-Either the [icr.io/appcafe/websphere-liberty](https://github.com/OpenLiberty/ci.docker/blob/master/docs/icr-images.md) or [icr.io/appcafe/websphere-liberty](https://github.com/WASdev/ci.docker/blob/master/docs/icr-images.md)
+Either the [icr.io/appcafe/open-liberty](https://github.com/OpenLiberty/ci.docker/blob/master/docs/icr-images.md) or [icr.io/appcafe/websphere-liberty](https://github.com/WASdev/ci.docker/blob/master/docs/icr-images.md)
 container images can be used to provide the runtime used by the Open Liberty buildpack using one of the following templates.
 
 ### Bootstrap Script
 
-A script is necessary to be able to grab the configuration and application created by the buildpacks. Create the following script:
+A script is necessary to be able to grab the configuration and application created by the buildpacks. Create the following bootstrap.sh script and place it in the same directory as your Dockerfile:
 
 ```bash
 #!/usr/bin/env bash
@@ -91,7 +91,7 @@ USER ${CNB_USER_ID}
 
 ```dockerfile
 # RUN IMAGE
-FROM  icr.io/appcafe/websphere-liberty:22.0.0.3-full-java11-openj9-ubi as run
+FROM  icr.io/appcafe/websphere-liberty:22.0.0.9-full-java11-openj9-ubi as run
 
 ENV CNB_USER_ID=1001
 ENV CNB_GROUP_ID=0
@@ -186,60 +186,55 @@ images that you have prepared earlier.
 
 ```toml
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/ca-certificates:3.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/ca-certificates"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/bellsoft-liberica:9.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/eclipse-openj9"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/syft:1.3.0"
+  uri = "docker://gcr.io/paketo-buildpacks/syft"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/leiningen:4.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/leiningen"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/gradle:6.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/gradle"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/maven:6.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/maven"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/liberty:0.4.0"
+  uri = "docker://gcr.io/paketo-buildpacks/liberty"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/procfile:5.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/procfile"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/environment-variables:4.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/environment-variables"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/image-labels:4.0.1"
+  uri = "docker://gcr.io/paketo-buildpacks/image-labels"
 
 [[order]]
 
   [[order.group]]
     id = "paketo-buildpacks/ca-certificates"
     optional = true
-    version = "3.0.1"
 
   [[order.group]]
-    id = "paketo-buildpacks/bellsoft-liberica"
-    version = "9.0.1"
+    id = "paketo-buildpacks/eclipse-openj9"
 
   [[order.group]]
     id = "paketo-buildpacks/syft"
     optional = true
-    version = "1.3.0"
 
   [[order.group]]
     id = "paketo-buildpacks/gradle"
     optional = true
-    version = "6.0.1"
 
   [[order.group]]
     id = "paketo-buildpacks/maven"
     optional = true
-    version = "6.0.1"
 
   [[order.group]]
     id = "paketo-buildpacks/liberty"
@@ -248,17 +243,14 @@ images that you have prepared earlier.
   [[order.group]]
     id = "paketo-buildpacks/procfile"
     optional = true
-    version = "5.0.1"
 
   [[order.group]]
     id = "paketo-buildpacks/environment-variables"
     optional = true
-    version = "4.0.1"
 
   [[order.group]]
     id = "paketo-buildpacks/image-labels"
     optional = true
-    version = "4.0.1"
 
 [stack]
   id = "io.buildpacks.stacks.liberty"
