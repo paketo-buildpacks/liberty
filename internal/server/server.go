@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 func GetServerConfigPath(serverPath string) string {
@@ -191,7 +192,9 @@ func GetServerList(userPath string) ([]string, error) {
 
 	var servers []string
 	for _, dir := range serverDirs {
-		servers = append(servers, dir.Name())
+		if !strings.HasPrefix(dir.Name(), ".") && dir.IsDir() {
+			servers = append(servers, dir.Name())
+		}
 	}
 
 	return servers, nil
