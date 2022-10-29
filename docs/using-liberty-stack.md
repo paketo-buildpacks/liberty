@@ -223,6 +223,7 @@ images that you have prepared earlier.
 
   [[order.group]]
     id = "paketo-buildpacks/eclipse-openj9"
+    optional = false
 
   [[order.group]]
     id = "paketo-buildpacks/syft"
