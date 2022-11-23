@@ -57,7 +57,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				{"name": "BP_LIBERTY_SERVER_NAME", "default": "", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
-				{"id": "open-liberty-runtime-full", "version": "21.0.11"},
+				{"id": "open-liberty-runtime-kernel", "version": "21.0.11"},
 				{"id": "websphere-liberty-runtime-kernel", "version": "21.0.11"},
 				{"id": "open-liberty-runtime-jakartaee9", "version": "21.0.11"},
 			},
@@ -107,7 +107,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.Unsetenv("BP_LIBERTY_PROFILE")).To(Succeed())
 		})
 
-		it("selects the latest full profile for Open Liberty by default", func() {
+		it("selects the latest kernel profile for Open Liberty by default", func() {
 			result, err := liberty.Build{
 				Logger:      bard.NewLogger(io.Discard),
 				SBOMScanner: &sbomScanner,
@@ -118,7 +118,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-kernel"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
@@ -316,7 +316,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-kernel"))
 			Expect(result.Unmet).To(HaveLen(0))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", filepath.Join(ctx.Application.Path, "usr", "servers", "defaultServer"), libcnb.SyftJSON, libcnb.CycloneDXJSON)
@@ -352,7 +352,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-full"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-kernel"))
 			Expect(result.Unmet).To(HaveLen(0))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
