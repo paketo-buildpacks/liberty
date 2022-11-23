@@ -241,14 +241,14 @@ api = "0.7"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.11:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.12:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee7"
     name = "WebSphere Liberty (Java EE7)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@22.0.0.11"
-    sha256 = "02ec1a4741af8bc98f982316946e965fe980f663080fb12b818c95a12de5a4d5"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@22.0.0.12"
+    sha256 = "7c76f794174d93c0a4737916690b316b5e9560fe1f8b72bf29cb111ea320577b"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/22.0.0.11/wlp-javaee7-22.0.0.11.zip"
-    version = "22.0.11"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/22.0.0.12/wlp-javaee7-22.0.0.12.zip"
+    version = "22.0.12"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
