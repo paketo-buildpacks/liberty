@@ -232,6 +232,34 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			Expect(execution.Command).To(Equal("java"))
 			Expect(execution.Args).To(Equal([]string{"-jar", ifixes[1], "--installLocation", wlpPath}))
 		})
+
+		it("lists installed iFixes", func() {
+			executor := &mocks.Executor{}
+			executor.On("Execute", mock.Anything).Run(func(args mock.Arguments) {
+				arg := args.Get(0).(effect.Execution)
+				_, err := arg.Stdout.Write([]byte(`
+						Product name: Open Liberty
+						Product version: 22.0.0.11
+						Product edition: Open
+						
+						PH49719 in the iFix(es): [220011-wlp-archive-IFPH49719]`),
+				)
+				Expect(err).ToNot(HaveOccurred())
+			}).Return(nil)
+			installedFixes, err := server.GetInstalledIFixes(wlpPath, executor)
+			Expect(err).ToNot(HaveOccurred())
+
+			execution := executor.Calls[0].Arguments[0].(effect.Execution)
+			Expect(execution.Command).To(Equal(filepath.Join(wlpPath, "bin", "productInfo")))
+			Expect(execution.Args).To(Equal([]string{"version", "--ifixes"}))
+
+			Expect(installedFixes).To(Equal([]server.InstalledIFix{
+				{
+					APAR: "PH49719",
+					IFix: "220011-wlp-archive-IFPH49719",
+				},
+			}))
+		})
 	})
 
 	when("installing features", func() {
@@ -243,6 +271,26 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			execution := executor.Calls[0].Arguments[0].(effect.Execution)
 			Expect(execution.Command).To(Equal(filepath.Join(wlpPath, "bin", "featureUtility")))
 			Expect(execution.Args).To(Equal([]string{"installServerFeatures", "--acceptLicense", "--noCache", "testServer"}))
+		})
+
+		it("lists installed features", func() {
+			executor := &mocks.Executor{}
+			executor.On("Execute", mock.Anything).Run(func(args mock.Arguments) {
+				arg := args.Get(0).(effect.Execution)
+				_, err := arg.Stdout.Write([]byte(`
+						microProfile-5.0
+						webProfile-9.1`),
+				)
+				Expect(err).ToNot(HaveOccurred())
+			}).Return(nil)
+			installedFeatures, err := server.GetInstalledFeatures(wlpPath, executor)
+			Expect(err).ToNot(HaveOccurred())
+
+			execution := executor.Calls[0].Arguments[0].(effect.Execution)
+			Expect(execution.Command).To(Equal(filepath.Join(wlpPath, "bin", "productInfo")))
+			Expect(execution.Args).To(Equal([]string{"featureInfo"}))
+
+			Expect(installedFeatures).To(Equal([]string{"microProfile-5.0", "webProfile-9.1"}))
 		})
 	})
 }

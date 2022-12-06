@@ -17,6 +17,8 @@
 package server
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"github.com/paketo-buildpacks/liberty/internal/util"
@@ -26,6 +28,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -240,6 +243,66 @@ func InstallFeatures(runtimePath string, serverName string, executor effect.Exec
 	}
 
 	return nil
+}
+
+type InstalledIFix struct {
+	APAR string
+	IFix string
+}
+
+func GetInstalledIFixes(runtimePath string, executor effect.Executor) ([]InstalledIFix, error) {
+	buf := &bytes.Buffer{}
+
+	if err := executor.Execute(effect.Execution{
+		Command: filepath.Join(runtimePath, "bin", "productInfo"),
+		Args:    []string{"version", "--ifixes"},
+		Stdout:  buf,
+	}); err != nil {
+		return []InstalledIFix{}, fmt.Errorf("unable to get installed iFixes\n%w", err)
+	}
+
+	re, err := regexp.Compile(`^(.*) in the iFix\(es\): \[(.*)\]$`)
+	if err != nil {
+		return []InstalledIFix{}, fmt.Errorf("unable to create iFix regex\n%w", err)
+	}
+
+	installed := make([]InstalledIFix, 0)
+	scanner := bufio.NewScanner(buf)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if match := re.FindStringSubmatch(line); len(match) >= 2 {
+			installed = append(installed, InstalledIFix{
+				APAR: strings.TrimSpace(match[1]),
+				IFix: strings.TrimSpace(match[2]),
+			})
+		}
+	}
+
+	return installed, nil
+}
+
+func GetInstalledFeatures(runtimePath string, executor effect.Executor) ([]string, error) {
+	buf := &bytes.Buffer{}
+
+	if err := executor.Execute(effect.Execution{
+		Command: filepath.Join(runtimePath, "bin", "productInfo"),
+		Args:    []string{"featureInfo"},
+		Stdout:  buf,
+	}); err != nil {
+		return []string{}, fmt.Errorf("unable to get list of installed features\n%w", err)
+	}
+
+	installedFeatures := make([]string, 0)
+	scanner := bufio.NewScanner(buf)
+	for scanner.Scan() {
+		feature := strings.TrimSpace(scanner.Text())
+		if len(feature) <= 0 {
+			continue
+		}
+		installedFeatures = append(installedFeatures, feature)
+	}
+
+	return installedFeatures, nil
 }
 
 type Config struct {

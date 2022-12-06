@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bindings"
-	sherpa "github.com/paketo-buildpacks/libpak/sherpa"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -206,7 +206,17 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, base)
 
 	if installType == openLibertyInstall || installType == websphereLibertyInstall {
-		if err := b.buildDistributionRuntime(profile, version, installType, serverName, context.Application.Path, featureList, detectedBuildSrc, dr, dc, &result); err != nil {
+		if err := b.buildDistributionRuntime(
+			profile,
+			version,
+			installType,
+			serverName,
+			context.Application.Path,
+			featureList,
+			detectedBuildSrc,
+			dr,
+			dc,
+			&result); err != nil {
 			return libcnb.BuildResult{}, err
 		}
 	} else if installType == noneInstall {
@@ -251,7 +261,7 @@ func (b Build) buildDistributionRuntime(
 		return fmt.Errorf("unable to load iFixes\n%w", err)
 	}
 
-	distro := NewDistribution(dep, cache, serverName, appPath, features, iFixes, b.Executor)
+	distro := NewDistribution(dep, cache, installType, serverName, appPath, features, iFixes, b.Executor)
 	distro.Logger = b.Logger
 
 	result.Layers = append(result.Layers, distro)
