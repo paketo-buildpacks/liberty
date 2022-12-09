@@ -18,11 +18,12 @@ package liberty
 
 import (
 	"fmt"
+	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/libpak/sbom"
 	"os"
 	"path/filepath"
 	"strconv"
-
-	"github.com/paketo-buildpacks/liberty/internal/server"
+	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libjvm/count"
@@ -33,7 +34,9 @@ import (
 )
 
 type Distribution struct {
+	Dependency       libpak.BuildpackDependency
 	ApplicationPath  string
+	InstallType      string
 	ServerName       string
 	Executor         effect.Executor
 	Features         []string
@@ -45,6 +48,7 @@ type Distribution struct {
 func NewDistribution(
 	dependency libpak.BuildpackDependency,
 	cache libpak.DependencyCache,
+	installType string,
 	serverName string,
 	applicationPath string,
 	features []string,
@@ -64,6 +68,8 @@ func NewDistribution(
 	}
 
 	return Distribution{
+		Dependency:       dependency,
+		InstallType:      installType,
 		ApplicationPath:  applicationPath,
 		ServerName:       serverName,
 		Executor:         executor,
@@ -118,8 +124,71 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		layer.LaunchEnvironment.Default("WLP_LOGGING_APPS_WRITE_JSON", "true")
 		layer.LaunchEnvironment.Default("WLP_LOGGING_JSON_ACCESS_LOG_FIELDS", "default")
 
+		if err := d.ContributeSBOM(layer); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to contribute SBOM\n%w", err)
+		}
+
 		return layer, nil
 	})
+}
+
+func (d Distribution) ContributeSBOM(layer libcnb.Layer) error {
+	sbomArtifact, err := d.Dependency.AsSyftArtifact()
+	if err != nil {
+		return fmt.Errorf("unable to get SBOM artifact %s\n%w", d.Dependency.ID, err)
+	}
+	artifacts := []sbom.SyftArtifact{sbomArtifact}
+
+	installedIFixes, err := server.GetInstalledIFixes(layer.Path, d.Executor)
+	if err != nil {
+		return fmt.Errorf("unable to get installed iFixes\n%w", err)
+	}
+	for _, ifix := range installedIFixes {
+		d.Logger.Debugf("Found installed iFix for APAR %s: %s\n", ifix.APAR, ifix.IFix)
+		artifacts = append(artifacts, sbom.SyftArtifact{
+			ID:        ifix.APAR,
+			Name:      ifix.APAR,
+			Version:   sbomArtifact.Version,
+			Type:      "jar",
+			Locations: []sbom.SyftLocation{{Path: ifix.IFix + ".jar"}},
+		})
+	}
+	installedFeatures, err := server.GetInstalledFeatures(layer.Path, d.Executor)
+	if err != nil {
+		return fmt.Errorf("unable to get installed features\n%w", err)
+	}
+	var groupId string
+	if d.InstallType == openLibertyInstall {
+		groupId = "io.openliberty.features"
+	} else {
+		groupId = "com.ibm.websphere.appserver.features"
+	}
+
+	var version string
+	if parts := strings.Split(sbomArtifact.PURL, "@"); len(parts) == 2 {
+		version = parts[1]
+	}
+	for _, feature := range installedFeatures {
+		d.Logger.Debugf("Found installed feature: %s", feature)
+		artifacts = append(artifacts, sbom.SyftArtifact{
+			ID:      feature,
+			Name:    feature,
+			Version: sbomArtifact.Version,
+			Type:    "esa",
+			PURL:    fmt.Sprintf("pkg:maven/%s/%s@%s", groupId, feature, version),
+		})
+
+	}
+
+	sbomPath := layer.SBOMPath(libcnb.SyftJSON)
+	dep := sbom.NewSyftDependency(layer.Path, artifacts)
+
+	d.Logger.Debugf("Writing Syft SBOM at %s: %+v", sbomPath, dep)
+	if err := dep.WriteTo(sbomPath); err != nil {
+		return fmt.Errorf("unable to write SBOM\n%w", err)
+	}
+
+	return nil
 }
 
 func (d Distribution) Name() string {
