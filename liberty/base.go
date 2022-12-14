@@ -273,7 +273,7 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 	serverPath := filepath.Join(layer.Path, "wlp", "usr", "servers", b.ServerName)
 
 	linkPath := filepath.Join(serverPath, "apps", "app")
-	if err := os.Remove(linkPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
+	if err := os.RemoveAll(linkPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("unable to remove app\n%w", err)
 	}
 
@@ -291,9 +291,11 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 		if err != nil {
 			return fmt.Errorf("unable to open compiled artifact\n%w", err)
 		}
-		err = crush.Extract(compiledArtifact, linkPath, 0)
-		if err != nil {
+		if err := crush.Extract(compiledArtifact, linkPath, 0); err != nil {
 			return fmt.Errorf("unable to extract compiled artifact\n%w", err)
+		}
+		if err := os.Remove(appPath); err != nil {
+			return fmt.Errorf("unable to remove compiled artifact\n%w", err)
 		}
 	}
 

@@ -210,8 +210,10 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 		layer, err = base.Contribute(layer)
 		Expect(err).ToNot(HaveOccurred())
 
+		// Ensure app war is expanded to <server>/apps/app and compiled artifact was deleted
 		Expect(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "apps", "app")).To(BeADirectory())
 		Expect(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "apps", "app", "index.html")).To(BeAnExistingFile())
+		Expect(filepath.Join(ctx.Application.Path, "test.war")).ToNot(BeAnExistingFile())
 
 		serverDir := filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer")
 		for _, file := range []string{
