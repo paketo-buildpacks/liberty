@@ -17,6 +17,7 @@
 package liberty_test
 
 import (
+	"fmt"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/ioutil"
 	"os"
@@ -31,7 +32,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func testBase(t *testing.T, _ spec.G, it spec.S) {
+func testBase(t *testing.T, when spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
@@ -62,7 +63,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 		}
 		srcTemplateDir := filepath.Join(ctx.Buildpack.Path, "templates")
 		Expect(os.Mkdir(srcTemplateDir, 0755)).To(Succeed())
-		Expect(os.WriteFile(filepath.Join(srcTemplateDir, "app.tmpl"), []byte{}, 0644)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(srcTemplateDir, "app.tmpl"), []byte(`<server><{{ .AppElement }} id="{{ .Id }}" name="{{ .Name }}" location="{{ .Location }}" context-root="{{ .ContextRoot }}"/></server>`), 0644)).To(Succeed())
 		template := `<?xml version="1.0" encoding="UTF-8"?>
 <server>
   <featureManager>
@@ -91,7 +92,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -124,7 +125,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -158,7 +159,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jaxrs-2.1", "cdi-2.0"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -202,7 +203,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -242,7 +243,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -272,7 +273,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -302,7 +303,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"testServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -357,7 +358,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			userFeatureDescriptor,
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -380,7 +381,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -400,7 +401,7 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 			ctx.Buildpack.Path,
 			"defaultServer",
 			[]string{"jsp-2.3"},
-			"/",
+			"",
 			&liberty.FeatureDescriptor{},
 			libcnb.Binding{},
 			bard.NewLogger(os.Stdout),
@@ -412,5 +413,128 @@ func testBase(t *testing.T, _ spec.G, it spec.S) {
 		layer, err = base.Contribute(layer)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(layer.LaunchEnvironment["JAVA_TOOL_OPTIONS.append"]).To(BeEmpty())
+	})
+
+	when("contributing application config", func() {
+		it.Before(func() {
+			appTemplate := `<server><{{ .AppElement }} id="{{ .Id }}" name="{{ .Name }}" location="{{ .Location }}" context-root="{{ .ContextRoot }}"/></server>`
+			Expect(os.WriteFile(filepath.Join(ctx.Buildpack.Path, "templates", "app.tmpl"), []byte(appTemplate), 0644)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Remove(filepath.Join(ctx.Buildpack.Path, "templates", "app.tmpl"))).To(Succeed())
+		})
+
+		it("contributes a default app.xml", func() {
+			base := liberty.NewBase(
+				ctx.Application.Path,
+				ctx.Buildpack.Path,
+				"defaultServer",
+				[]string{"jsp-2.3"},
+				"",
+				&liberty.FeatureDescriptor{},
+				libcnb.Binding{},
+				bard.NewLogger(os.Stdout),
+				"OpenJDK",
+			)
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).ToNot(HaveOccurred())
+			layer, err = base.Contribute(layer)
+			Expect(err).ToNot(HaveOccurred())
+
+			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
+			Expect(err).ToNot(HaveOccurred())
+			defer xmlFile.Close()
+			bytes, err := ioutil.ReadAll(xmlFile)
+			Expect(err).ToNot(HaveOccurred())
+
+			appXML := fmt.Sprintf(`<server><application id="app" name="app" location="%s" context-root="/"/></server>`,
+				filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "apps", "app"))
+			Expect(string(bytes)).To(Equal(appXML))
+		})
+
+		it("contributes app.xml with existing app config from server.xml", func() {
+			serverXML := `<?xml version="1.0" encoding="UTF-8"?><server><webApplication id="myapp" name="myapp" context-root="/dev"/></server>`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.xml"), []byte(serverXML), 0644)).To(Succeed())
+
+			base := liberty.NewBase(
+				ctx.Application.Path,
+				ctx.Buildpack.Path,
+				"defaultServer",
+				[]string{"jsp-2.3"},
+				"",
+				&liberty.FeatureDescriptor{},
+				libcnb.Binding{},
+				bard.NewLogger(os.Stdout),
+				"OpenJDK",
+			)
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).ToNot(HaveOccurred())
+			layer, err = base.Contribute(layer)
+			Expect(err).ToNot(HaveOccurred())
+
+			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
+			Expect(err).ToNot(HaveOccurred())
+			defer xmlFile.Close()
+			bytes, err := ioutil.ReadAll(xmlFile)
+			Expect(err).ToNot(HaveOccurred())
+
+			appXML := fmt.Sprintf(`<server><webApplication id="myapp" name="myapp" location="%s" context-root="/dev"/></server>`,
+				filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "apps", "app"))
+			Expect(string(bytes)).To(Equal(appXML))
+		})
+
+		it("fails when existing app config in server.xml is missing required ID", func() {
+			serverXML := `<?xml version="1.0" encoding="UTF-8"?><server><webApplication name="myapp" context-root="/dev"/></server>`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.xml"), []byte(serverXML), 0644)).To(Succeed())
+
+			base := liberty.NewBase(
+				ctx.Application.Path,
+				ctx.Buildpack.Path,
+				"defaultServer",
+				[]string{"jsp-2.3"},
+				"",
+				&liberty.FeatureDescriptor{},
+				libcnb.Binding{},
+				bard.NewLogger(os.Stdout),
+				"OpenJDK",
+			)
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).ToNot(HaveOccurred())
+			layer, err = base.Contribute(layer)
+			Expect(err).To(HaveOccurred())
+			Expect(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml")).ToNot(BeAnExistingFile())
+		})
+
+		it("uses provided context root", func() {
+			serverXML := `<?xml version="1.0" encoding="UTF-8"?><server><webApplication id="myapp" name="myapp" context-root="/dev"/></server>`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.xml"), []byte(serverXML), 0644)).To(Succeed())
+
+			base := liberty.NewBase(
+				ctx.Application.Path,
+				ctx.Buildpack.Path,
+				"defaultServer",
+				[]string{"jsp-2.3"},
+				"/app",
+				&liberty.FeatureDescriptor{},
+				libcnb.Binding{},
+				bard.NewLogger(os.Stdout),
+				"OpenJDK",
+			)
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).ToNot(HaveOccurred())
+			layer, err = base.Contribute(layer)
+			Expect(err).ToNot(HaveOccurred())
+
+			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
+			Expect(err).ToNot(HaveOccurred())
+			defer xmlFile.Close()
+			bytes, err := ioutil.ReadAll(xmlFile)
+			Expect(err).ToNot(HaveOccurred())
+
+			appXML := fmt.Sprintf(`<server><webApplication id="myapp" name="myapp" location="%s" context-root="/app"/></server>`,
+				filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "apps", "app"))
+			Expect(string(bytes)).To(Equal(appXML))
+		})
 	})
 }

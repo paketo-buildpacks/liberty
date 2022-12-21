@@ -303,20 +303,52 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 		}
 	}
 
-	if config.Application.Name == "app" {
-		b.Logger.Debugf("server.xml already has an application named 'app' defined. Skipping contribution of app config snippet...")
-		return nil
-	}
-
 	appType := "war"
 	if _, err := os.Stat(filepath.Join(appPath, "META-INF", "application.xml")); err == nil {
 		appType = "ear"
 	}
+	if err := b.createAppConfig(serverPath, linkPath, b.ContextRoot, appType, config); err != nil {
+		return fmt.Errorf("unable to create app config\n%w", err)
+	}
+	return nil
+}
 
-	appConfig := ApplicationConfig{
-		Path:        linkPath,
-		ContextRoot: b.ContextRoot,
-		Type:        appType,
+func (b Base) createAppConfig(serverPath string, appPath string, contextRoot string, appType string, config server.Config) error {
+	appConfigs := server.ProcessApplicationConfigs(config)
+
+	if appConfigs.HasId("") {
+		return fmt.Errorf("application config requires ID to be set: %+v", appConfigs)
+	}
+
+	appIds := appConfigs.Ids()
+	if len(appIds) > 1 {
+		return fmt.Errorf("more than one application config found: %+v", appConfigs)
+	}
+
+	var appConfig server.ApplicationConfig
+
+	if len(appIds) == 1 {
+		conf, err := appConfigs.GetApplication(appIds[0])
+		if err != nil {
+			return err
+		}
+		appConfig = conf
+	} else {
+		appConfig = server.ApplicationConfig{
+			Id:          "app",
+			Name:        "app",
+			ContextRoot: "/",
+			Type:        appType,
+			AppElement:  "application",
+		}
+	}
+
+	appConfig.Location = appPath
+	if contextRoot != "" {
+		appConfig.ContextRoot = contextRoot
+	}
+	if appConfig.Type == "" {
+		appConfig.Type = appType
 	}
 
 	templatePath, err := b.getConfigTemplate("app.tmpl")
@@ -376,12 +408,6 @@ func (b Base) contributeUserFeatures(layer libcnb.Layer) error {
 
 func (Base) Name() string {
 	return "base"
-}
-
-type ApplicationConfig struct {
-	Path        string
-	ContextRoot string
-	Type        string
 }
 
 func (b Base) getConfigTemplate(template string) (string, error) {
