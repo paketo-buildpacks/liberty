@@ -193,11 +193,13 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if err != nil {
 		return libcnb.BuildResult{}, err
 	}
+	contextRoot, _ := cr.Resolve("BP_LIBERTY_CONTEXT_ROOT")
 	base := NewBase(
 		context.Application.Path,
 		context.Buildpack.Path,
 		serverName,
 		featureList,
+		contextRoot,
 		userFeatureDescriptor,
 		binding,
 		b.Logger,

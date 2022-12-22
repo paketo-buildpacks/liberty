@@ -43,6 +43,7 @@ type Base struct {
 	Logger                bard.Logger
 	ServerName            string
 	Features              []string
+	ContextRoot           string
 	UserFeatureDescriptor *FeatureDescriptor
 	LibertyBinding        libcnb.Binding
 	JVM                   string
@@ -53,6 +54,7 @@ func NewBase(
 	buildpackPath string,
 	serverName string,
 	features []string,
+	contextRoot string,
 	userFeatureDescriptor *FeatureDescriptor,
 	libertyBinding libcnb.Binding,
 	logger bard.Logger,
@@ -70,6 +72,7 @@ func NewBase(
 	expectedMetadata := map[string]interface{}{
 		"serverName":   serverName,
 		"features":     features,
+		"contextRoot":  contextRoot,
 		"userFeatures": enabledUserFeatures,
 		"workspaceSum": workspaceSum,
 	}
@@ -97,6 +100,7 @@ func NewBase(
 		LayerContributor:      contributor,
 		ServerName:            serverName,
 		Features:              features,
+		ContextRoot:           contextRoot,
 		UserFeatureDescriptor: userFeatureDescriptor,
 		LibertyBinding:        libertyBinding,
 		Logger:                logger,
@@ -304,7 +308,6 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 		return nil
 	}
 
-	contextRoot := sherpa.GetEnvWithDefault("BP_LIBERTY_CONTEXT_ROOT", "/")
 	appType := "war"
 	if _, err := os.Stat(filepath.Join(appPath, "META-INF", "application.xml")); err == nil {
 		appType = "ear"
@@ -312,7 +315,7 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 
 	appConfig := ApplicationConfig{
 		Path:        linkPath,
-		ContextRoot: contextRoot,
+		ContextRoot: b.ContextRoot,
 		Type:        appType,
 	}
 
