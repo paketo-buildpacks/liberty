@@ -66,10 +66,10 @@ api = "0.7"
     name = "BP_LIBERTY_SERVER_NAME"
 
   [[metadata.configurations]]
-    build = false
+    build = true
     default = ""
     description = "Context root to use for app"
-    launch = true
+    launch = false
     name = "BP_LIBERTY_CONTEXT_ROOT"
 
   [[metadata.configurations]]
