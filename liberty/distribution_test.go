@@ -152,7 +152,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		Expect(installFeatureExecution.Args).To(Equal([]string{"installServerFeatures", "--acceptLicense", "--noCache", "defaultServer"}))
 	})
 
-	it("skips installing features with BP_LIBERTY_SKIP_FEATURE_INSTALL set", func() {
+	it("skips installing features", func() {
 		dep := libpak.BuildpackDependency{
 			ID:     "open-liberty-runtime",
 			URI:    "https://localhost/stub-liberty-runtime.zip",
