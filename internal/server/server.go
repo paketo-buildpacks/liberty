@@ -233,10 +233,6 @@ func InstallFeatures(runtimePath string, serverName string, executor effect.Exec
 		serverName,
 	}
 
-	if logger.IsDebugEnabled() {
-		args = append(args, "--verbose")
-	}
-
 	if err := executor.Execute(effect.Execution{
 		Command: filepath.Join(runtimePath, "bin", "featureUtility"),
 		Args:    args,

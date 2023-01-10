@@ -175,8 +175,8 @@ func (d Distribution) ContributeSBOM(layer libcnb.Layer) error {
 	if parts := strings.Split(sbomArtifact.PURL, "@"); len(parts) == 2 {
 		version = parts[1]
 	}
-	d.Logger.Debugf("Adding features to SBOM: %s", strings.Join(installedFeatures, ", "))
 	for _, feature := range installedFeatures {
+		d.Logger.Debugf("Found installed feature: %s", feature)
 		artifacts = append(artifacts, sbom.SyftArtifact{
 			ID:      feature,
 			Name:    feature,
