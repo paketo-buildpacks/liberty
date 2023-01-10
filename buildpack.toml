@@ -89,9 +89,9 @@ api = "0.7"
   [[metadata.configurations]]
     build = true
     default = "false"
-    description = ""
+    description = "Disable running the feature installer."
     launch = false
-    name = "BP_LIBERTY_SKIP_FEATURE_INSTALL"
+    name = "BP_LIBERTY_FEATURE_INSTALL_DISABLED"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.13:*:*:*:*:*:*:*"]

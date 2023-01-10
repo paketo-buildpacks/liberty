@@ -34,16 +34,16 @@ import (
 )
 
 type Distribution struct {
-	Dependency         libpak.BuildpackDependency
-	ApplicationPath    string
-	InstallType        string
-	ServerName         string
-	Executor           effect.Executor
-	SkipFeatureInstall bool
-	Features           []string
-	IFixes             []string
-	LayerContributor   libpak.DependencyLayerContributor
-	Logger             bard.Logger
+	Dependency            libpak.BuildpackDependency
+	ApplicationPath       string
+	InstallType           string
+	ServerName            string
+	Executor              effect.Executor
+	DisableFeatureInstall bool
+	Features              []string
+	IFixes                []string
+	LayerContributor      libpak.DependencyLayerContributor
+	Logger                bard.Logger
 }
 
 func NewDistribution(
@@ -52,7 +52,7 @@ func NewDistribution(
 	installType string,
 	serverName string,
 	applicationPath string,
-	skipFeatureInstall bool,
+	disableFeatureInstall bool,
 	features []string,
 	ifixes []string,
 	executor effect.Executor,
@@ -70,15 +70,15 @@ func NewDistribution(
 	}
 
 	return Distribution{
-		Dependency:         dependency,
-		InstallType:        installType,
-		ApplicationPath:    applicationPath,
-		ServerName:         serverName,
-		Executor:           executor,
-		SkipFeatureInstall: skipFeatureInstall,
-		Features:           features,
-		IFixes:             ifixes,
-		LayerContributor:   contributor,
+		Dependency:            dependency,
+		InstallType:           installType,
+		ApplicationPath:       applicationPath,
+		ServerName:            serverName,
+		Executor:              executor,
+		DisableFeatureInstall: disableFeatureInstall,
+		Features:              features,
+		IFixes:                ifixes,
+		LayerContributor:      contributor,
 	}
 }
 
@@ -90,7 +90,7 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("unable to expand Liberty Runtime\n%w", err)
 		}
 
-		if !d.SkipFeatureInstall {
+		if !d.DisableFeatureInstall {
 			if err := server.InstallFeatures(layer.Path, d.ServerName, d.Executor, d.Logger); err != nil {
 				return libcnb.Layer{}, fmt.Errorf("unable to install features to distribution\n%w", err)
 			}

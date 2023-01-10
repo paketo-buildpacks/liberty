@@ -173,12 +173,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
 	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 	featureList := strings.Fields(features)
-	skipFeatureInstall := false
+	disableFeatureInstall := false
 	if profile == "full" {
-		skipFeatureInstall = true
+		disableFeatureInstall = true
 	}
-	if val, isSet := cr.Resolve("BP_LIBERTY_SKIP_FEATURE_INSTALL"); isSet {
-		skipFeatureInstall = val == "true"
+	if val, isSet := cr.Resolve("BP_LIBERTY_FEATURE_INSTALL_DISABLED"); isSet {
+		disableFeatureInstall = val == "true"
 	}
 	appPath, err := detectedBuildSrc.AppPath()
 	if err != nil {
@@ -221,7 +221,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			installType,
 			serverName,
 			context.Application.Path,
-			skipFeatureInstall,
+			disableFeatureInstall,
 			featureList,
 			detectedBuildSrc,
 			dr,
@@ -246,7 +246,7 @@ func (b Build) buildDistributionRuntime(
 	installType string,
 	serverName string,
 	appPath string,
-	skipFeatureInstall bool,
+	disableFeatureInstall bool,
 	features []string,
 	buildSrc core.BuildSource,
 	dependencyResolver libpak.DependencyResolver,
@@ -272,7 +272,7 @@ func (b Build) buildDistributionRuntime(
 		return fmt.Errorf("unable to load iFixes\n%w", err)
 	}
 
-	distro := NewDistribution(dep, cache, installType, serverName, appPath, skipFeatureInstall, features, iFixes, b.Executor)
+	distro := NewDistribution(dep, cache, installType, serverName, appPath, disableFeatureInstall, features, iFixes, b.Executor)
 	distro.Logger = b.Logger
 
 	result.Layers = append(result.Layers, distro)
