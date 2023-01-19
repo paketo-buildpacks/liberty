@@ -67,7 +67,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, []string{}, []string{}, executor)
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, []string{}, []string{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
@@ -101,7 +101,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, []string{}, []string{iFixPath}, executor)
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, []string{}, []string{iFixPath}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
@@ -136,7 +136,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		executor.On("Execute", mock.Anything).Return(nil)
 
 		features := []string{"foo", "bar", "baz"}
-		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, features, []string{}, executor)
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, features, []string{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
@@ -152,4 +152,30 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		Expect(installFeatureExecution.Args).To(Equal([]string{"installServerFeatures", "--acceptLicense", "--noCache", "defaultServer"}))
 	})
 
+	it("skips installing features", func() {
+		dep := libpak.BuildpackDependency{
+			ID:     "open-liberty-runtime",
+			URI:    "https://localhost/stub-liberty-runtime.zip",
+			SHA256: "e71b55142699b277357d486eeb6244c71a0be3657a96a4286e30b27ceff34b17",
+		}
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		executor := &mocks.Executor{}
+		executor.On("Execute", mock.Anything).Return(nil)
+
+		features := []string{"foo", "bar", "baz"}
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, true, features, []string{}, executor)
+		distro.Logger = bard.NewLogger(io.Discard)
+
+		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("features", features))
+
+		layer, err = distro.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		installFeatureExecution := executor.Calls[0].Arguments[0].(effect.Execution)
+		Expect(installFeatureExecution.Command).ToNot(ContainSubstring("featureUtility"))
+	})
 }

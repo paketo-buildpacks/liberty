@@ -173,6 +173,13 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
 	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 	featureList := strings.Fields(features)
+	disableFeatureInstall := false
+	if profile == "full" {
+		disableFeatureInstall = true
+	}
+	if val, isSet := cr.Resolve("BP_LIBERTY_FEATURE_INSTALL_DISABLED"); isSet {
+		disableFeatureInstall = val == "true"
+	}
 	appPath, err := detectedBuildSrc.AppPath()
 	if err != nil {
 		return libcnb.BuildResult{}, err
@@ -214,6 +221,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			installType,
 			serverName,
 			context.Application.Path,
+			disableFeatureInstall,
 			featureList,
 			detectedBuildSrc,
 			dr,
@@ -238,6 +246,7 @@ func (b Build) buildDistributionRuntime(
 	installType string,
 	serverName string,
 	appPath string,
+	disableFeatureInstall bool,
 	features []string,
 	buildSrc core.BuildSource,
 	dependencyResolver libpak.DependencyResolver,
@@ -263,7 +272,7 @@ func (b Build) buildDistributionRuntime(
 		return fmt.Errorf("unable to load iFixes\n%w", err)
 	}
 
-	distro := NewDistribution(dep, cache, installType, serverName, appPath, features, iFixes, b.Executor)
+	distro := NewDistribution(dep, cache, installType, serverName, appPath, disableFeatureInstall, features, iFixes, b.Executor)
 	distro.Logger = b.Logger
 
 	result.Layers = append(result.Layers, distro)
