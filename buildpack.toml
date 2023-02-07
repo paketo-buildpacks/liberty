@@ -206,70 +206,70 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.13:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.1:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-kernel"
     name = "WebSphere Liberty (Kernel)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@22.0.0.13"
-    sha256 = "75eedce5c8dbde00b68290aae3f6c60c20c9e57132d140104bc766e48b2cfe52"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@23.0.0.1"
+    sha256 = "1b44e4429428a50e1fb9dd64c87064c093410925c822d828c251e4f661aa45b8"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/22.0.0.13/wlp-kernel-22.0.0.13.zip"
-    version = "22.0.13"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/23.0.0.1/wlp-kernel-23.0.0.1.zip"
+    version = "23.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.13:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.1:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-jakartaee9"
     name = "WebSphere Liberty (Jakarta EE9)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee9@22.0.0.13"
-    sha256 = "896e66f73a0f9b38fb1b41af5c106d427c841626abe9811a94ed8976f35fb679"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee9@23.0.0.1"
+    sha256 = "d795ffb4c724375496a5074c501ba47e42802aacfdd90fcf257b80b29a6da666"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee9/22.0.0.13/wlp-jakartaee9-22.0.0.13.zip"
-    version = "22.0.13"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee9/23.0.0.1/wlp-jakartaee9-23.0.0.1.zip"
+    version = "23.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.13:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.1:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee8"
     name = "WebSphere Liberty (Java EE8)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee8@22.0.0.13"
-    sha256 = "016b92199591b26bee4588d2fa753e2b45aa5b1b97734d3b4cab9dd9722e7ece"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee8@23.0.0.1"
+    sha256 = "9626ceb9a7cf27849924330e820264751d90762f4d84b0a5d698c386864f1642"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee8/22.0.0.13/wlp-javaee8-22.0.0.13.zip"
-    version = "22.0.13"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee8/23.0.0.1/wlp-javaee8-23.0.0.1.zip"
+    version = "23.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.13:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.1:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee7"
     name = "WebSphere Liberty (Java EE7)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@22.0.0.13"
-    sha256 = "d522ecb117585bc2fcbfaa6aba3cb8919b8ff7772429b792a4cf4e320a74f17c"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@23.0.0.1"
+    sha256 = "cac71d42713bedcc65acf12109d5971374c7f6e5576c1319960db664d9d6c612"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/22.0.0.13/wlp-javaee7-22.0.0.13.zip"
-    version = "22.0.13"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/23.0.0.1/wlp-javaee7-23.0.0.1.zip"
+    version = "23.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:22.0.0.13:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.1:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile9"
     name = "WebSphere Liberty (Web Profile 9)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile9@22.0.0.13"
-    sha256 = "25b8db5bdfd60b67c62282dcdbcb90896edc7da7867db5ad21841d500d8fccf0"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile9@23.0.0.1"
+    sha256 = "17479b857a6ddcdc086ff9a7066e30cedf771062f829accada7fd62d756d2323"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile9/22.0.0.13/wlp-webProfile9-22.0.0.13.zip"
-    version = "22.0.13"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile9/23.0.0.1/wlp-webProfile9-23.0.0.1.zip"
+    version = "23.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
