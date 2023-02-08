@@ -136,14 +136,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.13:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.1:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile9"
     name = "Open Liberty (Web Profile 9)"
-    purl = "pkg:maven/io.openliberty/openliberty-webProfile9@22.0.0.13"
-    sha256 = "f5279936887f08d1c976126377ace27fd5b5c3d76188c3da705b734f1e6aa121"
+    purl = "pkg:maven/io.openliberty/openliberty-webProfile9@23.0.0.1"
+    sha256 = "62c6c476092e4a17514f453affe54d227c7d3ebe7fe4f2034572d6bf29a0ff7a"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/22.0.0.13/openliberty-webProfile9-22.0.0.13.zip"
-    version = "22.0.13"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/23.0.0.1/openliberty-webProfile9-23.0.0.1.zip"
+    version = "23.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
@@ -192,14 +192,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:22.0.0.13:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.1:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
-    purl = "pkg:maven/io.openliberty/openliberty-kernel@22.0.0.13"
-    sha256 = "efa95e671e28de6d5d4258417672109eb901e1be25e792839cb0e1ccc2cbe1e0"
+    purl = "pkg:maven/io.openliberty/openliberty-kernel@23.0.0.1"
+    sha256 = "5e4e0a2549b86869a38ef789d975b72aebf2dab8b79fa5a6eb4a8fa9d2464141"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/22.0.0.13/openliberty-kernel-22.0.0.13.zip"
-    version = "22.0.13"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/23.0.0.1/openliberty-kernel-23.0.0.1.zip"
+    version = "23.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
