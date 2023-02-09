@@ -1,7 +1,6 @@
 # `gcr.io/paketo-buildpacks/liberty`
 
-The Paketo Buildpack for Liberty is a Cloud-Native Buildpack that contributes Open Liberty or WebSphere Liberty for Java
-EE support.
+The Paketo Buildpack for Liberty is a Cloud-Native Buildpack that contributes Open Liberty or WebSphere Liberty for Java EE support.
 
 ## Behavior
 
@@ -13,8 +12,7 @@ The buildpack will participate when building any of the following:
 
 When building a web application, this buildpack will participate if all the following conditions are met:
 
-* `$BP_JAVA_APP_SERVER` is `liberty` or if `$BP_JAVA_APP_SERVER` is unset or empty and this is the first buildpack to
-   provide a Java application server.
+* `$BP_JAVA_APP_SERVER` is `liberty` or if `$BP_JAVA_APP_SERVER` is unset or empty and this is the first buildpack to provide a Java application server.
 * `Main-Class` is NOT defined in the manifest
 * `<APPLICATION_ROOT>/META-INF/application.xml` or `<APPLICATION_ROOT>/WEB-INF` exist
 
@@ -34,9 +32,7 @@ The buildpack will do the following:
 * If a web application was built, it will symlink `<APPLICATION_ROOT>` to `<WLP_USR_DIR>/servers/<SERVER_NAME>/apps/app`
 * If a Liberty server was built, it will symlink `<APPLICATION_ROOT>` to `<WLP_USR_DIR>`
 
-The buildpack will support all available profiles of the most recent versions of the Liberty runtime. Because the Liberty
-versioning scheme is not conformant to semantic versioning, a Liberty version like `22.0.0.2` is defined here as `22.0.2`,
-and should be referenced as such.
+The buildpack will support all available profiles of the most recent versions of the Liberty runtime. Because the Liberty versioning scheme is not conformant to semantic versioning, a Liberty version like `22.0.0.2` is defined here as `22.0.2`, and should be referenced as such.
 
 ## Configuration
 
@@ -81,14 +77,9 @@ Valid profiles for WebSphere Liberty are:
 
 ### Default Configurations that Vary from Liberty's Default
 
-By default, the Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions
-from the Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and
-will instead go to `messages.log`. In addition, the log sources that will go to stdout are
-`message,trace,accessLog,ffdc,audit`.
+By default, the Liberty buildpack will log in `json` format. This will aid in log ingestion. Due to design decisions from the Liberty team, setting this format to any other value will prevent all log types from being sent to `stdout` and will instead go to `messages.log`. In addition, the log sources that will go to stdout are `message,trace,accessLog,ffdc,audit`.
 
-All of these defaults can be overridden by setting the appropriate properties found in Liberty's
-[documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment
-variables, or in [`bootstrap.properties`](#bindings).
+All of these defaults can be overridden by setting the appropriate properties found in Liberty's [documentation](https://openliberty.io/docs/21.0.0.11/log-trace-configuration.html). They can be set as environment variables, or in [`bootstrap.properties`](#bindings).
 
 ## Including Server Configuration in the Application Image
 
@@ -102,9 +93,7 @@ The following server configuration files can be included in the application imag
 image and can leak your secrets. See [Configuring Secrets](#configuring-secrets) for information on how to provide
 secrets in your configuration.
 
-At the moment, these files can only be included in the build by telling the Maven or Gradle buildpacks to provide them.
-Thus this method of including server configuration can only be performed when building from source code, it will not work
-when building with a pre-compiled WAR file.
+At the moment, these files can only be included in the build by telling the Maven or Gradle buildpacks to provide them. Thus this method of including server configuration can only be performed when building from source code, it will not work when building with a pre-compiled WAR file.
 
 For example, to provide server configuration in the `src/main/liberty/config`, set one of the following environment
 variables in your `pack build` command.
@@ -123,8 +112,7 @@ variables in your `pack build` command.
 
 ### Providing Application Config in server.xml
 
-Any application configuration provided in the `server.xml` must have an `id` set. This is required for the Liberty
-buildpack to provide additional configuration (e.g., updating the application's location).
+Any application configuration provided in the `server.xml` must have an `id` set. This is required for the Liberty buildpack to provide additional configuration (e.g., updating the application's location).
 
 For example:
 
@@ -188,18 +176,15 @@ For example, `FEATURE_REPO_URL`, `http_proxy` and `https_proxy`.
 
 ### Using Custom Features
 
-Custom features can be configured on the server as well using a volume mount to `/features` that contains the feature
-JARs and manifests along with a feature descriptor.
+Custom features can be configured on the server as well using a volume mount to `/features` that contains the feature JARs and manifests along with a feature descriptor.
 
 #### Feature Manifest
 
-The feature manifest is a TOML file called `features.toml` containing a list of `features` that should be installed on
-the server.
+The feature manifest is a TOML file called `features.toml` containing a list of `features` that should be installed on the server.
 
 A feature has the properties:
 
-* `name`: Name of the feature to enable. Use the symbolic name of the feature that you would use when enabling the
-  feature in the `server.xml`.
+* `name`: Name of the feature to enable. Use the symbolic name of the feature that you would use when enabling the feature in the `server.xml`.
 * `uri`: URI of where to find the feature. The `file` scheme is the only supported scheme at the moment.
 * `version`: Version of the feature.
 * `dependencies`: List of features that the custom feature depends on, if any.
