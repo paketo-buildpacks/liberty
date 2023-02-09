@@ -166,13 +166,9 @@ The buildpack accepts the following bindings:
 
 ## Installing Features
 
-You can install features by setting `$BP_LIBERTY_FEATURES` to be a space separate list of the features you want to install.
-For example, `BP_LIBERTY_FEATURES='jdbc-4.3 el-3.0'`. You can see a full list of available features in the
-[Liberty documentation on Features](https://openliberty.io/docs/22.0.0.2/reference/feature/feature-overview.html).
+You can install features by setting `$BP_LIBERTY_FEATURES` to be a space separate list of the features you want to install. For example, `BP_LIBERTY_FEATURES='jdbc-4.3 el-3.0'`. You can see a full list of available features in the [Liberty documentation on Features](https://openliberty.io/docs/22.0.0.2/reference/feature/feature-overview.html).
 
-Features are by default downloaded from Maven Central. You can control this behavior using the [standard environment
-variables for controlling `featureUtility`](https://openliberty.io/docs/22.0.0.2/reference/command/featureUtility-modifications.html).
-For example, `FEATURE_REPO_URL`, `http_proxy` and `https_proxy`.
+Features are by default downloaded from Maven Central. You can control this behavior using the [standard environment variables for controlling `featureUtility`](https://openliberty.io/docs/22.0.0.2/reference/command/featureUtility-modifications.html). For example, `FEATURE_REPO_URL`, `http_proxy` and `https_proxy`.
 
 ### Using Custom Features
 
