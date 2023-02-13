@@ -484,7 +484,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 			Expect(string(bytes)).To(Equal(appXML))
 		})
 
-		it("fails when existing app config in server.xml is missing required ID", func() {
+		it("add default ID when undefined for app in server config", func() {
 			serverXML := `<?xml version="1.0" encoding="UTF-8"?><server><webApplication name="myapp" context-root="/dev"/></server>`
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "server.xml"), []byte(serverXML), 0644)).To(Succeed())
 
@@ -502,8 +502,14 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 			layer, err := ctx.Layers.Layer("test-layer")
 			Expect(err).ToNot(HaveOccurred())
 			layer, err = base.Contribute(layer)
-			Expect(err).To(HaveOccurred())
-			Expect(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml")).ToNot(BeAnExistingFile())
+			Expect(err).ToNot(HaveOccurred())
+
+			xmlFile, err := os.Open(filepath.Join(ctx.Application.Path, "server.xml"))
+			Expect(err).ToNot(HaveOccurred())
+			defer xmlFile.Close()
+			bytes, err := ioutil.ReadAll(xmlFile)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(string(bytes)).To(Equal(`<?xml version="1.0" encoding="UTF-8"?><server><webApplication name="myapp" context-root="/dev" id="app"/></server>`))
 		})
 
 		it("uses provided context root", func() {

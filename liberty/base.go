@@ -316,10 +316,6 @@ func (b Base) contributeApp(layer libcnb.Layer, config server.Config) error {
 func (b Base) createAppConfig(serverPath string, appPath string, contextRoot string, appType string, config server.Config) error {
 	appConfigs := server.ProcessApplicationConfigs(config)
 
-	if appConfigs.HasId("") {
-		return fmt.Errorf("application config requires ID to be set: %+v", appConfigs)
-	}
-
 	appIds := appConfigs.Ids()
 	if len(appIds) > 1 {
 		return fmt.Errorf("more than one application config found: %+v", appConfigs)
@@ -340,6 +336,23 @@ func (b Base) createAppConfig(serverPath string, appPath string, contextRoot str
 			ContextRoot: "/",
 			Type:        appType,
 			AppElement:  "application",
+		}
+	}
+
+	if appConfig.Id == "" {
+		appConfig.Id = "app"
+
+		// Add ID to original server.xml to make sure app config is merged properly
+		configPath := filepath.Join(serverPath, "server.xml")
+		serverConfig, err := server.ReadServerConfigAsNode(configPath)
+		if err != nil {
+			return fmt.Errorf("unable to get server config\n%w", err)
+		}
+		if err := serverConfig.UpdateApplicationId("app"); err != nil {
+			return fmt.Errorf("unable to update app ID in original server.xml\n%w", err)
+		}
+		if err := serverConfig.SaveAs(configPath); err != nil {
+			return fmt.Errorf("unable server config\n%w", err)
 		}
 	}
 

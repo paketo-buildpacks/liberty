@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"github.com/antchfx/xmlquery"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
@@ -419,4 +420,57 @@ func ReadServerConfig(configPath string) (Config, error) {
 		return Config{}, fmt.Errorf("unable to unmarshal config '%s'\n%w", configPath, err)
 	}
 	return config, nil
+}
+
+type ConfigNode struct {
+	node *xmlquery.Node
+}
+
+func ReadServerConfigAsNode(configPath string) (ConfigNode, error) {
+	config, err := os.ReadFile(configPath)
+	if err != nil {
+		return ConfigNode{}, fmt.Errorf("unable to read server config\n%w", err)
+	}
+	reader := bytes.NewReader(config)
+	doc, err := xmlquery.Parse(reader)
+	if err != nil {
+		return ConfigNode{}, fmt.Errorf("unable to parse server config\n%w", err)
+	}
+
+	return ConfigNode{
+		node: doc,
+	}, nil
+}
+
+func (n *ConfigNode) GetApplicationNode() (*xmlquery.Node, error) {
+	serverNode, err := xmlquery.Query(n.node, "//server")
+	if err != nil {
+		return nil, fmt.Errorf("unable to find server configuration\n%w", err)
+	}
+	for _, appElement := range []string{"application", "webApplication", "enterpriseApplication"} {
+		appConfig, err := xmlquery.Query(serverNode, "//"+appElement)
+		if err != nil {
+			return nil, fmt.Errorf("unable to find app configuration '%s'\n%w", appElement, err)
+		}
+		if appConfig != nil {
+			return appConfig, nil
+		}
+	}
+	return nil, nil
+}
+
+func (n *ConfigNode) UpdateApplicationId(id string) error {
+	appConfig, err := n.GetApplicationNode()
+	if err != nil {
+		return fmt.Errorf("unable to get application node\n%w", err)
+	}
+	if appConfig == nil {
+		return nil
+	}
+	appConfig.SetAttr("id", id)
+	return nil
+}
+
+func (n *ConfigNode) SaveAs(configPath string) error {
+	return os.WriteFile(configPath, []byte(n.node.OutputXMLWithOptions(xmlquery.WithOutputSelf(), xmlquery.WithEmptyTagSupport())), 0644)
 }
