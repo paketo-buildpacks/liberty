@@ -21,6 +21,7 @@ import (
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bindings"
 	"github.com/paketo-buildpacks/libpak/sherpa"
+	"strconv"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -215,6 +216,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	result.Layers = append(result.Layers, base)
 
 	if installType == openLibertyInstall || installType == websphereLibertyInstall {
+		sccOptions, err := getSharedClassOptions(cr, jvmName)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to get SCC options\n%w", err)
+		}
 		if err := b.buildDistributionRuntime(
 			profile,
 			version,
@@ -224,6 +229,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			disableFeatureInstall,
 			featureList,
 			detectedBuildSrc,
+			sccOptions,
 			dr,
 			dc,
 			&result); err != nil {
@@ -240,6 +246,32 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	return result, nil
 }
 
+func getSharedClassOptions(cr libpak.ConfigurationResolver, jvmName string) (util.SharedClassCacheOptions, error) {
+	if jvmName != "OpenJ9" {
+		return util.SharedClassCacheOptions{
+			Enabled: false,
+		}, nil
+	}
+
+	resolvedSize, _ := cr.Resolve("BP_LIBERTY_SCC_SIZE_MB")
+	size, err := strconv.Atoi(resolvedSize)
+	if err != nil {
+		return util.SharedClassCacheOptions{}, fmt.Errorf("unable to parse BP_LIBERTY_SCC_SIZE_MB\n%w", err)
+	}
+	resolvedNumIterations, _ := cr.Resolve("BP_LIBERTY_SCC_NUM_ITERATIONS")
+	numIterations, err := strconv.Atoi(resolvedNumIterations)
+	if err != nil {
+		return util.SharedClassCacheOptions{}, fmt.Errorf("unable to parse BP_LIBERTY_SCC_NUM_ITERATIONS\n%w", err)
+	}
+
+	return util.SharedClassCacheOptions{
+		Enabled:       !cr.ResolveBool("BP_LIBERTY_SCC_DISABLED"),
+		SizeMB:        size,
+		NumIterations: numIterations,
+		Trim:          !cr.ResolveBool("BP_LIBERTY_SCC_TRIM_SIZE_DISABLED"),
+	}, nil
+}
+
 func (b Build) buildDistributionRuntime(
 	profile string,
 	version string,
@@ -249,6 +281,7 @@ func (b Build) buildDistributionRuntime(
 	disableFeatureInstall bool,
 	features []string,
 	buildSrc core.BuildSource,
+	sccOptions util.SharedClassCacheOptions,
 	dependencyResolver libpak.DependencyResolver,
 	cache libpak.DependencyCache,
 	result *libcnb.BuildResult) error {
@@ -272,7 +305,7 @@ func (b Build) buildDistributionRuntime(
 		return fmt.Errorf("unable to load iFixes\n%w", err)
 	}
 
-	distro := NewDistribution(dep, cache, installType, serverName, appPath, disableFeatureInstall, features, iFixes, b.Executor)
+	distro := NewDistribution(dep, cache, installType, serverName, appPath, disableFeatureInstall, features, iFixes, sccOptions, b.Executor)
 	distro.Logger = b.Logger
 
 	result.Layers = append(result.Layers, distro)
