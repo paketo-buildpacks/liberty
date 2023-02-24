@@ -4,9 +4,7 @@ github:
 
 codeowners:
 - path:  "*"
-  owner: "@paketo-buildpacks/java-maintainers"
-- path: "*"
-  owner: "@paketo-buildpacks/java-liberty"
+  owner: "@paketo-buildpacks/java-maintainers @paketo-buildpacks/java-liberty"
 
 package:
   repositories:   ["docker.io/paketobuildpacks/liberty","gcr.io/paketo-buildpacks/liberty"]
