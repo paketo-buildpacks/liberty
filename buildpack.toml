@@ -94,14 +94,14 @@ api = "0.7"
     name = "BP_LIBERTY_FEATURE_INSTALL_DISABLED"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.1:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.2:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:maven/io.openliberty/openliberty-runtime@23.0.0.1"
-    sha256 = "3a89e003cf3da027bdaf82ac4ddefa8e5b75f2b8ebde174af76ab1c8221f1567"
+    purl = "pkg:maven/io.openliberty/openliberty-runtime@23.0.0.2"
+    sha256 = "b3aa96812e3f217070433668e229b3fa56a9e353561863fb3e9abb1b4af28d1b"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/23.0.0.1/openliberty-runtime-23.0.0.1.zip"
-    version = "23.0.1"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/23.0.0.2/openliberty-runtime-23.0.0.2.zip"
+    version = "23.0.2"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
