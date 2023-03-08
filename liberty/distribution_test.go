@@ -17,6 +17,7 @@
 package liberty_test
 
 import (
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io"
 	"io/ioutil"
 	"os"
@@ -67,7 +68,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, []string{}, []string{}, executor)
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, []string{}, []string{}, util.SharedClassCacheOptions{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
@@ -101,7 +102,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())
 
-		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, []string{}, []string{iFixPath}, executor)
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, []string{}, []string{iFixPath}, util.SharedClassCacheOptions{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
@@ -136,7 +137,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		executor.On("Execute", mock.Anything).Return(nil)
 
 		features := []string{"foo", "bar", "baz"}
-		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, features, []string{}, executor)
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, false, features, []string{}, util.SharedClassCacheOptions{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("dependency", dep))
@@ -167,7 +168,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		executor.On("Execute", mock.Anything).Return(nil)
 
 		features := []string{"foo", "bar", "baz"}
-		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, true, features, []string{}, executor)
+		distro := liberty.NewDistribution(dep, dc, "ol", "defaultServer", ctx.Application.Path, true, features, []string{}, util.SharedClassCacheOptions{}, executor)
 		distro.Logger = bard.NewLogger(io.Discard)
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("features", features))

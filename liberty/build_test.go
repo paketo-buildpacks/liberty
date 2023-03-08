@@ -55,6 +55,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				{"name": "BP_LIBERTY_PROFILE", "default": "", "build": true},
 				{"name": "BP_LIBERTY_INSTALL_TYPE", "default": "ol", "build": true},
 				{"name": "BP_LIBERTY_SERVER_NAME", "default": "", "build": true},
+				{"name": "BP_LIBERTY_SCC_DISABLED", "default": "false", "build": true},
+				{"name": "BP_LIBERTY_SCC_SIZE_MB", "default": "100", "build": true},
+				{"name": "BP_LIBERTY_SCC_NUM_ITERATIONS", "default": "1", "build": true},
+				{"name": "BP_LIBERTY_SCC_TRIM_SIZE_DISABLED", "default": "false", "build": true},
 			},
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-kernel", "version": "21.0.11"},

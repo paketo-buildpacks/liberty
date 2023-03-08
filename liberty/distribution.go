@@ -18,19 +18,25 @@ package liberty
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/liberty/internal/server"
-	"github.com/paketo-buildpacks/libpak/sbom"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/liberty/internal/server"
+	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libjvm/count"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/crush"
 	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/sbom"
+	"golang.org/x/sys/unix"
+	"io"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+)
+
+const (
+	cacheName string = "liberty"
 )
 
 type Distribution struct {
@@ -44,6 +50,8 @@ type Distribution struct {
 	IFixes                []string
 	LayerContributor      libpak.DependencyLayerContributor
 	Logger                bard.Logger
+
+	sccOptions util.SharedClassCacheOptions
 }
 
 func NewDistribution(
@@ -55,6 +63,7 @@ func NewDistribution(
 	disableFeatureInstall bool,
 	features []string,
 	ifixes []string,
+	sccOptions util.SharedClassCacheOptions,
 	executor effect.Executor,
 ) Distribution {
 	contributor, _ := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
@@ -79,6 +88,8 @@ func NewDistribution(
 		Features:              features,
 		IFixes:                ifixes,
 		LayerContributor:      contributor,
+
+		sccOptions: sccOptions,
 	}
 }
 
@@ -108,6 +119,12 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("unable to create output directory\n%w", err)
 		}
 		layer.LaunchEnvironment.Override("WLP_OUTPUT_DIR", outputDir)
+
+		if d.sccOptions.Enabled {
+			if err := d.buildSharedClassCache(&layer, outputDir); err != nil {
+				return libcnb.Layer{}, fmt.Errorf("unable to build SCC\n%w", err)
+			}
+		}
 
 		libertyClasses, err := count.Classes(layer.Path)
 		if err != nil {
@@ -194,6 +211,101 @@ func (d Distribution) ContributeSBOM(layer libcnb.Layer) error {
 		return fmt.Errorf("unable to write SBOM\n%w", err)
 	}
 
+	return nil
+}
+
+func (d Distribution) buildSharedClassCache(layer *libcnb.Layer, outputDir string) error {
+	d.Logger.Header("Building the shared class cache")
+	// Set OpenJ9 env to use SCC settings
+	options := fmt.Sprintf("-Xshareclasses:name=%s,cacheDir=%s", cacheName, filepath.Join(outputDir, ".classCache"))
+
+	etcDir := filepath.Join(layer.Path, "etc")
+	if err := os.Mkdir(etcDir, 0744); err != nil {
+		return fmt.Errorf("unable to create etc directory\n%w", err)
+	}
+	envData := []byte(fmt.Sprintf("OPENJ9_JAVA_OPTIONS=%s", options))
+	if err := os.WriteFile(filepath.Join(etcDir, "server.env"), envData, 0644); err != nil {
+		return fmt.Errorf("unable to write server.env\n%w", err)
+	}
+
+	// Save old umask
+	oldMask := unix.Umask(0002)
+
+	// Create the initial layer
+	scc := util.SharedClassCache{
+		Name:     "liberty",
+		Path:     filepath.Join(outputDir, ".classCache"),
+		Executor: d.Executor,
+		Logger:   d.Logger,
+	}
+
+	if err := scc.CreateLayer(d.sccOptions.SizeMB); err != nil {
+		return fmt.Errorf("unable to create SCC layer\n%w", err)
+	}
+
+	// Start and stop Liberty to build server and app shared class cache
+	for i := 0; i < d.sccOptions.NumIterations; i++ {
+		if err := d.startAndStopServer(layer.Path); err != nil {
+			return fmt.Errorf("unable to start and stop server during initial SCC layer creation\n%w", err)
+		}
+	}
+
+	if d.sccOptions.Trim {
+		d.Logger.Body("Trimming the shared class cache")
+		// Resize server and app layer
+		if err := scc.Resize(d.sccOptions.SizeMB); err != nil {
+			return fmt.Errorf("unable to resize cache\n%w", err)
+		}
+
+		// Start and stop Liberty to build server and app shared class cache
+		for i := 0; i < d.sccOptions.NumIterations; i++ {
+			if err := d.startAndStopServer(layer.Path); err != nil {
+				return fmt.Errorf("unable to start and stop server during final SCC layer creation\n%w", err)
+			}
+		}
+	}
+
+	// Restore umask
+	_ = unix.Umask(oldMask)
+
+	fillRatio, err := scc.GetFillRatio()
+	if err != nil {
+		return fmt.Errorf("unable to calculate fill ratio\n%w", err)
+	}
+
+	d.Logger.Bodyf("Shared class cache is %.1f%% full", fillRatio*100)
+	return nil
+}
+
+func (d Distribution) startAndStopServer(layerPath string) error {
+	env := os.Environ()
+	env = append(env,
+		`WLP_LOGGING_MESSAGE_SOURCE=""`,
+		"WLP_LOGGING_CONSOLE_SOURCE=message,trace,accessLog,ffdc,audit",
+		"WLP_LOGGING_MESSAGE_FORMAT=JSON",
+		"WLP_LOGGING_CONSOLE_FORMAT=JSON",
+		"WLP_LOGGING_APPS_WRITE_JSON=true",
+		"WLP_LOGGING_JSON_ACCESS_LOG_FIELDS=default",
+	)
+	writer := io.Discard
+	if d.Logger.IsDebugEnabled() {
+		writer = d.Logger.DebugWriter()
+	}
+	if err := d.Executor.Execute(effect.Execution{
+		Command: filepath.Join(layerPath, "bin", "server"),
+		Args:    []string{"start"},
+		Env:     env,
+		Stdout:  writer,
+	}); err != nil {
+		return fmt.Errorf("unable to start Liberty server\n%w", err)
+	}
+	if err := d.Executor.Execute(effect.Execution{
+		Command: filepath.Join(layerPath, "bin", "server"),
+		Args:    []string{"stop"},
+		Stdout:  writer,
+	}); err != nil {
+		return fmt.Errorf("unable to stop Liberty server\n%w", err)
+	}
 	return nil
 }
 

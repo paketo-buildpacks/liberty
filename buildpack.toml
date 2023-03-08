@@ -93,6 +93,34 @@ api = "0.7"
     launch = false
     name = "BP_LIBERTY_FEATURE_INSTALL_DISABLED"
 
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "OpenJ9 only: Disable building the shared class cache."
+    launch = false
+    name = "BP_LIBERTY_SCC_DISABLED"
+
+  [[metadata.configurations]]
+    build = true
+    default = "100"
+    description = "OpenJ9 only: Size to use for the shared class cache."
+    launch = false
+    name = "BP_LIBERTY_SCC_SIZE_MB"
+
+  [[metadata.configurations]]
+    build = true
+    default = "1"
+    description = "OpenJ9 only: Number of iterations to cycle the server when building the shared class cache."
+    launch = false
+    name = "BP_LIBERTY_SCC_NUM_ITERATIONS"
+
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "OpenJ9 only: Disable trimming the size of the shared class cache."
+    launch = false
+    name = "BP_LIBERTY_SCC_TRIM_SIZE_DISABLED"
+
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.2:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
