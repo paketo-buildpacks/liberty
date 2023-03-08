@@ -293,4 +293,67 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 			Expect(installedFeatures).To(Equal([]string{"microProfile-5.0", "webProfile-9.1"}))
 		})
 	})
+
+	when("providing app config", func() {
+		it("merges config with the same IDs", func() {
+			config := server.Config{
+				Applications: []server.ApplicationConfig{
+					{
+						Id:         "sample-app",
+						Name:       "myapp1",
+						AppElement: "application",
+					},
+					{
+						Id:          "sample-app",
+						ContextRoot: "/test-app",
+					},
+				},
+				WebApplications: []server.ApplicationConfig{
+					{
+						Id:         "sample-war",
+						Name:       "myapp2",
+						AppElement: "webApplication",
+					},
+					{
+						Id:          "sample-war",
+						ContextRoot: "/test-war",
+					},
+				},
+				EnterpriseApplications: []server.ApplicationConfig{
+					{
+						Id:         "sample-ear",
+						Name:       "myapp3",
+						AppElement: "enterpriseApplication",
+					},
+					{
+						Id:          "sample-ear",
+						ContextRoot: "/test-ear",
+					},
+				},
+			}
+
+			apps := server.ProcessApplicationConfigs(config)
+			Expect(apps.HasId("sample-app")).To(BeTrue())
+			Expect(apps.HasId("sample-war")).To(BeTrue())
+			Expect(apps.HasId("sample-ear")).To(BeTrue())
+			Expect(apps.GetApplication("sample-app")).To(Equal(server.ApplicationConfig{
+				Id:          "sample-app",
+				Name:        "myapp1",
+				ContextRoot: "/test-app",
+				AppElement:  "application",
+			}))
+			Expect(apps.GetApplication("sample-war")).To(Equal(server.ApplicationConfig{
+				Id:          "sample-war",
+				Name:        "myapp2",
+				ContextRoot: "/test-war",
+				AppElement:  "webApplication",
+			}))
+			Expect(apps.GetApplication("sample-ear")).To(Equal(server.ApplicationConfig{
+				Id:          "sample-ear",
+				Name:        "myapp3",
+				ContextRoot: "/test-ear",
+				AppElement:  "enterpriseApplication",
+			}))
+		})
+	})
 }
