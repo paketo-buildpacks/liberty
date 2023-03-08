@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"github.com/antchfx/xmlquery"
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
@@ -314,12 +315,91 @@ type Config struct {
 	FeatureManager struct {
 		Features []string `xml:"feature"`
 	} `xml:"featureManager"`
-	Application struct {
-		Name string `xml:"name,attr"`
-	} `xml:"application"`
-	HTTPEndpoint struct {
+	Applications           []ApplicationConfig `xml:"application"`
+	WebApplications        []ApplicationConfig `xml:"webApplication"`
+	EnterpriseApplications []ApplicationConfig `xml:"enterpriseApplication"`
+	HTTPEndpoint           struct {
 		Host string `xml:"host,attr"`
 	} `xml:"httpEndpoint"`
+}
+
+type ApplicationConfig struct {
+	Id          string `xml:"id,attr"`
+	Name        string `xml:"name,attr"`
+	Location    string `xml:"location,attr"`
+	ContextRoot string `xml:"context-root,attr,omitempty"`
+	Type        string `xml:"type,attr,omitempty"`
+
+	AppElement string `xml:"-"`
+}
+
+type ApplicationConfigs struct {
+	appMap map[string][]ApplicationConfig
+}
+
+func ProcessApplicationConfigs(config Config) ApplicationConfigs {
+	appMap := make(map[string][]ApplicationConfig)
+	for appType, apps := range map[string][]ApplicationConfig{
+		"application":           config.Applications,
+		"webApplication":        config.WebApplications,
+		"enterpriseApplication": config.EnterpriseApplications,
+	} {
+		for _, app := range apps {
+			app.AppElement = appType
+			baseApps, ok := appMap[app.Id]
+			if !ok {
+				baseApps = make([]ApplicationConfig, 0)
+			}
+			baseApps = append(baseApps, app)
+			appMap[app.Id] = baseApps
+		}
+	}
+	return ApplicationConfigs{appMap: appMap}
+}
+
+func (apps *ApplicationConfigs) Ids() []string {
+	ids := make([]string, 0)
+	for key := range apps.appMap {
+		ids = append(ids, key)
+	}
+	return ids
+}
+
+func (apps *ApplicationConfigs) HasId(id string) bool {
+	_, hasApp := apps.appMap[id]
+	return hasApp
+}
+
+func (apps *ApplicationConfigs) GetApplication(id string) (ApplicationConfig, error) {
+	configs, foundApp := apps.appMap[id]
+	if !foundApp {
+		return ApplicationConfig{}, fmt.Errorf("unable to find app with ID '%s'", id)
+	}
+
+	mergedConfig := ApplicationConfig{
+		Id:          id,
+		ContextRoot: "/",
+	}
+
+	for _, config := range configs {
+		if config.Name != "" {
+			mergedConfig.Name = config.Name
+		}
+		if config.Location != "" {
+			mergedConfig.Location = config.Location
+		}
+		if config.ContextRoot != "" {
+			mergedConfig.ContextRoot = config.ContextRoot
+		}
+		if config.Type != "" {
+			mergedConfig.Type = config.Type
+		}
+		if config.AppElement != "" {
+			mergedConfig.AppElement = config.AppElement
+		}
+	}
+
+	return mergedConfig, nil
 }
 
 func ReadServerConfig(configPath string) (Config, error) {
@@ -329,15 +409,68 @@ func ReadServerConfig(configPath string) (Config, error) {
 	}
 	defer xmlFile.Close()
 
-	bytes, err := ioutil.ReadAll(xmlFile)
+	content, err := ioutil.ReadAll(xmlFile)
 	if err != nil {
 		return Config{}, fmt.Errorf("unable to read config '%s'\n%w", configPath, err)
 	}
 
 	var config Config
-	err = xml.Unmarshal(bytes, &config)
+	err = xml.Unmarshal(content, &config)
 	if err != nil {
 		return Config{}, fmt.Errorf("unable to unmarshal config '%s'\n%w", configPath, err)
 	}
 	return config, nil
+}
+
+type ConfigNode struct {
+	node *xmlquery.Node
+}
+
+func ReadServerConfigAsNode(configPath string) (ConfigNode, error) {
+	config, err := os.ReadFile(configPath)
+	if err != nil {
+		return ConfigNode{}, fmt.Errorf("unable to read server config\n%w", err)
+	}
+	reader := bytes.NewReader(config)
+	doc, err := xmlquery.Parse(reader)
+	if err != nil {
+		return ConfigNode{}, fmt.Errorf("unable to parse server config\n%w", err)
+	}
+
+	return ConfigNode{
+		node: doc,
+	}, nil
+}
+
+func (n *ConfigNode) GetApplicationNode() (*xmlquery.Node, error) {
+	serverNode, err := xmlquery.Query(n.node, "//server")
+	if err != nil {
+		return nil, fmt.Errorf("unable to find server configuration\n%w", err)
+	}
+	for _, appElement := range []string{"application", "webApplication", "enterpriseApplication"} {
+		appConfig, err := xmlquery.Query(serverNode, "//"+appElement)
+		if err != nil {
+			return nil, fmt.Errorf("unable to find app configuration '%s'\n%w", appElement, err)
+		}
+		if appConfig != nil {
+			return appConfig, nil
+		}
+	}
+	return nil, nil
+}
+
+func (n *ConfigNode) UpdateApplicationId(id string) error {
+	appConfig, err := n.GetApplicationNode()
+	if err != nil {
+		return fmt.Errorf("unable to get application node\n%w", err)
+	}
+	if appConfig == nil {
+		return nil
+	}
+	appConfig.SetAttr("id", id)
+	return nil
+}
+
+func (n *ConfigNode) SaveAs(configPath string) error {
+	return os.WriteFile(configPath, []byte(n.node.OutputXMLWithOptions(xmlquery.WithOutputSelf(), xmlquery.WithEmptyTagSupport())), 0644)
 }
