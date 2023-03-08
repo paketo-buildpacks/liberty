@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/BurntSushi/toml v1.2.1
+	github.com/antchfx/xmlquery v1.3.15
 	github.com/buildpacks/libcnb v1.27.0
 	github.com/heroku/color v0.0.6
 	github.com/onsi/gomega v1.27.2
@@ -15,8 +16,10 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
+	github.com/antchfx/xpath v1.2.3 // indirect
 	github.com/creack/pty v1.1.18 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
