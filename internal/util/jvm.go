@@ -56,7 +56,7 @@ func DetectJVMName(executor effect.Executor) (string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("unable to read cache ratio\n%w", err)
+		return "", fmt.Errorf("unable to read JVM name\n%w", err)
 	}
 
 	return "", nil
@@ -93,10 +93,7 @@ func (scc SharedClassCache) GetFillRatio() (float64, error) {
 		return 0.0, fmt.Errorf("unable to get cache stats\n%w\n%s", err, stderrBuf.String())
 	}
 
-	r, err := regexp.Compile(`Cache is (\d+)% full`)
-	if err != nil {
-		return 0.0, err
-	}
+	r := regexp.MustCompile(`Cache is (\d+)% full`)
 
 	scanner := bufio.NewScanner(buf)
 	for scanner.Scan() {
@@ -105,7 +102,7 @@ func (scc SharedClassCache) GetFillRatio() (float64, error) {
 		if matches := r.FindStringSubmatch(line); matches != nil {
 			v, err := strconv.ParseInt(matches[1], 10, 64)
 			if err != nil {
-				return 0.0, err
+				return 0.0, fmt.Errorf("unable to parse [%s] to int\n%w", matches[1], err)
 			}
 			return float64(v) / 100, nil
 		}
