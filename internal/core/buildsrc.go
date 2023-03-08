@@ -27,7 +27,9 @@ import (
 )
 
 const (
-	JavaAppServerLiberty = "liberty"
+	JavaAppServerLiberty  = "liberty"
+	AppBuildSourceName    = "app-build-src"
+	ServerBuildSourceName = "svr-build-src"
 )
 
 // BuildSource represents different build sources that the Liberty buildpack supports
@@ -41,10 +43,10 @@ type BuildSource interface {
 	// DefaultServerName returns the default server name that should be used for the build source
 	DefaultServerName() (string, error)
 
-	// ValidateAppProvider returns true if the `jvm-application-package` dependency is provided
+	// ValidateApp returns true if the `jvm-application-package` dependency is provided
 	ValidateApp() (bool, error)
 
-	// AppPaths returns the list of paths in which the build source contains applications
+	// AppPath returns the list of paths in which the build source contains applications
 	AppPath() (string, error)
 }
 
@@ -65,7 +67,7 @@ func NewAppBuildSource(appPath string, requestedAppServer string, logger bard.Lo
 }
 
 func (a AppBuildSource) Name() string {
-	return "app-build-src"
+	return AppBuildSourceName
 }
 
 // Detect checks to make sure Main-Class is not defined in `META-INF/MANIFEST.MF`
@@ -137,7 +139,7 @@ func NewServerBuildSource(installRoot string, serverName string, logger bard.Log
 }
 
 func (s ServerBuildSource) Name() string {
-	return "svr-build-src"
+	return ServerBuildSourceName
 }
 
 func (s ServerBuildSource) Detect() (bool, error) {
