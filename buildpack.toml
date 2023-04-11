@@ -147,7 +147,6 @@ api = "0.7"
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
-      
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.3:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-javaee8"
