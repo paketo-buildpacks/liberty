@@ -134,21 +134,21 @@ api = "0.7"
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
-
+      
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.2:*:*:*:*:*:*:*"]
-    id = "open-liberty-runtime-jakartaee9"
-    name = "Open Liberty (Jakarta EE9)"
-    purl = "pkg:maven/io.openliberty/openliberty-jakartaee9@23.0.0.2"
-    sha256 = "32f267a1dceae26d9349deb252581ff7e33e2b1a6f324b9f430ad23b16efe67e"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.3:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-jakartaee10"
+    name = "Open Liberty (Jakarta EE10)"
+    purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@23.0.0.3"
+    sha256 = "72ee05eeda25da1dfd207546298faeeec9fb2503d779bf01114869c9e0865e54"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee9/23.0.0.2/openliberty-jakartaee9-23.0.0.2.zip"
-    version = "23.0.2"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/23.0.0.3/openliberty-jakartaee10-23.0.0.3.zip"
+    version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
-
+      
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.3:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-javaee8"
@@ -164,14 +164,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.2:*:*:*:*:*:*:*"]
-    id = "open-liberty-runtime-webProfile9"
-    name = "Open Liberty (Web Profile 9)"
-    purl = "pkg:maven/io.openliberty/openliberty-webProfile9@23.0.0.2"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.3:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-webProfile10"
+    name = "Open Liberty (Web Profile 10)"
+    purl = "pkg:maven/io.openliberty/openliberty-webProfile10@23.0.0.3"
     sha256 = "dca56a1db905d1176af7ba3a4ad779355429da7b676d7f984a41d228b3fccd9c"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile9/23.0.0.2/openliberty-webProfile9-23.0.0.2.zip"
-    version = "23.0.2"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile10/23.0.0.3/openliberty-webProfile10-23.0.0.3.zip"
+    version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
@@ -192,14 +192,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.2:*:*:*:*:*:*:*"]
-    id = "open-liberty-runtime-microProfile5"
-    name = "Open Liberty (Micro Profile 5)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile5@23.0.0.2"
-    sha256 = "4f58ccec2e60a1f446d45004652024a02e008b8ce015d6d8c9b477b806eb09ca"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.3:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-microProfile6"
+    name = "Open Liberty (Micro Profile 6)"
+    purl = "pkg:maven/io.openliberty/openliberty-microProfile6@23.0.0.3"
+    sha256 = "818e5a95956df7db48c5ab699003551158ec92f76c607d4ebef9f9f5c4208579"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile5/23.0.0.2/openliberty-microProfile5-23.0.0.2.zip"
-    version = "23.0.2"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile6/23.0.0.6/openliberty-microProfile6-23.0.0.3.zip"
+    version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
@@ -245,21 +245,21 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
-      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
+      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.2:*:*:*:liberty:*:*:*"]
-    id = "websphere-liberty-runtime-jakartaee9"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.3:*:*:*:liberty:*:*:*"]
+    id = "websphere-liberty-runtime-jakartaee10"
     name = "WebSphere Liberty (Jakarta EE9)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee9@23.0.0.2"
-    sha256 = "6407f9b6a1e403a86b469404081de43ba70f3f166935c370ffce734f30a27e6e"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee10@23.0.0.3"
+    sha256 = "69027a0656e3450d36f8276f109a6bf68aeed550b6dbee35e713c6f1ca7af431"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee9/23.0.0.2/wlp-jakartaee9-23.0.0.2.zip"
-    version = "23.0.2"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee10/23.0.0.3/wlp-jakartaee9-23.0.0.3.zip"
+    version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
-      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
+      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.3:*:*:*:liberty:*:*:*"]
@@ -273,7 +273,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
-      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
+      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.3:*:*:*:liberty:*:*:*"]
@@ -287,21 +287,21 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
-      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
+      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
-  [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.2:*:*:*:liberty:*:*:*"]
-    id = "websphere-liberty-runtime-webProfile9"
-    name = "WebSphere Liberty (Web Profile 9)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile9@23.0.0.2"
-    sha256 = "a76766bfe3f3b7e4f33c2be23eab18d951573652bd7f82306e64eb11445791bf"
+[[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.3:*:*:*:liberty:*:*:*"]
+    id = "websphere-liberty-runtime-webProfile10"
+    name = "WebSphere Liberty (Web Profile 10)"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile10@23.0.0.3"
+    sha256 = "8b7446f7cb9488fa6348a867d53c880ba67aa63685356dd6ba34325022528141"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile9/23.0.0.2/wlp-webProfile9-23.0.0.2.zip"
-    version = "23.0.2"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile10/23.0.0.3/wlp-webProfile10-23.0.0.3.zip"
+    version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
-      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
+      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.3:*:*:*:liberty:*:*:*"]
@@ -315,7 +315,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
-      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
+      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.3:*:*:*:liberty:*:*:*"]
@@ -329,7 +329,7 @@ api = "0.7"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
-      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/22.0.0.8/lafiles/runtime/en.html"
+      uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
 [[stacks]]
   id = "io.buildpacks.stacks.bionic"

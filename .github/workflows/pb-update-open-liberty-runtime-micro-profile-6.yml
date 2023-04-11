@@ -1,4 +1,4 @@
-name: Update websphere-liberty-runtime-jakartaee9
+name: Update open-liberty-runtime-microProfile6
 "on":
     schedule:
         - cron: 0 5 * * 1-5
@@ -44,8 +44,8 @@ jobs:
             - id: dependency
               uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
               with:
-                artifact_id: wlp-jakartaee9
-                group_id: com.ibm.websphere.appserver.runtime
+                artifact_id: openliberty-microProfile6
+                group_id: io.openliberty
                 packaging: zip
                 uri: https://repo1.maven.org/maven2
             - name: Update Buildpack Dependency
@@ -90,7 +90,7 @@ jobs:
               env:
                 CPE: ${{ steps.dependency.outputs.cpe }}
                 CPE_PATTERN: '[\d]+\.[\d]+\.[\d]+\.[\d]+'
-                ID: websphere-liberty-runtime-jakartaee9
+                ID: open-liberty-runtime-microProfile6
                 PURL: ${{ steps.dependency.outputs.purl }}
                 PURL_PATTERN: '[\d]+\.[\d]+\.[\d]+\.[\d]+'
                 SHA256: ${{ steps.dependency.outputs.sha256 }}
@@ -100,14 +100,14 @@ jobs:
             - uses: peter-evans/create-pull-request@v5
               with:
                 author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
-                body: Bumps `websphere-liberty-runtime-jakartaee9` from `${{ steps.buildpack.outputs.old-version }}` to `${{ steps.buildpack.outputs.new-version }}`.
-                branch: update/buildpack/websphere-liberty-runtime-jakartaee-9
+                body: Bumps `open-liberty-runtime-microProfile6` from `${{ steps.buildpack.outputs.old-version }}` to `${{ steps.buildpack.outputs.new-version }}`.
+                branch: update/buildpack/open-liberty-runtime-micro-profile-6
                 commit-message: |-
-                    Bump websphere-liberty-runtime-jakartaee9 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
+                    Bump open-liberty-runtime-microProfile6 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
 
-                    Bumps websphere-liberty-runtime-jakartaee9 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}.
+                    Bumps open-liberty-runtime-microProfile6 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}.
                 delete-branch: true
                 labels: ${{ steps.buildpack.outputs.version-label }}, type:dependency-upgrade
                 signoff: true
-                title: Bump websphere-liberty-runtime-jakartaee9 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
+                title: Bump open-liberty-runtime-microProfile6 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
                 token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
