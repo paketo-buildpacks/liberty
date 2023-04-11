@@ -254,7 +254,7 @@ api = "0.7"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee10@23.0.0.3"
     sha256 = "499e6985d73ffa3cf5bacf647f98daf256218a67c661665f31f3e13ef240d2d1"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee10/23.0.0.3/wlp-jakartaee9-23.0.0.3.zip"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee10/23.0.0.3/wlp-jakartaee10-23.0.0.3.zip"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
