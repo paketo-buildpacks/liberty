@@ -118,7 +118,7 @@ dependencies:
     uri:         https://repo1.maven.org/maven2
     group_id:    com.ibm.websphere.appserver.runtime
     artifact_id: wlp-jakartaee10
-    packaging:   zip    
+    packaging:   zip
 - id:   websphere-liberty-runtime-webProfile10
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
