@@ -198,7 +198,7 @@ api = "0.7"
     purl = "pkg:maven/io.openliberty/openliberty-microProfile6@23.0.0.3"
     sha256 = "9a78c5f2c0e41472084660c64c134adbdf37e5d02f089a10b7c3e260b887a4e4"
     stacks = ["io.buildpacks.stacks.bionic", "*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile6/23.0.0.6/openliberty-microProfile6-23.0.0.3.zip"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile6/23.0.0.3/openliberty-microProfile6-23.0.0.3.zip"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
