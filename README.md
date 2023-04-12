@@ -58,20 +58,20 @@ Valid profiles for Open Liberty are:
 
 * full
 * kernel
-* jakartaee9
+* jakartaee10
 * javaee8
 * webProfile9
 * webProfile8
-* microProfile5
+* microProfile6
 * microProfile4
 
 Valid profiles for WebSphere Liberty are:
 
 * kernel
-* jakartaee9
+* jakartaee10
 * javaee8
 * javaee7
-* webProfile9
+* webProfile10
 * webProfile8
 * webProfile7
 

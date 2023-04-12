@@ -103,20 +103,20 @@ func GetFeatureList(profile string, serverPath string, additionalFeatures []stri
 func IsValidOpenLibertyProfile(profile string) bool {
 	return profile == "full" ||
 		profile == "kernel" ||
-		profile == "jakartaee9" ||
+		profile == "jakartaee10" ||
 		profile == "javaee8" ||
-		profile == "webProfile9" ||
+		profile == "webProfile10" ||
 		profile == "webProfile8" ||
-		profile == "microProfile5" ||
+		profile == "microProfile6" ||
 		profile == "microProfile4"
 }
 
 func IsValidWebSphereLibertyProfile(profile string) bool {
 	return profile == "kernel" ||
-		profile == "jakartaee9" ||
+		profile == "jakartaee10" ||
 		profile == "javaee8" ||
 		profile == "javaee7" ||
-		profile == "webProfile9" ||
+		profile == "webProfile10" ||
 		profile == "webProfile8" ||
 		profile == "webProfile7"
 }
@@ -126,15 +126,15 @@ func GetDefaultFeatures(serverProfile string) []string {
 	case "full", "kernel":
 		return []string{"jsp-2.3"}
 	case "jakartaee9":
-		return []string{"jakartaee-9.1"}
+		return []string{"jakartaee-10.0"}
 	case "javaee8":
 		return []string{"javaee-8.0"}
 	case "webProfile9":
-		return []string{"webProfile-9.1"}
+		return []string{"webProfile-10.0"}
 	case "webProfile8":
 		return []string{"webProfile-8.0"}
 	case "microProfile5":
-		return []string{"microProfile-5.0"}
+		return []string{"microProfile-6.0"}
 	case "microProfile4":
 		return []string{"microProfile-4.1"}
 	}
