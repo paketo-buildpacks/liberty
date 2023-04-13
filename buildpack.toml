@@ -134,6 +134,7 @@ api = "0.7"
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
+
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.3:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-jakartaee10"
@@ -147,6 +148,7 @@ api = "0.7"
     [[metadata.dependencies.licenses]]
       type = "EPL-1.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
+
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.3:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-javaee8"
@@ -287,7 +289,7 @@ api = "0.7"
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
-[[metadata.dependencies]]
+  [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.3:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile10"
     name = "WebSphere Liberty (Web Profile 10)"
