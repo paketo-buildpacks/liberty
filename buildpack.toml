@@ -132,7 +132,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
@@ -146,7 +146,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
@@ -160,7 +160,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
@@ -174,7 +174,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
@@ -188,7 +188,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
@@ -202,7 +202,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
@@ -216,7 +216,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
@@ -230,7 +230,7 @@ api = "0.7"
     version = "23.0.3"
 
     [[metadata.dependencies.licenses]]
-      type = "EPL-1.0"
+      type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
