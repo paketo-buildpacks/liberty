@@ -74,7 +74,7 @@ func (a AppBuildSource) Name() string {
 func (a AppBuildSource) Detect() (bool, error) {
 	// If user requests an app server, and it is not `liberty` then skip
 	if a.RequestedAppServer != "" && a.RequestedAppServer != JavaAppServerLiberty {
-		a.Logger.Debugf("failed to match requested app server of [%s], buildpack supports [%s]", a.RequestedAppServer, JavaAppServerLiberty)
+		a.Logger.Infof("SKIPPED: failed to match requested app server of [%s], buildpack supports [%s]", a.RequestedAppServer, JavaAppServerLiberty)
 		return false, nil
 	}
 
@@ -84,7 +84,7 @@ func (a AppBuildSource) Detect() (bool, error) {
 		return false, err
 	}
 	if isMainClassDefined {
-		a.Logger.Debug("`Main-Class` found in `META-INF/MANIFEST.MF`, skipping build")
+		a.Logger.Info("SKIPPED: `Main-Class` found in `META-INF/MANIFEST.MF`, skipping build")
 		return false, nil
 	}
 
