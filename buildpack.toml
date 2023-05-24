@@ -1,4 +1,4 @@
-# Copyright 2018-2022 the original author or authors.
+# Copyright 2018-2023 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ api = "0.7"
     name = "Open Liberty (All Features)"
     purl = "pkg:maven/io.openliberty/openliberty-runtime@23.0.0.4"
     sha256 = "4c67071fe383ca64e8d71172fe8695d7152152d5c05b28aaf1b98b53cbface5f"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/23.0.0.4/openliberty-runtime-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -141,7 +141,7 @@ api = "0.7"
     name = "Open Liberty (Jakarta EE10)"
     purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@23.0.0.4"
     sha256 = "3a883af3da97de2c2166aed95750b58c6ac635abb20983017dd38e2aa910c91d"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/23.0.0.4/openliberty-jakartaee10-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -155,7 +155,7 @@ api = "0.7"
     name = "Open Liberty (Java EE8)"
     purl = "pkg:maven/io.openliberty/openliberty-javaee8@23.0.0.4"
     sha256 = "67cc2fad05dbbf3fc749e4c3e4153e9609a12194663d44ce5a7ed5afa1f00055"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-javaee8/23.0.0.4/openliberty-javaee8-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -169,7 +169,7 @@ api = "0.7"
     name = "Open Liberty (Web Profile 10)"
     purl = "pkg:maven/io.openliberty/openliberty-webProfile10@23.0.0.4"
     sha256 = "247a91b6c61a067240ea313b9ccf64f4a99414261f523047fa1294e210c02b34"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile10/23.0.0.4/openliberty-webProfile10-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -183,7 +183,7 @@ api = "0.7"
     name = "Open Liberty (Web Profile 8)"
     purl = "pkg:maven/io.openliberty/openliberty-webProfile8@23.0.0.4"
     sha256 = "38b731d6170f584e3dd46215ac50e87ac5351b202e4fd53680b2cb43135b76ab"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile8/23.0.0.4/openliberty-webProfile8-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -197,7 +197,7 @@ api = "0.7"
     name = "Open Liberty (Micro Profile 6)"
     purl = "pkg:maven/io.openliberty/openliberty-microProfile6@23.0.0.4"
     sha256 = "5835a5691a273f58f316e538811f3ef1d0ef5c425e2006ce382e51f7a97822bf"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile6/23.0.0.4/openliberty-microProfile6-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -211,7 +211,7 @@ api = "0.7"
     name = "Open Liberty (Micro Profile 4)"
     purl = "pkg:maven/io.openliberty/openliberty-microProfile4@23.0.0.4"
     sha256 = "bcf93041df46d8fec56a5a8445fa80c756970e17787a00a07cba10228769cc80"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/23.0.0.4/openliberty-microProfile4-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -225,7 +225,7 @@ api = "0.7"
     name = "Open Liberty (Kernel)"
     purl = "pkg:maven/io.openliberty/openliberty-kernel@23.0.0.4"
     sha256 = "0def9e84e25064003c63dfd4c91e52766ea6986dfe7069cccda40a8a02a5780f"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/23.0.0.4/openliberty-kernel-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -239,7 +239,7 @@ api = "0.7"
     name = "WebSphere Liberty (Kernel)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@23.0.0.4"
     sha256 = "cff7ec6189cb3983ab164576a9fc19cff15fbfa7b707c54a0936f80fc8ba93b1"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/23.0.0.4/wlp-kernel-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -253,7 +253,7 @@ api = "0.7"
     name = "WebSphere Liberty (Jakarta EE9)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee10@23.0.0.4"
     sha256 = "a7df9af6a24215e90c582eef2ec9b12bc305f98dd63a8f925b2e1ef675956360"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee10/23.0.0.4/wlp-jakartaee10-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -267,7 +267,7 @@ api = "0.7"
     name = "WebSphere Liberty (Java EE8)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee8@23.0.0.4"
     sha256 = "e9984ce3fa8d0422f58352213f8dcfa88dac0f412a5ccb4b5c6b7be3dc67dd82"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee8/23.0.0.4/wlp-javaee8-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -281,7 +281,7 @@ api = "0.7"
     name = "WebSphere Liberty (Java EE7)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@23.0.0.4"
     sha256 = "a00e343bfefa5aeab4b61874ef5ad7c44c0243205139a7b27e77bf9b8c1dbc96"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/23.0.0.4/wlp-javaee7-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -295,7 +295,7 @@ api = "0.7"
     name = "WebSphere Liberty (Web Profile 10)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile10@23.0.0.4"
     sha256 = "caa04e76af6f44b2943a5d15178e6b07416ec9adfbd5ea5f95404eae74e9954c"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile10/23.0.0.4/wlp-webProfile10-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -309,7 +309,7 @@ api = "0.7"
     name = "WebSphere Liberty (Web Profile 8)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile8@23.0.0.4"
     sha256 = "4a7d6367f437dc9120d26a5381d83e7b5bf429aa1b06281b40049301f7d2aad7"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile8/23.0.0.4/wlp-webProfile8-23.0.0.4.zip"
     version = "23.0.4"
 
@@ -323,16 +323,13 @@ api = "0.7"
     name = "WebSphere Liberty (Web Profile 7)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile7@23.0.0.4"
     sha256 = "efe111ef9a353e0c2dd61a6b971a099ad8702b72cd9eb6d90805402621a3b71f"
-    stacks = ["io.buildpacks.stacks.bionic", "*"]
+    stacks = ["*"]
     uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/23.0.0.4/wlp-webProfile7-23.0.0.4.zip"
     version = "23.0.4"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
-
-[[stacks]]
-  id = "io.buildpacks.stacks.bionic"
 
 [[stacks]]
   id = "*"
