@@ -206,14 +206,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.4:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.5:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile4@23.0.0.4"
-    sha256 = "bcf93041df46d8fec56a5a8445fa80c756970e17787a00a07cba10228769cc80"
+    purl = "pkg:maven/io.openliberty/openliberty-microProfile4@23.0.0.5"
+    sha256 = "e370b6b1d793836cfd319ccbe704395b37f3c91a4c0b5999b0f6eee1c5edc61c"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/23.0.0.4/openliberty-microProfile4-23.0.0.4.zip"
-    version = "23.0.4"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/23.0.0.5/openliberty-microProfile4-23.0.0.5.zip"
+    version = "23.0.5"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
