@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/BurntSushi/toml v1.3.1
-	github.com/antchfx/xmlquery v1.3.15
+	github.com/antchfx/xmlquery v1.3.16
 	github.com/buildpacks/libcnb v1.28.0
 	github.com/heroku/color v0.0.6
 	github.com/onsi/gomega v1.27.7
