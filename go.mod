@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/BurntSushi/toml v1.3.2
-	github.com/antchfx/xmlquery v1.3.16
+	github.com/antchfx/xmlquery v1.3.17
 	github.com/buildpacks/libcnb v1.28.0
 	github.com/heroku/color v0.0.6
 	github.com/onsi/gomega v1.27.8
@@ -12,7 +12,7 @@ require (
 	github.com/paketo-buildpacks/libpak v1.66.0
 	github.com/sclevine/spec v1.4.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/sys v0.8.0
+	golang.org/x/sys v0.9.0
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/net v0.11.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
