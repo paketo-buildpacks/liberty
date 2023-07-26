@@ -304,14 +304,14 @@ api = "0.7"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.6:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:23.0.0.7:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile8"
     name = "WebSphere Liberty (Web Profile 8)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile8@23.0.0.6"
-    sha256 = "1a483155d707497cb106584436ccd76ca423ca4411efea68f0a76758de9a7d6d"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile8@23.0.0.7"
+    sha256 = "c6922412a394b5a03394d24c4b83aca88ce470fa7d73568f8b5e1e1317a3ede6"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile8/23.0.0.6/wlp-webProfile8-23.0.0.6.zip"
-    version = "23.0.6"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile8/23.0.0.7/wlp-webProfile8-23.0.0.7.zip"
+    version = "23.0.7"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
