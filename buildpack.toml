@@ -122,14 +122,14 @@ api = "0.7"
     name = "BP_LIBERTY_SCC_TRIM_SIZE_DISABLED"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.7:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.8:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:maven/io.openliberty/openliberty-runtime@23.0.0.7"
-    sha256 = "a4fd7dfdee39b73bc4212e7353e4adfc09afc80a87c166427e0bb2877abef287"
+    purl = "pkg:maven/io.openliberty/openliberty-runtime@23.0.0.8"
+    sha256 = "21a112139f9df393f0a336ab4f7a0040d2acfc7895342fbd939f8e05ed7dde73"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/23.0.0.7/openliberty-runtime-23.0.0.7.zip"
-    version = "23.0.7"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/23.0.0.8/openliberty-runtime-23.0.0.8.zip"
+    version = "23.0.8"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
