@@ -220,14 +220,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.8:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.9:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
-    purl = "pkg:maven/io.openliberty/openliberty-kernel@23.0.0.8"
-    sha256 = "cf0a03a75076abe1db03bd2486b41c21715c6aba1a164e0c8346224de2fc1757"
+    purl = "pkg:maven/io.openliberty/openliberty-kernel@23.0.0.9"
+    sha256 = "d2d7c9ef4b2acea6a5d95a7c8cf1d04dd848b43706e2965ee60d3cf0a3139318"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/23.0.0.8/openliberty-kernel-23.0.0.8.zip"
-    version = "23.0.8"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/23.0.0.9/openliberty-kernel-23.0.0.9.zip"
+    version = "23.0.9"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
