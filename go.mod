@@ -7,9 +7,9 @@ require (
 	github.com/antchfx/xmlquery v1.3.18
 	github.com/buildpacks/libcnb v1.29.0
 	github.com/heroku/color v0.0.6
-	github.com/onsi/gomega v1.27.10
+	github.com/onsi/gomega v1.28.0
 	github.com/paketo-buildpacks/libjvm v1.43.2
-	github.com/paketo-buildpacks/libpak v1.66.2
+	github.com/paketo-buildpacks/libpak v1.67.0
 	github.com/sclevine/spec v1.4.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/sys v0.12.0
