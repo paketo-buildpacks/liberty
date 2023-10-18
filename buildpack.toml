@@ -170,16 +170,16 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.9:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.10:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile10"
     name = "Open Liberty (Web Profile 10)"
-    purl = "pkg:maven/io.openliberty/openliberty-webProfile10@23.0.0.9"
-    sha256 = "3325f4f795fdb9e2fb5d432dd2e696b390e2906284b2bea39c65be7b4f248801"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-23.0.0.9.tar.gz"
-    source-sha256 = "55735a40f51afd586fc6800349bcce35f3584434124e418244f8287ef2261d68"
+    purl = "pkg:maven/io.openliberty/openliberty-webProfile10@23.0.0.10"
+    sha256 = "37f7f067beef49cc9423e813b2a496565ffedcf5fcb1e68730fb35fd630eac48"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-23.0.0.10.tar.gz"
+    source-sha256 = "43b87c72d3901a0ce172c7c3ac6e9e08f9bfcb5dffe6a0bcae4425d07f676b68"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile10/23.0.0.9/openliberty-webProfile10-23.0.0.9.zip"
-    version = "23.0.9"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile10/23.0.0.10/openliberty-webProfile10-23.0.0.10.zip"
+    version = "23.0.10"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
