@@ -138,16 +138,16 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.11:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-jakartaee10"
     name = "Open Liberty (Jakarta EE10)"
-    purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@23.0.0.11"
-    sha256 = "72f81755d02c4b9b3770967a33854c9251c047408d74c8b593c6ee96107e1c74"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-23.0.0.11.tar.gz"
-    source-sha256 = "41a117e54e5371bf4ad7006f4b86b5af05f9d3a11906db417542ffeff7404871"
+    purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@23.0.0.12"
+    sha256 = "b71da8d16ee74e3b2108f1ad6c13cb051c0bf3620f7ec8958ed76081d242b385"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-23.0.0.12.tar.gz"
+    source-sha256 = "4fb88d315e1fac8a817da107eaa3823416762716f4ffdb817b0ccaac69fa0edf"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/23.0.0.11/openliberty-jakartaee10-23.0.0.11.zip"
-    version = "23.0.11"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/23.0.0.12/openliberty-jakartaee10-23.0.0.12.zip"
+    version = "23.0.12"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
@@ -202,16 +202,16 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.11:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:23.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile6"
     name = "Open Liberty (Micro Profile 6)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile6@23.0.0.11"
-    sha256 = "6947796114ada4bf8c92137a3eaf74be008f88e2d763c5f0ae9e5a7db1682fc2"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-23.0.0.11.tar.gz"
-    source-sha256 = "41a117e54e5371bf4ad7006f4b86b5af05f9d3a11906db417542ffeff7404871"
+    purl = "pkg:maven/io.openliberty/openliberty-microProfile6@23.0.0.12"
+    sha256 = "331620869b998770d64fc8897b64efecc37ea1edf2c2a90cc068278ca12442b4"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-23.0.0.12.tar.gz"
+    source-sha256 = "4fb88d315e1fac8a817da107eaa3823416762716f4ffdb817b0ccaac69fa0edf"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile6/23.0.0.11/openliberty-microProfile6-23.0.0.11.zip"
-    version = "23.0.11"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile6/23.0.0.12/openliberty-microProfile6-23.0.0.12.zip"
+    version = "23.0.12"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
