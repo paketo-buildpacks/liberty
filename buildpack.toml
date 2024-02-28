@@ -138,16 +138,16 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.1:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.2:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-jakartaee10"
     name = "Open Liberty (Jakarta EE10)"
-    purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@24.0.0.1"
-    sha256 = "a50fa8daf47b93d7bd82fac3933936246c3a6107aa5ef172914ec4d69d432826"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.1.tar.gz"
-    source-sha256 = "7009169cd40721bb6e7d2e6cdf54f28b833631fd121a05052b3fb87dc4b89cf1"
+    purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@24.0.0.2"
+    sha256 = "827f8d84b650454950a04138a03d39ea47153b85d7e4f0332d2fa8c0490cb98d"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.2.tar.gz"
+    source-sha256 = "21caabf6ba2b5c1ecd207c06e85ee00c4ac8fadbdcdf8008896a5108d6b34b24"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/24.0.0.1/openliberty-jakartaee10-24.0.0.1.zip"
-    version = "24.0.1"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/24.0.0.2/openliberty-jakartaee10-24.0.0.2.zip"
+    version = "24.0.2"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
