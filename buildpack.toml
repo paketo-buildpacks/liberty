@@ -234,16 +234,16 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.3:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.4:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
-    purl = "pkg:maven/io.openliberty/openliberty-kernel@24.0.0.3"
-    sha256 = "3a7cd6d79710aade8dae0dd2922af91a1b0df6b78a603c6ccb5e9ec24fff71a2"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.3.tar.gz"
-    source-sha256 = "b460cf0175fd2f4c623e51077d78411f9848c2627d2717bdf8a1f5aef61a60ec"
+    purl = "pkg:maven/io.openliberty/openliberty-kernel@24.0.0.4"
+    sha256 = "724b635cfa7a61b2e7dc4333417e1c608686b29a39d41918ea003372583d8086"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.4.tar.gz"
+    source-sha256 = "fa2719435d0ed237d09fb63226eeb0f3f4535de9713d469fe75b9706001b9653"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/24.0.0.3/openliberty-kernel-24.0.0.3.zip"
-    version = "24.0.3"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/24.0.0.4/openliberty-kernel-24.0.0.4.zip"
+    version = "24.0.4"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
