@@ -6,8 +6,8 @@ github.com/antchfx/xmlquery v1.4.0 h1:xg2HkfcRK2TeTbdb0m1jxCYnvsPaGY/oeZWTGqX/0h
 github.com/antchfx/xmlquery v1.4.0/go.mod h1:Ax2aeaeDjfIw3CwXKDQ0GkwZ6QlxoChlIBP+mGnDFjI=
 github.com/antchfx/xpath v1.3.0 h1:nTMlzGAK3IJ0bPpME2urTuFL76o4A96iYvoKFHRXJgc=
 github.com/antchfx/xpath v1.3.0/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
-github.com/buildpacks/libcnb v1.30.1 h1:airpkZzh8Mlt+SQEMTj0B1r5agDHZvgfpwzpKVMEgZQ=
-github.com/buildpacks/libcnb v1.30.1/go.mod h1:JU2fam/ECXw6I5iRnZbfKgjWsrZbzbgvZHR6WBSVHRc=
+github.com/buildpacks/libcnb v1.30.3 h1:JtFMFPO2450uDLzpE1b50TvmM1GEZa8YT9cQ2ZZtHqA=
+github.com/buildpacks/libcnb v1.30.3/go.mod h1:JPb1vC7HQcGK0oONfqJvsYzOjw3be+WBbQ0KYOIhNvA=
 github.com/creack/pty v1.1.21 h1:1/QdRyBaHHJP61QkWMXlOIBfsgdDeeKfK8SYVUWJKf0=
 github.com/creack/pty v1.1.21/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
