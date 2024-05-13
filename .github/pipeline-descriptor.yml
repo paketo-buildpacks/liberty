@@ -6,6 +6,9 @@ codeowners:
 - path:  "*"
   owner: "@paketo-buildpacks/java-maintainers @paketo-buildpacks/java-liberty"
 
+helpers:
+  "bin/helper": "$GOMOD/cmd/helper"
+
 package:
   repositories:   ["docker.io/paketobuildpacks/liberty","gcr.io/paketo-buildpacks/liberty"]
   register:       true
