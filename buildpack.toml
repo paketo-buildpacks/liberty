@@ -292,14 +292,14 @@ api = "0.7"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:24.0.0.4:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:24.0.0.5:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee7"
     name = "WebSphere Liberty (Java EE7)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@24.0.0.4"
-    sha256 = "423632c417ec79ddd9943f096ae4948e1825dfc4c34a95e1d2593cc3c98ccf9b"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@24.0.0.5"
+    sha256 = "8b1f2eaf88e569ac798ba64a6698d150ce5fb3a4a9177ed0c300b2adf6be63a2"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/24.0.0.4/wlp-javaee7-24.0.0.4.zip"
-    version = "24.0.4"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/24.0.0.5/wlp-javaee7-24.0.0.5.zip"
+    version = "24.0.5"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
