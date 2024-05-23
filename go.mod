@@ -3,7 +3,7 @@ module github.com/paketo-buildpacks/liberty
 go 1.22
 
 require (
-	github.com/BurntSushi/toml v1.3.2
+	github.com/BurntSushi/toml v1.4.0
 	github.com/antchfx/xmlquery v1.4.0
 	github.com/buildpacks/libcnb v1.30.3
 	github.com/heroku/color v0.0.6
