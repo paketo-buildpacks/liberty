@@ -122,16 +122,16 @@ api = "0.7"
     name = "BP_LIBERTY_SCC_TRIM_SIZE_DISABLED"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.7:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.8:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:maven/io.openliberty/openliberty-runtime@24.0.0.7"
-    sha256 = "00523cdee35f9b1859e6b0b88a562a8eee7aa0b4a610f4fcd6011ac642b24aa1"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.7.tar.gz"
-    source-sha256 = "d100dd287b51992271d2f411370a86fb4ae17458a645190021de3ab24db6afaa"
+    purl = "pkg:maven/io.openliberty/openliberty-runtime@24.0.0.8"
+    sha256 = "f9209074c52d76900c4d88a40ca5e98a3ab11d6417ce82be7aed57c4f0c5ac37"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.8.tar.gz"
+    source-sha256 = "60ac00c0a55b365b43c70eab03518812065d129cb550812fe0ff764ef1745099"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/24.0.0.7/openliberty-runtime-24.0.0.7.zip"
-    version = "24.0.7"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/24.0.0.8/openliberty-runtime-24.0.0.8.zip"
+    version = "24.0.8"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
