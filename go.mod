@@ -12,7 +12,7 @@ require (
 	github.com/paketo-buildpacks/libpak v1.71.0
 	github.com/sclevine/spec v1.4.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/sys v0.25.0
+	golang.org/x/sys v0.26.0
 )
 
 require (
