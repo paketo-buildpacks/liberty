@@ -17,12 +17,12 @@
 package util_test
 
 import (
-	"github.com/paketo-buildpacks/liberty/internal/util"
-	"github.com/sclevine/spec"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
 )
@@ -35,7 +35,7 @@ func testApp(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		testPath, err = ioutil.TempDir("", "app-utils")
+		testPath, err = os.MkdirTemp("", "app-utils")
 		Expect(err).NotTo(HaveOccurred())
 	})
 

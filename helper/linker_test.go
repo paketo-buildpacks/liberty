@@ -17,7 +17,6 @@
 package helper_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,12 +39,12 @@ func testLink(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		appDir, err = ioutil.TempDir("", "execd-helper-apps")
+		appDir, err = os.MkdirTemp("", "execd-helper-apps")
 		Expect(err).NotTo(HaveOccurred())
 		appDir, err = filepath.EvalSymlinks(appDir)
 		Expect(err).ToNot(HaveOccurred())
 
-		layerDir, err = ioutil.TempDir("", "execd-helper-layers")
+		layerDir, err = os.MkdirTemp("", "execd-helper-layers")
 		Expect(err).NotTo(HaveOccurred())
 		layerDir, err = filepath.EvalSymlinks(layerDir)
 		Expect(err).ToNot(HaveOccurred())

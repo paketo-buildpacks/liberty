@@ -17,7 +17,6 @@
 package liberty_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,10 +39,10 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		ctx.Application.Path, err = ioutil.TempDir("", "open-liberty-app")
+		ctx.Application.Path, err = os.MkdirTemp("", "open-liberty-app")
 		Expect(err).NotTo(HaveOccurred())
 
-		ctx.Platform.Path, err = ioutil.TempDir("", "open-liberty-test-platform")
+		ctx.Platform.Path, err = os.MkdirTemp("", "open-liberty-test-platform")
 		Expect(err).NotTo(HaveOccurred())
 
 		ctx.Buildpack.Metadata = map[string]interface{}{

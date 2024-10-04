@@ -18,11 +18,12 @@ package liberty
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/paketo-buildpacks/liberty/internal/util"
 	"github.com/paketo-buildpacks/libpak/bindings"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"strconv"
-	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/internal/core"
@@ -148,7 +149,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	if b.SBOMScanner == nil {
-		b.SBOMScanner = sbom.NewSyftCLISBOMScanner(context.Layers, b.Executor, b.Logger)
+		b.SBOMScanner = sbom.NewSyftCLISBOMScanner(context.Layers, effect.CommandExecutor{}, b.Logger)
 	}
 
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")

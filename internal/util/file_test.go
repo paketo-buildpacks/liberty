@@ -18,13 +18,13 @@ package util_test
 
 import (
 	"errors"
-	"github.com/paketo-buildpacks/liberty/internal/util"
-	"github.com/sclevine/spec"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
 )
@@ -37,7 +37,7 @@ func testFile(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		testPath, err = ioutil.TempDir("", "file-utils")
+		testPath, err = os.MkdirTemp("", "file-utils")
 		Expect(err).NotTo(HaveOccurred())
 
 		// EvalSymlinks on macOS resolves the temporary directory too so do that here or checking the symlinks will fail
