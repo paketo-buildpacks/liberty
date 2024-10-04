@@ -18,11 +18,12 @@ package liberty_test
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/libpak/sherpa"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/libpak/sherpa"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/liberty/liberty"
@@ -41,17 +42,17 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		ctx.Layers.Path, err = ioutil.TempDir("", "base-layers")
+		ctx.Layers.Path, err = os.MkdirTemp("", "base-layers")
 		Expect(err).NotTo(HaveOccurred())
 		ctx.Layers.Path, err = filepath.EvalSymlinks(ctx.Layers.Path)
 		Expect(err).ToNot(HaveOccurred())
 
-		ctx.Application.Path, err = ioutil.TempDir("", "workspace")
+		ctx.Application.Path, err = os.MkdirTemp("", "workspace")
 		Expect(err).ToNot(HaveOccurred())
 		ctx.Application.Path, err = filepath.EvalSymlinks(ctx.Application.Path)
 		Expect(err).ToNot(HaveOccurred())
 
-		ctx.Buildpack.Path, err = ioutil.TempDir("", "base-buildpack")
+		ctx.Buildpack.Path, err = os.MkdirTemp("", "base-buildpack")
 		Expect(err).ToNot(HaveOccurred())
 		ctx.Buildpack.Path, err = filepath.EvalSymlinks(ctx.Buildpack.Path)
 		Expect(err).ToNot(HaveOccurred())
@@ -141,7 +142,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 		Expect(err).ToNot(HaveOccurred())
 		defer xmlFile.Close()
 
-		bytes, err := ioutil.ReadAll(xmlFile)
+		bytes, err := io.ReadAll(xmlFile)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(string(bytes)).To(Equal(`<?xml version="1.0" encoding="UTF-8"?>
 <server>
@@ -175,7 +176,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 		Expect(err).ToNot(HaveOccurred())
 		defer xmlFile.Close()
 
-		bytes, err := ioutil.ReadAll(xmlFile)
+		bytes, err := io.ReadAll(xmlFile)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(string(bytes)).To(Equal(`<?xml version="1.0" encoding="UTF-8"?>
 <server>
@@ -445,7 +446,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
 			Expect(err).ToNot(HaveOccurred())
 			defer xmlFile.Close()
-			bytes, err := ioutil.ReadAll(xmlFile)
+			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 
 			appXML := fmt.Sprintf(`<server><application id="app" name="app" location="%s" context-root="/"/></server>`,
@@ -476,7 +477,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
 			Expect(err).ToNot(HaveOccurred())
 			defer xmlFile.Close()
-			bytes, err := ioutil.ReadAll(xmlFile)
+			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 
 			appXML := fmt.Sprintf(`<server><webApplication id="myapp" name="myapp" location="%s" context-root="/dev"/></server>`,
@@ -501,13 +502,13 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 			)
 			layer, err := ctx.Layers.Layer("test-layer")
 			Expect(err).ToNot(HaveOccurred())
-			layer, err = base.Contribute(layer)
+			_, err = base.Contribute(layer)
 			Expect(err).ToNot(HaveOccurred())
 
 			xmlFile, err := os.Open(filepath.Join(ctx.Application.Path, "server.xml"))
 			Expect(err).ToNot(HaveOccurred())
 			defer xmlFile.Close()
-			bytes, err := ioutil.ReadAll(xmlFile)
+			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(string(bytes)).To(Equal(`<?xml version="1.0" encoding="UTF-8"?><server><webApplication name="myapp" context-root="/dev" id="app"/></server>`))
 		})
@@ -535,7 +536,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
 			Expect(err).ToNot(HaveOccurred())
 			defer xmlFile.Close()
-			bytes, err := ioutil.ReadAll(xmlFile)
+			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 
 			appXML := fmt.Sprintf(`<server><webApplication id="myapp" name="myapp" location="%s" context-root="/app"/></server>`,

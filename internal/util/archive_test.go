@@ -17,12 +17,12 @@
 package util_test
 
 import (
-	"github.com/paketo-buildpacks/liberty/internal/util"
-	"github.com/sclevine/spec"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
 )
@@ -35,7 +35,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		testPath, err = ioutil.TempDir("", "archive-utils")
+		testPath, err = os.MkdirTemp("", "archive-utils")
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -53,7 +53,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 
 			testFile := filepath.Join(testPath, "test-dir", "test.txt")
 			Expect(testFile).To(BeARegularFile())
-			contents, err := ioutil.ReadFile(testFile)
+			contents, err := os.ReadFile(testFile)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(contents).To(Equal([]byte("foo bar baz\n")))
 		})
@@ -67,7 +67,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 
 			testFile := filepath.Join(testPath, "test.txt")
 			Expect(testFile).To(BeARegularFile())
-			contents, err := ioutil.ReadFile(testFile)
+			contents, err := os.ReadFile(testFile)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(contents).To(Equal([]byte("foo bar baz\n")))
 		})
@@ -83,7 +83,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 
 			testFile := filepath.Join(testPath, "test-dir", "test.txt")
 			Expect(testFile).To(BeARegularFile())
-			contents, err := ioutil.ReadFile(testFile)
+			contents, err := os.ReadFile(testFile)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(contents).To(Equal([]byte("foo bar baz\n")))
 		})
@@ -97,7 +97,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 
 			testFile := filepath.Join(testPath, "test.txt")
 			Expect(testFile).To(BeARegularFile())
-			contents, err := ioutil.ReadFile(testFile)
+			contents, err := os.ReadFile(testFile)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(contents).To(Equal([]byte("foo bar baz\n")))
 		})

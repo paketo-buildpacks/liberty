@@ -18,7 +18,6 @@ package server_test
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,7 +41,7 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		testPath, err = ioutil.TempDir("", "server")
+		testPath, err = os.MkdirTemp("", "server")
 		Expect(err).NotTo(HaveOccurred())
 
 		// EvalSymlinks on macOS resolves the temporary directory too so do that here or checking the symlinks will fail
@@ -170,11 +169,11 @@ func testServer(t *testing.T, when spec.G, it spec.S) {
 
 		it("loads iFixes", func() {
 			Expect(os.MkdirAll(iFixesPath, 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-1.jar"), []byte{}, 0644)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-2.jar"), []byte{}, 0644)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, ".DS_Store"), []byte{}, 0644)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "foo.txt"), []byte{}, 0644)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(iFixesPath, "fix-3.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(iFixesPath, "fix-1.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(iFixesPath, "fix-2.jar"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(iFixesPath, ".DS_Store"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(iFixesPath, "foo.txt"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(iFixesPath, "fix-3.jar"), []byte{}, 0644)).To(Succeed())
 
 			fixes, err := server.LoadIFixesList(iFixesPath)
 

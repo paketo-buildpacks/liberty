@@ -18,13 +18,13 @@ package liberty_test
 
 import (
 	"bytes"
-	"github.com/paketo-buildpacks/libpak/effect"
-	"github.com/stretchr/testify/mock"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
@@ -46,7 +46,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		ctx.Application.Path, err = ioutil.TempDir("", "build-application")
+		t.Setenv("BP_ARCH", "amd64")
+
+		ctx.Application.Path, err = os.MkdirTemp("", "build-application")
 		Expect(err).NotTo(HaveOccurred())
 
 		ctx.Buildpack.Metadata = map[string]interface{}{
@@ -72,7 +74,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			{Name: "java-app-server"},
 		}
 
-		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
+		ctx.Layers.Path, err = os.MkdirTemp("", "build-layers")
 		Expect(err).NotTo(HaveOccurred())
 
 		sbomScanner = mocks.SBOMScanner{}
@@ -217,7 +219,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		context("Main-Class in MANIFEST.MF", func() {
 			it.Before(func() {
 				Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
-				Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`Main-Class: org.DoStuff`), 0644)).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`Main-Class: org.DoStuff`), 0644)).To(Succeed())
 			})
 
 			it("doesn't run", func() {
@@ -263,7 +265,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.Setenv("BP_LIBERTY_VERSION", "21.0.11")).To(Succeed())
 			Expect(os.Setenv("BP_LIBERTY_PROFILE", "jakartaee10")).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
 		})
 
 		it.After(func() {

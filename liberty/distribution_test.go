@@ -17,12 +17,12 @@
 package liberty_test
 
 import (
-	"github.com/paketo-buildpacks/liberty/internal/util"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/paketo-buildpacks/liberty/internal/util"
 
 	"github.com/paketo-buildpacks/libpak/effect"
 	"github.com/paketo-buildpacks/libpak/effect/mocks"
@@ -47,7 +47,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		ctx.Layers.Path, err = ioutil.TempDir("", "home-layers")
+		ctx.Layers.Path, err = os.MkdirTemp("", "home-layers")
 		Expect(err).NotTo(HaveOccurred())
 
 		executor.On("Execute", mock.Anything).Return(nil)
@@ -92,7 +92,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 		}
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 
-		iFixesPath, err := ioutil.TempDir("", "ifixes")
+		iFixesPath, err := os.MkdirTemp("", "ifixes")
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(os.MkdirAll(iFixesPath, 0755)).To(Succeed())
@@ -173,7 +173,7 @@ func testDistribution(t *testing.T, when spec.G, it spec.S) {
 
 		Expect(distro.LayerContributor.ExpectedMetadata.(map[string]interface{})).To(HaveKeyWithValue("features", features))
 
-		layer, err = distro.Contribute(layer)
+		_, err = distro.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
 		installFeatureExecution := executor.Calls[0].Arguments[0].(effect.Execution)

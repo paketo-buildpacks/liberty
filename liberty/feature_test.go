@@ -18,14 +18,15 @@ package liberty_test
 
 import (
 	"encoding/xml"
+	"io"
+	"os"
+	"path/filepath"
+	"testing"
+
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/liberty/liberty"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/sclevine/spec"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"testing"
 )
 
 func testFeatures(t *testing.T, when spec.G, it spec.S) {
@@ -38,9 +39,9 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		configRoot, err = ioutil.TempDir("", "config")
+		configRoot, err = os.MkdirTemp("", "config")
 		Expect(err).NotTo(HaveOccurred())
-		runtimeRoot, err = ioutil.TempDir("", "liberty-runtime")
+		runtimeRoot, err = os.MkdirTemp("", "liberty-runtime")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(os.MkdirAll(filepath.Join(runtimeRoot, "usr", "servers", "defaultServer", "configDropins", "defaults"), 0755)).To(Succeed())
 		Expect(os.MkdirAll(filepath.Join(runtimeRoot, "usr", "extension", "lib", "features"), 0755)).To(Succeed())
@@ -54,7 +55,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 
 	when("feature descriptor is not provided", func() {
 		it("should not load any features", func() {
-			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
+			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(io.Discard))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(desc.Features).To(BeEmpty())
 		})
@@ -73,7 +74,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("should resolve features", func() {
-			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
+			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(io.Discard))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(desc.Features).To(HaveLen(1))
 
@@ -98,7 +99,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.WriteFile(filepath.Join(configRoot, "features.toml"), []byte(features), 0644)).To(Succeed())
 		})
 		it("should throw an error", func() {
-			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(ioutil.Discard))
+			desc, err := liberty.ReadFeatureDescriptor(configRoot, bard.NewLogger(io.Discard))
 			Expect(err).NotTo(HaveOccurred())
 			Expect(desc.ResolveFeatures()).ToNot(Succeed())
 		})
@@ -163,7 +164,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 			Expect(err).ToNot(HaveOccurred())
 			defer xmlFile.Close()
 
-			bytes, err := ioutil.ReadAll(xmlFile)
+			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 
 			var featureConfig struct {

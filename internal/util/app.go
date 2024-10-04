@@ -18,11 +18,12 @@ package util
 
 import (
 	"fmt"
-	"github.com/paketo-buildpacks/libjvm"
-	"github.com/paketo-buildpacks/libpak/sherpa"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/paketo-buildpacks/libjvm"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 // IsJvmApplicationPackage will return true if `META-INF/application.xml` or `WEB-INF/` exists, which happens when a
@@ -68,7 +69,7 @@ func GetApps(path string) ([]string, error) {
 		return []string{}, nil
 	}
 
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return []string{}, err
 	}

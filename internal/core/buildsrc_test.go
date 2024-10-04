@@ -17,7 +17,7 @@
 package core_test
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -37,7 +37,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		testPath, err = ioutil.TempDir("", "core")
+		testPath, err = os.MkdirTemp("", "core")
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -55,14 +55,14 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			Expect(os.WriteFile(filepath.Join(testPath, "META-INF", "MANIFEST.MF"),
 				[]byte("Main-Class: com.java.HelloWorld"),
 				0644)).To(Succeed())
-			appBuildSource := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			appBuildSource := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(io.Discard))
 			ok, err := appBuildSource.Detect()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(ok).To(BeFalse())
 		})
 
 		it("detects successfully when Main-Class is not set", func() {
-			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(io.Discard))
 			ok, err := appBuildSrc.Detect()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(ok).To(BeTrue())
@@ -70,7 +70,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 
 		it("validates successfully when a compiled web archive is supplied", func() {
 			Expect(os.Mkdir(filepath.Join(testPath, "WEB-INF"), 0755)).To(Succeed())
-			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(io.Discard))
 			ok, err := appBuildSrc.ValidateApp()
 			Expect(err).To(Succeed())
 			Expect(ok).To(BeTrue())
@@ -79,21 +79,21 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 		it("validates successfully when a compiled enterprise archive is supplied", func() {
 			Expect(os.Mkdir(filepath.Join(testPath, "META-INF"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(testPath, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
-			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(io.Discard))
 			ok, err := appBuildSrc.ValidateApp()
 			Expect(err).To(Succeed())
 			Expect(ok).To(BeTrue())
 		})
 
 		it("fails app validation when META-INF or application.xml not found", func() {
-			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(io.Discard))
 			ok, err := appBuildSrc.ValidateApp()
 			Expect(err).To(Succeed())
 			Expect(ok).To(BeFalse())
 		})
 
 		it("fails app validation when requested server is unknown", func() {
-			appBuildSrc := core.NewAppBuildSource(testPath, "foo", bard.NewLogger(ioutil.Discard))
+			appBuildSrc := core.NewAppBuildSource(testPath, "foo", bard.NewLogger(io.Discard))
 			ok, err := appBuildSrc.ValidateApp()
 			Expect(err).To(Succeed())
 			Expect(ok).To(BeFalse())
@@ -117,7 +117,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				defaultServerPath := filepath.Join(serversPath, "defaultServer")
 				Expect(os.Mkdir(defaultServerPath, 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(defaultServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -127,7 +127,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				testServerPath := filepath.Join(serversPath, "testServer")
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -137,7 +137,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				testServerPath := filepath.Join(serversPath, "testServer")
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -148,7 +148,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.Mkdir(testServerPath+"-other", 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -159,13 +159,13 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.Mkdir(testServerPath+"-other", 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				_, err := serverBuildSource.Detect()
 				Expect(err).To(HaveOccurred())
 			})
 
 			it("fails to detect if there are no servers", func() {
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				_, err := serverBuildSource.Detect()
 				Expect(err).To(HaveOccurred())
 			})
@@ -173,7 +173,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			it("validates enterprise archive is provided in apps", func() {
 				appPath := filepath.Join(serversPath, "testServer", "apps", "test.ear")
 				Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.ValidateApp()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -182,7 +182,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			it("validates enterprise archive is provided in dropins", func() {
 				appPath := filepath.Join(serversPath, "testServer", "dropins", "test.ear")
 				Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.ValidateApp()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -191,7 +191,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			it("validates web archive is provided in apps", func() {
 				appPath := filepath.Join(serversPath, "testServer", "apps", "test.war")
 				Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.ValidateApp()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -200,14 +200,14 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			it("validates web archive is provided in dropins", func() {
 				appPath := filepath.Join(serversPath, "testServer", "dropins", "test.war")
 				Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.ValidateApp()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
 			})
 
 			it("does not validate when an app is not provided", func() {
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				_, err := serverBuildSource.ValidateApp()
 				Expect(err).To(HaveOccurred())
 			})
@@ -229,7 +229,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				defaultServerPath := filepath.Join(serversPath, "defaultServer")
 				Expect(os.Mkdir(defaultServerPath, 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(defaultServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -239,7 +239,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				testServerPath := filepath.Join(serversPath, "testServer")
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -249,7 +249,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				testServerPath := filepath.Join(serversPath, "testServer")
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -260,7 +260,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.Mkdir(testServerPath+"-other", 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "testServer", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.Detect()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -271,13 +271,13 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 				Expect(os.Mkdir(testServerPath, 0755)).To(Succeed())
 				Expect(os.Mkdir(testServerPath+"-other", 0755)).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(testServerPath, "server.xml"), []byte{}, 0644)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				_, err := serverBuildSource.Detect()
 				Expect(err).To(HaveOccurred())
 			})
 
 			it("fails to detect if there are no servers", func() {
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				_, err := serverBuildSource.Detect()
 				Expect(err).To(HaveOccurred())
 			})
@@ -285,7 +285,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			it("validates enterprise archive is provided in dropins", func() {
 				appPath := filepath.Join(serversPath, "testServer", "dropins", "test.ear")
 				Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.ValidateApp()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -294,7 +294,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			it("validates web archive is provided in apps", func() {
 				appPath := filepath.Join(serversPath, "testServer", "apps", "test.war")
 				Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.ValidateApp()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
@@ -303,14 +303,14 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 			it("validates web archive is provided in dropins", func() {
 				appPath := filepath.Join(serversPath, "testServer", "dropins", "test.war")
 				Expect(os.MkdirAll(appPath, 0755)).To(Succeed())
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				ok, err := serverBuildSource.ValidateApp()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(ok).To(BeTrue())
 			})
 
 			it("does not validate when an app is not provided", func() {
-				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(ioutil.Discard))
+				serverBuildSource := core.NewServerBuildSource(testPath, "", bard.NewLogger(io.Discard))
 				_, err := serverBuildSource.ValidateApp()
 				Expect(err).To(HaveOccurred())
 			})
@@ -320,7 +320,7 @@ func testBuildSource(t *testing.T, when spec.G, it spec.S) {
 	when("building an app source with server config", func() {
 		it("works", func() {
 			Expect(os.WriteFile(filepath.Join(testPath, "test.war"), []byte{}, 0644)).To(Succeed())
-			appBuildSource := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(ioutil.Discard))
+			appBuildSource := core.NewAppBuildSource(testPath, "liberty", bard.NewLogger(io.Discard))
 			ok, err := appBuildSource.Detect()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(ok).To(BeTrue())

@@ -21,17 +21,18 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"github.com/antchfx/xmlquery"
-	"github.com/paketo-buildpacks/liberty/internal/util"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/effect"
-	"github.com/paketo-buildpacks/libpak/sherpa"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/antchfx/xmlquery"
+	"github.com/paketo-buildpacks/liberty/internal/util"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 func GetServerConfigPath(serverPath string) string {
@@ -189,7 +190,7 @@ func GetServerList(userPath string) ([]string, error) {
 		return []string{}, nil
 	}
 
-	serverDirs, err := ioutil.ReadDir(serversPath)
+	serverDirs, err := os.ReadDir(serversPath)
 	if err != nil {
 		return []string{}, err
 	}
@@ -409,7 +410,7 @@ func ReadServerConfig(configPath string) (Config, error) {
 	}
 	defer xmlFile.Close()
 
-	content, err := ioutil.ReadAll(xmlFile)
+	content, err := io.ReadAll(xmlFile)
 	if err != nil {
 		return Config{}, fmt.Errorf("unable to read config '%s'\n%w", configPath, err)
 	}
