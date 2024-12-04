@@ -11,21 +11,21 @@ jobs:
         steps:
             - name: Docker login gcr.io
               if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
-              uses: docker/login-action@v3
+              uses: docker/login-action@v2
               with:
                 password: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
                 registry: gcr.io
                 username: _json_key
             - name: Docker login docker.io
               if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
-              uses: docker/login-action@v3
+              uses: docker/login-action@v2
               with:
                 password: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
                 registry: docker.io
                 username: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
-            - uses: actions/setup-go@v5
+            - uses: actions/setup-go@v3
               with:
-                go-version: "1.23"
+                go-version: "1.18"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -33,13 +33,44 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package@latest
-            - uses: buildpacks/github-actions/setup-tools@v5.7.2
-              with:
-                crane-version: 0.19.1
-                yj-version: 5.1.0
-            - uses: buildpacks/github-actions/setup-pack@v5.7.2
-              with:
-                pack-version: 0.34.2
+            - name: Install crane
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                echo "Installing crane ${CRANE_VERSION}"
+
+                mkdir -p "${HOME}"/bin
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
+
+                curl \
+                  --show-error \
+                  --silent \
+                  --location \
+                  "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" \
+                | tar -C "${HOME}/bin" -xz crane
+              env:
+                CRANE_VERSION: 0.8.0
+            - name: Install pack
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                echo "Installing pack ${PACK_VERSION}"
+
+                mkdir -p "${HOME}"/bin
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
+
+                curl \
+                  --location \
+                  --show-error \
+                  --silent \
+                  "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
+                | tar -C "${HOME}"/bin -xz pack
+              env:
+                PACK_VERSION: 0.27.0
             - name: Enable pack Experimental
               if: ${{ false }}
               run: |
@@ -51,9 +82,9 @@ jobs:
 
                 mkdir -p "${HOME}"/.pack
                 echo "experimental = true" >> "${HOME}"/.pack/config.toml
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v3
             - if: ${{ false }}
-              uses: actions/cache@v4
+              uses: actions/cache@v3
               with:
                 key: ${{ runner.os }}-go-${{ hashFiles('**/buildpack.toml', '**/package.toml') }}
                 path: |-
@@ -67,8 +98,8 @@ jobs:
 
                 set -euo pipefail
 
-                if [[ ${GITHUB_REF:-} != "refs/"* ]]; then
-                  echo "GITHUB_REF set to [${GITHUB_REF:-}], but that is unexpected. It should start with 'refs/*'"
+                if [ -z "${GITHUB_REF+set}" ]; then
+                  echo "GITHUB_REF set to [${GITHUB_REF-<unset>}], but should never be empty or unset"
                   exit 255
                 fi
 
@@ -78,15 +109,15 @@ jobs:
                   MAJOR_VERSION="$(echo "${VERSION}" | awk -F '.' '{print $1 }')"
                   MINOR_VERSION="$(echo "${VERSION}" | awk -F '.' '{print $1 "." $2 }')"
 
-                  echo "version-major=${MAJOR_VERSION}" >> "$GITHUB_OUTPUT"
-                  echo "version-minor=${MINOR_VERSION}" >> "$GITHUB_OUTPUT"
+                  echo "::set-output name=version-major::${MAJOR_VERSION}"
+                  echo "::set-output name=version-minor::${MINOR_VERSION}"
                 elif [[ ${GITHUB_REF} =~ refs/heads/(.+) ]]; then
                   VERSION=${BASH_REMATCH[1]}
                 else
                   VERSION=$(git rev-parse --short HEAD)
                 fi
 
-                echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+                echo "::set-output name=version::${VERSION}"
                 echo "Selected ${VERSION} from
                   * ref: ${GITHUB_REF}
                   * sha: ${GITHUB_SHA}
@@ -97,32 +128,23 @@ jobs:
 
                 set -euo pipefail
 
-                # With Go 1.20, we need to set this so that we produce statically compiled binaries
-                #
-                # Starting with Go 1.20, Go will produce binaries that are dynamically linked against libc
-                #   which can cause compatibility issues. The compiler links against libc on the build system
-                #   but that may be newer than on the stacks we support.
-                export CGO_ENABLED=0
-
                 if [[ "${INCLUDE_DEPENDENCIES}" == "true" ]]; then
                   create-package \
-                    --source "${SOURCE_PATH:-.}" \
+                    --source ${SOURCE_PATH:-.} \
                     --cache-location "${HOME}"/carton-cache \
                     --destination "${HOME}"/buildpack \
                     --include-dependencies \
                     --version "${VERSION}"
                 else
                   create-package \
-                    --source "${SOURCE_PATH:-.}" \
+                    --source ${SOURCE_PATH:-.} \
                     --destination "${HOME}"/buildpack \
                     --version "${VERSION}"
                 fi
 
-                PACKAGE_FILE="${SOURCE_PATH:-.}/package.toml"
-                if [ -f "${PACKAGE_FILE}" ]; then
-                  cp "${PACKAGE_FILE}" "${HOME}/buildpack/package.toml"
-                  printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}/buildpack" "${OS}" >> "${HOME}/buildpack/package.toml"
-                fi
+                PACKAGE_FILE=${SOURCE_PATH:-.}/package.toml
+                [[ -e ${PACKAGE_FILE} ]] && cp ${PACKAGE_FILE} "${HOME}"/package.toml
+                printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}"/buildpack "${OS}" >> "${HOME}"/package.toml
               env:
                 INCLUDE_DEPENDENCIES: "false"
                 OS: linux
@@ -135,23 +157,15 @@ jobs:
 
                 set -euo pipefail
 
-                COMPILED_BUILDPACK="${HOME}/buildpack"
-
-                # create-package puts the buildpack here, we need to run from that directory
-                #   for component buildpacks so that pack doesn't need a package.toml
-                cd "${COMPILED_BUILDPACK}"
-                CONFIG=""
-                if [ -f "${COMPILED_BUILDPACK}/package.toml" ]; then
-                  CONFIG="--config ${COMPILED_BUILDPACK}/package.toml"
-                fi
 
                 PACKAGE_LIST=($PACKAGES)
                 # Extract first repo (Docker Hub) as the main to package & register
                 PACKAGE=${PACKAGE_LIST[0]}
 
                 if [[ "${PUBLISH:-x}" == "true" ]]; then
-                  pack -v buildpack package \
-                    "${PACKAGE}:${VERSION}" ${CONFIG} \
+                  pack buildpack package \
+                    "${PACKAGE}:${VERSION}" \
+                    --config "${HOME}"/package.toml \
                     --publish
 
                   if [[ -n ${VERSION_MINOR:-} && -n ${VERSION_MAJOR:-} ]]; then
@@ -159,7 +173,7 @@ jobs:
                     crane tag "${PACKAGE}:${VERSION}" "${VERSION_MAJOR}"
                   fi
                   crane tag "${PACKAGE}:${VERSION}" latest
-                  echo "digest=$(crane digest "${PACKAGE}:${VERSION}")" >> "$GITHUB_OUTPUT"
+                  echo "::set-output name=digest::$(crane digest "${PACKAGE}:${VERSION}")"
 
                   # copy to other repositories specified
                   for P in "${PACKAGE_LIST[@]}"
@@ -175,9 +189,10 @@ jobs:
                     done
 
                 else
-                  pack -v buildpack package \
-                    "${PACKAGE}:${VERSION}" ${CONFIG} \
-                    --format "${FORMAT}" $([ -n "$TTL_SH_PUBLISH" ] && [ "$TTL_SH_PUBLISH" = "true" ] && echo "--publish")
+                  pack buildpack package \
+                    "${PACKAGE}:${VERSION}" \
+                    --config "${HOME}"/package.toml \
+                    --format "${FORMAT}"
                 fi
               env:
                 PACKAGES: docker.io/paketobuildpacks/liberty gcr.io/paketo-buildpacks/liberty
@@ -208,7 +223,7 @@ jobs:
                 DIGEST: ${{ steps.package.outputs.digest }}
                 GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
             - if: ${{ true }}
-              uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:5.7.2
+              uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:4.0.1
               with:
                 address: docker.io/paketobuildpacks/liberty@${{ steps.package.outputs.digest }}
                 id: paketo-buildpacks/liberty
