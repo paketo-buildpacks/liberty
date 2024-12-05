@@ -62,7 +62,7 @@ Valid profiles for Open Liberty are:
 * javaee8
 * webProfile9
 * webProfile8
-* microProfile6
+* microProfile7
 * microProfile4
 
 Valid profiles for WebSphere Liberty are:
