@@ -202,22 +202,6 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.11:*:*:*:*:*:*:*"]
-    id = "open-liberty-runtime-microProfile6"
-    name = "Open Liberty (Micro Profile 6)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile6@24.0.0.11"
-    sha256 = "16c834a41a01f77ec826d9b0f334aed447801b1d9f3fc05f5ac8cf6e0a4736ac"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.11.tar.gz"
-    source-sha256 = "320cf36d310438d615a79350c8de4a737ff697ef45664c5671682284b9c647bb"
-    stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile6/24.0.0.11/openliberty-microProfile6-24.0.0.11.zip"
-    version = "24.0.11"
-
-    [[metadata.dependencies.licenses]]
-      type = "EPL-2.0"
-      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
-
-  [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.12:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
@@ -248,6 +232,22 @@ api = "0.7"
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
+
+    [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:24.0.0.12:*:*:*:*:*:*:*"]
+    id = "open-liberty-runtime-microProfile7"
+    name = "Open Liberty (Micro Profile 7)"
+    purl = "pkg:maven/io.openliberty/openliberty-microProfile7@24.0.0.12"
+    sha256 = "aafcede3ca008f36867f94cd8c6bea7d3c58116eeeb255539b98c0f20c292798"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-24.0.0.12.tar.gz"
+    source-sha256 = "57ff32688ecb5b6d1852e15c7ca388dda13d76d1e218f29a8dae1e552de39fcf"
+    stacks = ["*"]
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile7/24.0.0.12/openliberty-microProfile7-24.0.0.12.zip"
+    version = "24.0.12"
+
+    [[metadata.dependencies.licenses]]
+      type = "EPL-2.0"
+      uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"    
 
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:ibm:websphere_application_server:24.0.0.12:*:*:*:liberty:*:*:*"]
