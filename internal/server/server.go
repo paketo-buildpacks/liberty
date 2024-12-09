@@ -108,7 +108,7 @@ func IsValidOpenLibertyProfile(profile string) bool {
 		profile == "javaee8" ||
 		profile == "webProfile10" ||
 		profile == "webProfile8" ||
-		profile == "microProfile6" ||
+		profile == "microProfile7" ||
 		profile == "microProfile4"
 }
 
@@ -134,8 +134,8 @@ func GetDefaultFeatures(serverProfile string) []string {
 		return []string{"webProfile-10.0"}
 	case "webProfile8":
 		return []string{"webProfile-8.0"}
-	case "microProfile5":
-		return []string{"microProfile-6.0"}
+	case "microProfile7":
+		return []string{"microProfile-7.0"}
 	case "microProfile4":
 		return []string{"microProfile-4.1"}
 	}
