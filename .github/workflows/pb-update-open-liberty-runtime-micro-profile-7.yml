@@ -1,4 +1,4 @@
-name: Update open-liberty-runtime-microProfile3
+name: Update open-liberty-runtime-microProfile7
 "on":
     schedule:
         - cron: 0 5 * * 1-5
@@ -27,7 +27,7 @@ jobs:
             - id: dependency
               uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
               with:
-                artifact_id: openliberty-microProfile3
+                artifact_id: openliberty-microProfile7
                 group_id: io.openliberty
                 packaging: zip
                 uri: https://repo1.maven.org/maven2
@@ -80,7 +80,7 @@ jobs:
                 ARCH: ""
                 CPE: ${{ steps.dependency.outputs.cpe }}
                 CPE_PATTERN: '[\d]+\.[\d]+\.[\d]+\.[\d]+'
-                ID: open-liberty-runtime-microProfile3
+                ID: open-liberty-runtime-microProfile7
                 PURL: ${{ steps.dependency.outputs.purl }}
                 PURL_PATTERN: '[\d]+\.[\d]+\.[\d]+\.[\d]+'
                 SHA256: ${{ steps.dependency.outputs.sha256 }}
@@ -92,14 +92,14 @@ jobs:
             - uses: peter-evans/create-pull-request@v6
               with:
                 author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
-                body: Bumps `open-liberty-runtime-microProfile3` from `${{ steps.buildpack.outputs.old-version }}` to `${{ steps.buildpack.outputs.new-version }}`.
-                branch: update/buildpack/open-liberty-runtime-micro-profile-3
+                body: Bumps `open-liberty-runtime-microProfile7` from `${{ steps.buildpack.outputs.old-version }}` to `${{ steps.buildpack.outputs.new-version }}`.
+                branch: update/buildpack/open-liberty-runtime-micro-profile-7
                 commit-message: |-
-                    Bump open-liberty-runtime-microProfile3 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
+                    Bump open-liberty-runtime-microProfile7 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
 
-                    Bumps open-liberty-runtime-microProfile3 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}.
+                    Bumps open-liberty-runtime-microProfile7 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}.
                 delete-branch: true
                 labels: ${{ steps.buildpack.outputs.version-label }}, type:dependency-upgrade
                 signoff: true
-                title: Bump open-liberty-runtime-microProfile3 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
+                title: Bump open-liberty-runtime-microProfile7 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
                 token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
