@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/BurntSushi/toml v1.4.0
-	github.com/antchfx/xmlquery v1.4.2
+	github.com/antchfx/xmlquery v1.4.3
 	github.com/buildpacks/libcnb v1.30.4
 	github.com/heroku/color v0.0.6
 	github.com/onsi/gomega v1.36.1
@@ -17,7 +17,7 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
-	github.com/antchfx/xpath v1.3.2 // indirect
+	github.com/antchfx/xpath v1.3.3 // indirect
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
@@ -34,7 +34,7 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.5.0 // indirect
