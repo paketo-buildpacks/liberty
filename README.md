@@ -1,4 +1,4 @@
-# `gcr.io/paketo-buildpacks/liberty`
+# `paketobuildpacks/liberty`
 
 The Paketo Buildpack for Liberty is a Cloud-Native Buildpack that contributes Open Liberty or WebSphere Liberty for Java EE support.
 
