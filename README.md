@@ -1,4 +1,7 @@
-# `gcr.io/paketo-buildpacks/liberty`
+# Paketo Buildpack for Liberty
+
+## Buildpack ID: `paketo-buildpacks/liberty`
+## Registry URLs: `docker.io/paketobuildpacks/liberty`
 
 The Paketo Buildpack for Liberty is a Cloud-Native Buildpack that contributes Open Liberty or WebSphere Liberty for Java EE support.
 
