@@ -186,34 +186,34 @@ images that you have prepared earlier.
 
 ```toml
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/ca-certificates"
+  uri = "docker://docker.io/paketobuildpacks/ca-certificates"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/eclipse-openj9"
+  uri = "docker://docker.io/paketobuildpacks/eclipse-openj9"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/syft"
+  uri = "docker://docker.io/paketobuildpacks/syft"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/leiningen"
+  uri = "docker://docker.io/paketobuildpacks/leiningen"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/gradle"
+  uri = "docker://docker.io/paketobuildpacks/gradle"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/maven"
+  uri = "docker://docker.io/paketobuildpacks/maven"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/liberty"
+  uri = "docker://docker.io/paketobuildpacks/liberty"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/procfile"
+  uri = "docker://docker.io/paketobuildpacks/procfile"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/environment-variables"
+  uri = "docker://docker.io/paketobuildpacks/environment-variables"
 
 [[buildpacks]]
-  uri = "docker://gcr.io/paketo-buildpacks/image-labels"
+  uri = "docker://docker.io/paketobuildpacks/image-labels"
 
 [[order]]
 
