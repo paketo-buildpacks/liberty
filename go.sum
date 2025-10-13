@@ -2,9 +2,8 @@ github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg
 github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
-github.com/antchfx/xmlquery v1.4.4 h1:mxMEkdYP3pjKSftxss4nUHfjBhnMk4imGoR96FRY2dg=
-github.com/antchfx/xmlquery v1.4.4/go.mod h1:AEPEEPYE9GnA2mj5Ur2L5Q5/2PycJ0N9Fusrx9b12fc=
-github.com/antchfx/xpath v1.3.3/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
+github.com/antchfx/xmlquery v1.5.0 h1:uAi+mO40ZWfyU6mlUBxRVvL6uBNZ6LMU4M3+mQIBV4c=
+github.com/antchfx/xmlquery v1.5.0/go.mod h1:lJfWRXzYMK1ss32zm1GQV3gMIW/HFey3xDZmkP1SuNc=
 github.com/antchfx/xpath v1.3.5 h1:PqbXLC3TkfeZyakF5eeh3NTWEbYl4VHNVeufANzDbKQ=
 github.com/antchfx/xpath v1.3.5/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
 github.com/buildpacks/libcnb v1.30.4 h1:Jp6cJxYsZQgqix+lpRdSpjHt5bv5yCJqgkw9zWmS6xU=
