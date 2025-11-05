@@ -122,32 +122,32 @@ api = "0.7"
     name = "BP_LIBERTY_SCC_TRIM_SIZE_DISABLED"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.10:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
-    purl = "pkg:maven/io.openliberty/openliberty-runtime@25.0.0.10"
-    sha256 = "59fde9b911e2d2e6db5795b150dd8b91da7a06adaf147435fa82fd9d346a00a9"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.10.tar.gz"
-    source-sha256 = "880cd0e49e10a45fe3ff9bd48f6c71ce2887da0f8faa2a878505c6799bfd0e9a"
+    purl = "pkg:maven/io.openliberty/openliberty-runtime@25.0.0.11"
+    sha256 = "64370044d67e749ee70f9732aeab2c44b4ea48d6551521e0d16b62db8a14f721"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.11.tar.gz"
+    source-sha256 = "62947667641eb2a95970d4ddeb147270de07110a63daceca7040ac0b6b18400d"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/25.0.0.10/openliberty-runtime-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-runtime/25.0.0.11/openliberty-runtime-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.10:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-jakartaee10"
     name = "Open Liberty (Jakarta EE10)"
-    purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@25.0.0.10"
-    sha256 = "3e0c10191e19657e41837bacb46d21e894bc8acf273fc0b08667c2b51e794de9"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.10.tar.gz"
-    source-sha256 = "880cd0e49e10a45fe3ff9bd48f6c71ce2887da0f8faa2a878505c6799bfd0e9a"
+    purl = "pkg:maven/io.openliberty/openliberty-jakartaee10@25.0.0.11"
+    sha256 = "eaf91b4f472b809165e4e96610c0a599a4e963514c755ae5e657e7989c608ffc"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.11.tar.gz"
+    source-sha256 = "62947667641eb2a95970d4ddeb147270de07110a63daceca7040ac0b6b18400d"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/25.0.0.10/openliberty-jakartaee10-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-jakartaee10/25.0.0.11/openliberty-jakartaee10-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
@@ -186,148 +186,148 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.10:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile8"
     name = "Open Liberty (Web Profile 8)"
-    purl = "pkg:maven/io.openliberty/openliberty-webProfile8@25.0.0.10"
-    sha256 = "49727d67b0624b9a82a593389779055a3d83eea8b1a5b5df75624196bc08aaeb"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.10.tar.gz"
-    source-sha256 = "880cd0e49e10a45fe3ff9bd48f6c71ce2887da0f8faa2a878505c6799bfd0e9a"
+    purl = "pkg:maven/io.openliberty/openliberty-webProfile8@25.0.0.11"
+    sha256 = "311c74cdf3dffd9f8a13ee92a261c60968e975aa32a2a46e1362e1c15c48afe6"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.11.tar.gz"
+    source-sha256 = "62947667641eb2a95970d4ddeb147270de07110a63daceca7040ac0b6b18400d"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile8/25.0.0.10/openliberty-webProfile8-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-webProfile8/25.0.0.11/openliberty-webProfile8-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.10:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile4@25.0.0.10"
-    sha256 = "59b47b3d66550375fef78ece3a934fe0514e7d24d6bdafe548b8d8bfda0772ec"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.10.tar.gz"
-    source-sha256 = "880cd0e49e10a45fe3ff9bd48f6c71ce2887da0f8faa2a878505c6799bfd0e9a"
+    purl = "pkg:maven/io.openliberty/openliberty-microProfile4@25.0.0.11"
+    sha256 = "a05ee14e4f257a1f8e5cd93d9578eb888c5ea14fcba8e353a180c33c546e6b13"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.11.tar.gz"
+    source-sha256 = "62947667641eb2a95970d4ddeb147270de07110a63daceca7040ac0b6b18400d"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/25.0.0.10/openliberty-microProfile4-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile4/25.0.0.11/openliberty-microProfile4-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.10:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
-    purl = "pkg:maven/io.openliberty/openliberty-kernel@25.0.0.10"
-    sha256 = "8d471a3cac35d027d1d9aed764196304942e84338a8616dc3e0bf3665fff4e94"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.10.tar.gz"
-    source-sha256 = "880cd0e49e10a45fe3ff9bd48f6c71ce2887da0f8faa2a878505c6799bfd0e9a"
+    purl = "pkg:maven/io.openliberty/openliberty-kernel@25.0.0.11"
+    sha256 = "8c84453c40ea46cb0f48793df9e770688e025ce61cf64053623b03aaad89365c"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.11.tar.gz"
+    source-sha256 = "62947667641eb2a95970d4ddeb147270de07110a63daceca7040ac0b6b18400d"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/25.0.0.10/openliberty-kernel-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-kernel/25.0.0.11/openliberty-kernel-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.10:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:25.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile7"
     name = "Open Liberty (Micro Profile 7)"
-    purl = "pkg:maven/io.openliberty/openliberty-microProfile7@25.0.0.10"
-    sha256 = "22f0ecdb80965da7b4e3fb493873d02c7b486ae36b446a60617ab3ae6ccb7b1f"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.10.tar.gz"
-    source-sha256 = "880cd0e49e10a45fe3ff9bd48f6c71ce2887da0f8faa2a878505c6799bfd0e9a"
+    purl = "pkg:maven/io.openliberty/openliberty-microProfile7@25.0.0.11"
+    sha256 = "62680128e1b39f0c2ea5b3ba73233c8c87a56fc982a51d25f448312be0a677ed"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-25.0.0.11.tar.gz"
+    source-sha256 = "62947667641eb2a95970d4ddeb147270de07110a63daceca7040ac0b6b18400d"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile7/25.0.0.10/openliberty-microProfile7-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-microProfile7/25.0.0.11/openliberty-microProfile7-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.10:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-kernel"
     name = "WebSphere Liberty (Kernel)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@25.0.0.10"
-    sha256 = "b4e43aed3154fbe0f401fa1695739de7af097a9f3582730f326f3e77a9f8dee5"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@25.0.0.11"
+    sha256 = "6d73d42a3732a9eff2d9ff3debea71bb64fde4e7dfa5fb0a3f8e66b3cf689361"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/25.0.0.10/wlp-kernel-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/25.0.0.11/wlp-kernel-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.10:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-jakartaee10"
     name = "WebSphere Liberty (Jakarta EE9)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee10@25.0.0.10"
-    sha256 = "b966159db063e7fe59812b83ba4c6c0bfc3af8bcf55e721d1f651a980e778b94"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee10@25.0.0.11"
+    sha256 = "7abfffc6ba2543eb17a45ba8efcc75f81663355592f9634b8bd4631f9ae1c8a7"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee10/25.0.0.10/wlp-jakartaee10-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-jakartaee10/25.0.0.11/wlp-jakartaee10-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.10:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee8"
     name = "WebSphere Liberty (Java EE8)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee8@25.0.0.10"
-    sha256 = "158e476a02517331f08d5528c48d5d82c8a104555af3a1442ae72f2287cc6229"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee8@25.0.0.11"
+    sha256 = "ea28a7835375234ef57a9d2ad9e8ae2b18fdf6907ad6b347048a2d520edd4784"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee8/25.0.0.10/wlp-javaee8-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee8/25.0.0.11/wlp-javaee8-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.10:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee7"
     name = "WebSphere Liberty (Java EE7)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@25.0.0.10"
-    sha256 = "21ecdae0db201ab2379829318f97a5f7d60ea76f31f0b8416b4f20f757b70c71"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@25.0.0.11"
+    sha256 = "7232a88ae4e3bb9a52d723e752415b03d74cb446a483f913e71592c4f814dece"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/25.0.0.10/wlp-javaee7-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/25.0.0.11/wlp-javaee7-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.10:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile10"
     name = "WebSphere Liberty (Web Profile 10)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile10@25.0.0.10"
-    sha256 = "86776ca08fafcb4a1063f64398e0656387646f37fdf886472224b707a67e91ee"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile10@25.0.0.11"
+    sha256 = "8ef6961a830925c28e3c12138e324e18f40a3c1a510c34a20b84b6466e45f6d4"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile10/25.0.0.10/wlp-webProfile10-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile10/25.0.0.11/wlp-webProfile10-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.10:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:25.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile8"
     name = "WebSphere Liberty (Web Profile 8)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile8@25.0.0.10"
-    sha256 = "526e18150268ca90425059940f7b1eb2d616870d107dd118af9e2ad4bc6bc8ff"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile8@25.0.0.11"
+    sha256 = "9fecc521f46f90413d8a220e344db3962a579af2925e9c8c0ae6ea5baaa7abe3"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile8/25.0.0.10/wlp-webProfile8-25.0.0.10.zip"
-    version = "25.0.10"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile8/25.0.0.11/wlp-webProfile8-25.0.0.11.zip"
+    version = "25.0.11"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
