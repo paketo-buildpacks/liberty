@@ -104,9 +104,9 @@ func GetFeatureList(profile string, serverPath string, additionalFeatures []stri
 func IsValidOpenLibertyProfile(profile string) bool {
 	return profile == "full" ||
 		profile == "kernel" ||
-		profile == "jakartaee10" ||
+		profile == "jakartaee11" ||
 		profile == "javaee8" ||
-		profile == "webProfile10" ||
+		profile == "webProfile11" ||
 		profile == "webProfile8" ||
 		profile == "microProfile7" ||
 		profile == "microProfile4"
@@ -114,10 +114,10 @@ func IsValidOpenLibertyProfile(profile string) bool {
 
 func IsValidWebSphereLibertyProfile(profile string) bool {
 	return profile == "kernel" ||
-		profile == "jakartaee10" ||
+		profile == "jakartaee11" ||
 		profile == "javaee8" ||
 		profile == "javaee7" ||
-		profile == "webProfile10" ||
+		profile == "webProfile11" ||
 		profile == "webProfile8" ||
 		profile == "webProfile7"
 }
