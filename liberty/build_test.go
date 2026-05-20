@@ -65,7 +65,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			"dependencies": []map[string]interface{}{
 				{"id": "open-liberty-runtime-kernel", "version": "21.0.11"},
 				{"id": "websphere-liberty-runtime-kernel", "version": "21.0.11"},
-				{"id": "open-liberty-runtime-jakartaee10", "version": "21.0.11"},
+				{"id": "open-liberty-runtime-jakartaee11", "version": "21.0.11"},
 			},
 		}
 
@@ -146,8 +146,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
 
-		it("selects the latest jakartaee10 profile for Open Liberty", func() {
-			Expect(os.Setenv("BP_LIBERTY_PROFILE", "jakartaee10")).To(Succeed())
+		it("selects the latest jakartaee11 profile for Open Liberty", func() {
+			Expect(os.Setenv("BP_LIBERTY_PROFILE", "jakartaee11")).To(Succeed())
 			result, err := liberty.Build{
 				Logger:      bard.NewLogger(io.Discard),
 				SBOMScanner: &sbomScanner,
@@ -158,7 +158,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-jakartaee10"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-jakartaee11"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})
@@ -263,7 +263,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	context("user env config set", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BP_LIBERTY_VERSION", "21.0.11")).To(Succeed())
-			Expect(os.Setenv("BP_LIBERTY_PROFILE", "jakartaee10")).To(Succeed())
+			Expect(os.Setenv("BP_LIBERTY_PROFILE", "jakartaee11")).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "application.xml"), []byte{}, 0644)).To(Succeed())
 		})
@@ -284,7 +284,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Expect(result.Layers).To(HaveLen(3))
 			Expect(result.Layers[0].Name()).To(Equal("helper"))
 			Expect(result.Layers[1].Name()).To(Equal("base"))
-			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-jakartaee10"))
+			Expect(result.Layers[2].Name()).To(Equal("open-liberty-runtime-jakartaee11"))
 
 			sbomScanner.AssertCalled(t, "ScanLaunch", ctx.Application.Path, libcnb.SyftJSON, libcnb.CycloneDXJSON)
 		})

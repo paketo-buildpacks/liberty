@@ -29,14 +29,14 @@ dependencies:
     group_id:    io.openliberty
     artifact_id: openliberty-runtime
     packaging:   zip
-- id:   open-liberty-runtime-jakartaee10
+- id:   open-liberty-runtime-jakartaee11
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
     group_id:    io.openliberty
-    artifact_id: openliberty-jakartaee10
+    artifact_id: openliberty-jakartaee11
     packaging:   zip
 - id:   open-liberty-runtime-javaee8
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
@@ -47,14 +47,14 @@ dependencies:
     group_id:    io.openliberty
     artifact_id: openliberty-javaee8
     packaging:   zip
-- id:   open-liberty-runtime-webProfile10
+- id:   open-liberty-runtime-webProfile11
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
     group_id:    io.openliberty
-    artifact_id: openliberty-webProfile10
+    artifact_id: openliberty-webProfile11
     packaging:   zip
 - id:   open-liberty-runtime-webProfile8
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
@@ -101,23 +101,23 @@ dependencies:
     group_id:    com.ibm.websphere.appserver.runtime
     artifact_id: wlp-kernel
     packaging:   zip
-- id:   websphere-liberty-runtime-jakartaee10
+- id:   websphere-liberty-runtime-jakartaee11
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
     group_id:    com.ibm.websphere.appserver.runtime
-    artifact_id: wlp-jakartaee10
+    artifact_id: wlp-jakartaee11
     packaging:   zip
-- id:   websphere-liberty-runtime-webProfile10
+- id:   websphere-liberty-runtime-webProfile11
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   cpe_pattern:     "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
   uses: docker://ghcr.io/paketo-buildpacks/actions/liberty-dependency:main
   with:
     uri:         https://repo1.maven.org/maven2
     group_id:    com.ibm.websphere.appserver.runtime
-    artifact_id: wlp-webProfile10
+    artifact_id: wlp-webProfile11
     packaging:   zip
 - id:   websphere-liberty-runtime-javaee8
   purl_pattern:    "[\\d]+\\.[\\d]+\\.[\\d]+\\.[\\d]+"
