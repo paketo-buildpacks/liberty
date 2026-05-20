@@ -93,7 +93,7 @@ jobs:
               with:
                 author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
                 body: Bumps `websphere-liberty-runtime-jakartaee11` from `${{ steps.buildpack.outputs.old-version }}` to `${{ steps.buildpack.outputs.new-version }}`.
-                branch: update/buildpack/websphere-liberty-runtime-jakartaee-10
+                branch: update/buildpack/websphere-liberty-runtime-jakartaee-11
                 commit-message: |-
                     Bump websphere-liberty-runtime-jakartaee11 from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
 
