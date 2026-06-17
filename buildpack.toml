@@ -250,14 +250,14 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.5:*:*:*:liberty:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.6:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-kernel"
     name = "WebSphere Liberty (Kernel)"
-    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@26.0.0.5"
-    sha256 = "4ce253d6896e137008647577cda984a9a4da82e4caf044608ef0ee84312a5371"
+    purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@26.0.0.6"
+    sha256 = "8c89a363bb50d7e347d6de8e5ab6bc0c8c52354bd626938451c49fb237caecb3"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/26.0.0.5/wlp-kernel-26.0.0.5.zip"
-    version = "26.0.5"
+    uri = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/26.0.0.6/wlp-kernel-26.0.0.6.zip"
+    version = "26.0.6"
 
     [[metadata.dependencies.licenses]]
       type = "Proprietary"
