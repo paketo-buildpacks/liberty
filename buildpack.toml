@@ -154,16 +154,16 @@ api = "0.7"
       uri = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.5:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.6:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-javaee8"
     name = "Open Liberty (Java EE8)"
-    purl = "pkg:maven/io.openliberty/openliberty-javaee8@26.0.0.5"
-    sha256 = "3bddc69e4f3ff0300b75243581af9d2870a9944861c22e026b8e170eab7bd3f5"
-    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-26.0.0.5.tar.gz"
-    source-sha256 = "c3bcbadc2d71a6d6b131bb00fe9327a1ddb8a46a059fcb051349cd9017058352"
+    purl = "pkg:maven/io.openliberty/openliberty-javaee8@26.0.0.6"
+    sha256 = "d0f2d78f4d01ceaafb27d0235a750fe337904c9fb6a1ffb6b2c860abd509b9f0"
+    source = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-26.0.0.6.tar.gz"
+    source-sha256 = "d555392c7af30ab289c89c5ac7cb8ce10bd87dcaa215bea62c20a5dea453b6d9"
     stacks = ["*"]
-    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-javaee8/26.0.0.5/openliberty-javaee8-26.0.0.5.zip"
-    version = "26.0.5"
+    uri = "https://repo1.maven.org/maven2/io/openliberty/openliberty-javaee8/26.0.0.6/openliberty-javaee8-26.0.0.6.zip"
+    version = "26.0.6"
 
     [[metadata.dependencies.licenses]]
       type = "EPL-2.0"
