@@ -29,9 +29,10 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
 
-          AUTHED_URL="${PRIVATE_REPO_URL/https:\/\//https://x-access-token:${PAT}@}"
+          # Build the authenticated URL directly in the workflow expression so
+          # the PAT is never passed through a masked-secret shell substitution.
+          git remote add private "https://x-access-token:${PAT}@${PRIVATE_REPO_URL#https://}"
 
-          git remote add private "${AUTHED_URL}"
           git push private "HEAD:refs/heads/${TARGET_BRANCH}" --force
 
           echo "Pushed to ${TARGET_BRANCH} on private repo."
@@ -45,8 +46,6 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-
-          AUTHED_URL="${PRIVATE_REPO_URL/https:\/\//https://x-access-token:${PAT}@}"
 
           git fetch private "${BASE_BRANCH}"
           git checkout -b merge-target "private/${BASE_BRANCH}"
