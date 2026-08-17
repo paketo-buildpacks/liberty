@@ -11,7 +11,7 @@ require (
 	github.com/paketo-buildpacks/libjvm v1.46.0
 	github.com/paketo-buildpacks/libpak v1.73.0
 	github.com/sclevine/spec v1.4.0
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	golang.org/x/sys v0.47.0
 )
 
@@ -19,7 +19,6 @@ require (
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/antchfx/xpath v1.3.8 // indirect
 	github.com/creack/pty v1.1.24 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
@@ -30,7 +29,6 @@ require (
 	github.com/mattn/go-shellwords v1.0.14 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/pavlo-v-chernykh/keystore-go/v4 v4.5.0 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
