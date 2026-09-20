@@ -155,17 +155,17 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	installType, _ := cr.Resolve("BP_LIBERTY_INSTALL_TYPE")
 	profile, _ := cr.Resolve("BP_LIBERTY_PROFILE")
 	if profile == "" {
-		if installType == openLibertyInstall {
-			profile = "kernel"
-		} else if installType == websphereLibertyInstall {
+		switch installType {
+		case openLibertyInstall, websphereLibertyInstall:
 			profile = "kernel"
 		}
 	}
 
 	isValidProfile := true
-	if installType == openLibertyInstall {
+	switch installType {
+	case openLibertyInstall:
 		isValidProfile = server.IsValidOpenLibertyProfile(profile)
-	} else if installType == websphereLibertyInstall {
+	case websphereLibertyInstall:
 		isValidProfile = server.IsValidWebSphereLibertyProfile(profile)
 	}
 	if !isValidProfile {
@@ -175,10 +175,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	version, _ := cr.Resolve("BP_LIBERTY_VERSION")
 	features, _ := cr.Resolve("BP_LIBERTY_FEATURES")
 	featureList := strings.Fields(features)
-	disableFeatureInstall := false
-	if profile == "full" {
-		disableFeatureInstall = true
-	}
+	disableFeatureInstall := profile == "full"
 	if val, isSet := cr.Resolve("BP_LIBERTY_FEATURE_INSTALL_DISABLED"); isSet {
 		disableFeatureInstall = val == "true"
 	}
@@ -216,7 +213,8 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	)
 	result.Layers = append(result.Layers, base)
 
-	if installType == openLibertyInstall || installType == websphereLibertyInstall {
+	switch installType {
+	case openLibertyInstall, websphereLibertyInstall:
 		sccOptions, err := getSharedClassOptions(cr, jvmName)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to get SCC options\n%w", err)
@@ -236,11 +234,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			&result); err != nil {
 			return libcnb.BuildResult{}, err
 		}
-	} else if installType == noneInstall {
+	case noneInstall:
 		if err := b.buildStackRuntime(serverName, &result); err != nil {
 			return libcnb.BuildResult{}, err
 		}
-	} else {
+	default:
 		return libcnb.BuildResult{}, fmt.Errorf("unable to process install type: '%s'", installType)
 	}
 
@@ -289,9 +287,10 @@ func (b Build) buildDistributionRuntime(
 
 	var distType string
 
-	if installType == openLibertyInstall {
+	switch installType {
+	case openLibertyInstall:
 		distType = "open-liberty-runtime"
-	} else if installType == websphereLibertyInstall {
+	case websphereLibertyInstall:
 		distType = "websphere-liberty-runtime"
 	}
 

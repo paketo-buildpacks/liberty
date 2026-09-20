@@ -48,7 +48,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 			zipPath := filepath.Join("testdata", "test.zip")
 			zipFile, err := os.Open(zipPath)
 			Expect(err).NotTo(HaveOccurred())
-			defer zipFile.Close()
+			defer func() { _ = zipFile.Close() }()
 			Expect(util.Extract(zipFile, testPath, 0)).To(Succeed())
 
 			testFile := filepath.Join(testPath, "test-dir", "test.txt")
@@ -62,7 +62,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 			zipPath := filepath.Join("testdata", "test.zip")
 			zipFile, err := os.Open(zipPath)
 			Expect(err).NotTo(HaveOccurred())
-			defer zipFile.Close()
+			defer func() { _ = zipFile.Close() }()
 			Expect(util.Extract(zipFile, testPath, 1)).To(Succeed())
 
 			testFile := filepath.Join(testPath, "test.txt")
@@ -78,7 +78,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 			zipPath := filepath.Join("testdata", "test.tar.gz")
 			zipFile, err := os.Open(zipPath)
 			Expect(err).NotTo(HaveOccurred())
-			defer zipFile.Close()
+			defer func() { _ = zipFile.Close() }()
 			Expect(util.Extract(zipFile, testPath, 0)).To(Succeed())
 
 			testFile := filepath.Join(testPath, "test-dir", "test.txt")
@@ -92,7 +92,7 @@ func testArchive(t *testing.T, when spec.G, it spec.S) {
 			zipPath := filepath.Join("testdata", "test.tar.gz")
 			zipFile, err := os.Open(zipPath)
 			Expect(err).NotTo(HaveOccurred())
-			defer zipFile.Close()
+			defer func() { _ = zipFile.Close() }()
 			Expect(util.Extract(zipFile, testPath, 1)).To(Succeed())
 
 			testFile := filepath.Join(testPath, "test.txt")
