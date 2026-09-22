@@ -1,6 +1,6 @@
 module github.com/paketo-buildpacks/liberty/v2/dependency/retrieval
 
-go 1.27
+go 1.27.1
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
