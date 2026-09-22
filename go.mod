@@ -7,7 +7,7 @@ require (
 	github.com/antchfx/xmlquery v1.5.1
 	github.com/buildpacks/libcnb v1.30.4
 	github.com/heroku/color v0.0.6
-	github.com/onsi/gomega v1.43.0
+	github.com/onsi/gomega v1.43.1
 	github.com/paketo-buildpacks/libjvm v1.46.0
 	github.com/paketo-buildpacks/libpak v1.73.0
 	github.com/sclevine/spec v1.4.0
@@ -23,7 +23,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
-	github.com/magiconair/properties v1.18.11 // indirect
+	github.com/magiconair/properties v1.18.12 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-shellwords v1.0.15 // indirect
