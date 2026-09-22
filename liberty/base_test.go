@@ -140,7 +140,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 
 		xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "server.xml"))
 		Expect(err).ToNot(HaveOccurred())
-		defer xmlFile.Close()
+		defer func() { _ = xmlFile.Close() }()
 
 		bytes, err := io.ReadAll(xmlFile)
 		Expect(err).ToNot(HaveOccurred())
@@ -174,7 +174,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 
 		xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "server.xml"))
 		Expect(err).ToNot(HaveOccurred())
-		defer xmlFile.Close()
+		defer func() { _ = xmlFile.Close() }()
 
 		bytes, err := io.ReadAll(xmlFile)
 		Expect(err).ToNot(HaveOccurred())
@@ -445,7 +445,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 
 			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
 			Expect(err).ToNot(HaveOccurred())
-			defer xmlFile.Close()
+			defer func() { _ = xmlFile.Close() }()
 			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -476,7 +476,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 
 			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
 			Expect(err).ToNot(HaveOccurred())
-			defer xmlFile.Close()
+			defer func() { _ = xmlFile.Close() }()
 			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -507,7 +507,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 
 			xmlFile, err := os.Open(filepath.Join(ctx.Application.Path, "server.xml"))
 			Expect(err).ToNot(HaveOccurred())
-			defer xmlFile.Close()
+			defer func() { _ = xmlFile.Close() }()
 			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(string(bytes)).To(Equal(`<?xml version="1.0" encoding="UTF-8"?><server><webApplication name="myapp" context-root="/dev" id="app"/></server>`))
@@ -535,7 +535,7 @@ func testBase(t *testing.T, when spec.G, it spec.S) {
 
 			xmlFile, err := os.Open(filepath.Join(layer.Path, "wlp", "usr", "servers", "defaultServer", "configDropins", "overrides", "app.xml"))
 			Expect(err).ToNot(HaveOccurred())
-			defer xmlFile.Close()
+			defer func() { _ = xmlFile.Close() }()
 			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())
 

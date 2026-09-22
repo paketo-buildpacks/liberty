@@ -162,7 +162,7 @@ func testFeatures(t *testing.T, when spec.G, it spec.S) {
 
 			xmlFile, err := os.Open(featureConfigPath)
 			Expect(err).ToNot(HaveOccurred())
-			defer xmlFile.Close()
+			defer func() { _ = xmlFile.Close() }()
 
 			bytes, err := io.ReadAll(xmlFile)
 			Expect(err).ToNot(HaveOccurred())

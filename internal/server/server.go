@@ -408,7 +408,7 @@ func ReadServerConfig(configPath string) (Config, error) {
 	if err != nil {
 		return Config{}, fmt.Errorf("unable to open config '%s'\n%w", configPath, err)
 	}
-	defer xmlFile.Close()
+	defer func() { _ = xmlFile.Close() }()
 
 	content, err := io.ReadAll(xmlFile)
 	if err != nil {
