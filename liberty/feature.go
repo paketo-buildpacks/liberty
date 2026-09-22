@@ -207,7 +207,7 @@ func (i FeatureInstaller) Enable() error {
 	if err != nil {
 		return fmt.Errorf("unable to create file '%s'\n%w", featuresConfigPath, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	err = t.Execute(file, featuresToEnable)
 	if err != nil {
 		return fmt.Errorf("unable to execute template\n%w", err)

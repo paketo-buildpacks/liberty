@@ -239,7 +239,7 @@ func (b Base) contributeConfig(serverPath string) error {
 		if err != nil {
 			return fmt.Errorf("unable to create file '%s'\n%w", serverConfigPath, err)
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		err = t.Execute(file, b.Features)
 		if err != nil {
 			return fmt.Errorf("unable to execute template\n%w", err)
@@ -379,7 +379,7 @@ func (b Base) createAppConfig(serverPath string, appPath string, contextRoot str
 	if err != nil {
 		return fmt.Errorf("unable to create file '%s'\n%w", appConfig, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	err = t.Execute(file, appConfig)
 	if err != nil {
 		return fmt.Errorf("unable to execute template\n%w", err)

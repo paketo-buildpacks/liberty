@@ -66,7 +66,7 @@ func NewDistribution(
 	sccOptions util.SharedClassCacheOptions,
 	executor effect.Executor,
 ) Distribution {
-	contributor, _ := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
+	contributor := libpak.NewDependencyLayerContributor(dependency, cache, libcnb.LayerTypes{
 		Cache:  true,
 		Launch: true,
 	})
@@ -97,7 +97,7 @@ func (d Distribution) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	d.LayerContributor.Logger = d.Logger
 	return d.LayerContributor.Contribute(layer, func(artifact *os.File) (libcnb.Layer, error) {
 		d.Logger.Bodyf("Expanding to %s", layer.Path)
-		if err := crush.ExtractZip(artifact, layer.Path, 1); err != nil {
+		if err := crush.Extract(artifact, layer.Path, 1); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to expand Liberty Runtime\n%w", err)
 		}
 
