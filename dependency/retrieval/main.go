@@ -213,6 +213,7 @@ func generateMavenMetadata(d distribution, versionFetcher versionology.VersionFe
 		},
 		Name:    d.name,
 		PURL:    retrieve.GeneratePURL(d.purlName, raw, checksum, uri),
+		SHA256:  checksum,
 		Stacks:  []string{"*"},
 		URI:     uri,
 		Version: versionString,
