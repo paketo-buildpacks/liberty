@@ -347,6 +347,81 @@ api = "0.7"
       type = "Proprietary"
       uri = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-full"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-jakartaee11"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-javaee8"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-webProfile11"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-webProfile8"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-microProfile4"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-microProfile7"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "open-liberty-runtime-kernel"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "websphere-liberty-runtime-kernel"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "websphere-liberty-runtime-jakartaee11"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "websphere-liberty-runtime-javaee8"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "websphere-liberty-runtime-javaee7"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "websphere-liberty-runtime-webProfile11"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "websphere-liberty-runtime-webProfile8"
+    patches = 1
+
+  [[metadata.dependency-constraints]]
+    constraint = "26.*"
+    id = "websphere-liberty-runtime-webProfile7"
+    patches = 1
+
 [[stacks]]
   id = "*"
 
