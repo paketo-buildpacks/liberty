@@ -36,12 +36,10 @@ const (
 	mavenRepository = "https://repo1.maven.org/maven2"
 
 	openLibertyGroupID = "io.openliberty"
-	openLibertyPURL    = "openliberty"
 	openLibertyLicense = "https://raw.githubusercontent.com/OpenLiberty/open-liberty/integration/LICENSE"
 	openLibertySource  = "https://github.com/OpenLiberty/open-liberty/archive/refs/tags/gm-%s.tar.gz"
 
 	webSphereGroupID = "com.ibm.websphere.appserver.runtime"
-	webSpherePURL    = "websphere-liberty"
 	webSphereLicense = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/23.0.0.3/lafiles/runtime/en.html"
 )
 
@@ -52,27 +50,26 @@ type distribution struct {
 	groupID     string
 	artifact    string
 	name        string
-	purlName    string
 	license     string
 	licenseType string
 }
 
 var distributions = []distribution{
-	{"open-liberty-runtime-full", openLibertyGroupID, "openliberty-runtime", "Open Liberty (All Features)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"open-liberty-runtime-jakartaee11", openLibertyGroupID, "openliberty-jakartaee11", "Open Liberty (Jakarta EE11)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"open-liberty-runtime-javaee8", openLibertyGroupID, "openliberty-javaee8", "Open Liberty (Java EE8)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"open-liberty-runtime-webProfile11", openLibertyGroupID, "openliberty-webProfile11", "Open Liberty (Web Profile 11)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"open-liberty-runtime-webProfile8", openLibertyGroupID, "openliberty-webProfile8", "Open Liberty (Web Profile 8)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"open-liberty-runtime-microProfile4", openLibertyGroupID, "openliberty-microProfile4", "Open Liberty (Micro Profile 4)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"open-liberty-runtime-microProfile7", openLibertyGroupID, "openliberty-microProfile7", "Open Liberty (Micro Profile 7)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"open-liberty-runtime-kernel", openLibertyGroupID, "openliberty-kernel", "Open Liberty (Kernel)", openLibertyPURL, openLibertyLicense, "EPL-2.0"},
-	{"websphere-liberty-runtime-kernel", webSphereGroupID, "wlp-kernel", "WebSphere Liberty (Kernel)", webSpherePURL, webSphereLicense, "Proprietary"},
-	{"websphere-liberty-runtime-jakartaee11", webSphereGroupID, "wlp-jakartaee11", "WebSphere Liberty (Jakarta EE11)", webSpherePURL, webSphereLicense, "Proprietary"},
-	{"websphere-liberty-runtime-javaee8", webSphereGroupID, "wlp-javaee8", "WebSphere Liberty (Java EE8)", webSpherePURL, webSphereLicense, "Proprietary"},
-	{"websphere-liberty-runtime-javaee7", webSphereGroupID, "wlp-javaee7", "WebSphere Liberty (Java EE7)", webSpherePURL, webSphereLicense, "Proprietary"},
-	{"websphere-liberty-runtime-webProfile11", webSphereGroupID, "wlp-webProfile11", "WebSphere Liberty (Web Profile 11)", webSpherePURL, webSphereLicense, "Proprietary"},
-	{"websphere-liberty-runtime-webProfile8", webSphereGroupID, "wlp-webProfile8", "WebSphere Liberty (Web Profile 8)", webSpherePURL, webSphereLicense, "Proprietary"},
-	{"websphere-liberty-runtime-webProfile7", webSphereGroupID, "wlp-webProfile7", "WebSphere Liberty (Web Profile 7)", webSpherePURL, webSphereLicense, "Proprietary"},
+	{"open-liberty-runtime-full", openLibertyGroupID, "openliberty-runtime", "Open Liberty (All Features)", openLibertyLicense, "EPL-2.0"},
+	{"open-liberty-runtime-jakartaee11", openLibertyGroupID, "openliberty-jakartaee11", "Open Liberty (Jakarta EE11)", openLibertyLicense, "EPL-2.0"},
+	{"open-liberty-runtime-javaee8", openLibertyGroupID, "openliberty-javaee8", "Open Liberty (Java EE8)", openLibertyLicense, "EPL-2.0"},
+	{"open-liberty-runtime-webProfile11", openLibertyGroupID, "openliberty-webProfile11", "Open Liberty (Web Profile 11)", openLibertyLicense, "EPL-2.0"},
+	{"open-liberty-runtime-webProfile8", openLibertyGroupID, "openliberty-webProfile8", "Open Liberty (Web Profile 8)", openLibertyLicense, "EPL-2.0"},
+	{"open-liberty-runtime-microProfile4", openLibertyGroupID, "openliberty-microProfile4", "Open Liberty (Micro Profile 4)", openLibertyLicense, "EPL-2.0"},
+	{"open-liberty-runtime-microProfile7", openLibertyGroupID, "openliberty-microProfile7", "Open Liberty (Micro Profile 7)", openLibertyLicense, "EPL-2.0"},
+	{"open-liberty-runtime-kernel", openLibertyGroupID, "openliberty-kernel", "Open Liberty (Kernel)", openLibertyLicense, "EPL-2.0"},
+	{"websphere-liberty-runtime-kernel", webSphereGroupID, "wlp-kernel", "WebSphere Liberty (Kernel)", webSphereLicense, "Proprietary"},
+	{"websphere-liberty-runtime-jakartaee11", webSphereGroupID, "wlp-jakartaee11", "WebSphere Liberty (Jakarta EE11)", webSphereLicense, "Proprietary"},
+	{"websphere-liberty-runtime-javaee8", webSphereGroupID, "wlp-javaee8", "WebSphere Liberty (Java EE8)", webSphereLicense, "Proprietary"},
+	{"websphere-liberty-runtime-javaee7", webSphereGroupID, "wlp-javaee7", "WebSphere Liberty (Java EE7)", webSphereLicense, "Proprietary"},
+	{"websphere-liberty-runtime-webProfile11", webSphereGroupID, "wlp-webProfile11", "WebSphere Liberty (Web Profile 11)", webSphereLicense, "Proprietary"},
+	{"websphere-liberty-runtime-webProfile8", webSphereGroupID, "wlp-webProfile8", "WebSphere Liberty (Web Profile 8)", webSphereLicense, "Proprietary"},
+	{"websphere-liberty-runtime-webProfile7", webSphereGroupID, "wlp-webProfile7", "WebSphere Liberty (Web Profile 7)", webSphereLicense, "Proprietary"},
 }
 
 type generator struct {
@@ -212,7 +209,7 @@ func generateMavenMetadata(d distribution, versionFetcher versionology.VersionFe
 			},
 		},
 		Name:    d.name,
-		PURL:    retrieve.GeneratePURL(d.purlName, raw, checksum, uri),
+		PURL:    mavenPURL(d, raw),
 		SHA256:  checksum,
 		Stacks:  []string{"*"},
 		URI:     uri,
@@ -250,6 +247,12 @@ func buildpackVersion(raw string) (string, error) {
 	}
 
 	return strings.Join([]string{parts[0], parts[1], parts[3]}, "."), nil
+}
+
+// mavenPURL returns the Maven package URL for a distribution. The version is
+// the raw four-part Maven version, matching how the artifacts are published.
+func mavenPURL(d distribution, version string) string {
+	return fmt.Sprintf("pkg:maven/%s/%s@%s", d.groupID, d.artifact, version)
 }
 
 func cpe(d distribution, version string) string {
