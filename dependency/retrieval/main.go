@@ -44,7 +44,7 @@ const (
 )
 
 // distribution maps a dependency id to the Maven artifact that provides it and
-// the metadata used to generate its PURL, CPE, and license fields.
+// the metadata used to generate its PURL, CPEs, and license fields.
 type distribution struct {
 	id          string
 	groupID     string
@@ -200,7 +200,7 @@ func generateMavenMetadata(d distribution, versionFetcher versionology.VersionFe
 
 	dependency := cargo.ConfigMetadataDependency{
 		Checksum: fmt.Sprintf("sha256:%s", checksum),
-		CPE:      cpe(d, raw),
+		CPEs:     []string{cpe(d, raw)},
 		ID:       d.id,
 		Licenses: []interface{}{
 			map[string]string{
