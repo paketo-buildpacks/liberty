@@ -109,7 +109,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:dba6f751e7875646ea103484d84194b6ace2dc66d01feb15db1a48aa66887766"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-full"
     name = "Open Liberty (All Features)"
     purl = "pkg:maven/io.openliberty/openliberty-runtime@26.0.0.11"
@@ -126,7 +126,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:7088d9ea4e2a6e0f54dec6f4c9c43df9de4f449ae0cb07914885510204683bbc"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-jakartaee11"
     name = "Open Liberty (Jakarta EE11)"
     purl = "pkg:maven/io.openliberty/openliberty-jakartaee11@26.0.0.11"
@@ -143,7 +143,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:b72def3e8ca202296ed9e4ba07e46e82c1c24d9a620128b150ff1fd594fc1342"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-javaee8"
     name = "Open Liberty (Java EE8)"
     purl = "pkg:maven/io.openliberty/openliberty-javaee8@26.0.0.11"
@@ -160,7 +160,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:530d1e9180839636b30ff688f41bd357a87713adfe2f32adf23e04109e4b4060"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile11"
     name = "Open Liberty (Web Profile 11)"
     purl = "pkg:maven/io.openliberty/openliberty-webProfile11@26.0.0.11"
@@ -177,7 +177,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:b362fa27c9abe236a8a47a36818c1a4459dd43bd5d771466dd386af7123a7773"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-webProfile8"
     name = "Open Liberty (Web Profile 8)"
     purl = "pkg:maven/io.openliberty/openliberty-webProfile8@26.0.0.11"
@@ -194,7 +194,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:f1d54dd050f6234be59f36690558da230ac1e46733456dbc138e731faad401ab"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile4"
     name = "Open Liberty (Micro Profile 4)"
     purl = "pkg:maven/io.openliberty/openliberty-microProfile4@26.0.0.11"
@@ -211,7 +211,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:5892bdaf6e0eaadb9d2f0ef4ee7260ede1906618ae761ac54132bbe5ee85010b"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-microProfile7"
     name = "Open Liberty (Micro Profile 7)"
     purl = "pkg:maven/io.openliberty/openliberty-microProfile7@26.0.0.11"
@@ -228,7 +228,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:dd2c811e970f2f184ef3ce33b53609a539d3d7edf3378da27c91148f0285e3ec"
-    cpe = "cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:open_liberty:26.0.0.11:*:*:*:*:*:*:*"]
     id = "open-liberty-runtime-kernel"
     name = "Open Liberty (Kernel)"
     purl = "pkg:maven/io.openliberty/openliberty-kernel@26.0.0.11"
@@ -245,7 +245,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:5c201414ace12f79ae5bf8ade2ba3dc1d4f213d4b4a34d3ee854c6917729e595"
-    cpe = "cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-kernel"
     name = "WebSphere Liberty (Kernel)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-kernel@26.0.0.11"
@@ -260,7 +260,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:e11522f2af7f0ce8451fa9aa23e3ac91974694a101303544e758489c47a742e5"
-    cpe = "cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-jakartaee11"
     name = "WebSphere Liberty (Jakarta EE11)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-jakartaee11@26.0.0.11"
@@ -275,7 +275,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:71ac6dbdb7fc56c4280bb9b5defdb0419d2ebc20ccc1df5f65d39b2ead57100d"
-    cpe = "cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee8"
     name = "WebSphere Liberty (Java EE8)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee8@26.0.0.11"
@@ -290,7 +290,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:150b07a40309fd9ba66706ccbca8293f75ae970ac2aaf169aac00a0021fe2a14"
-    cpe = "cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-javaee7"
     name = "WebSphere Liberty (Java EE7)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-javaee7@26.0.0.11"
@@ -305,7 +305,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:c42caab46586fbf0d92612476d5c6d637b142d38366fa111f7d5001cf10a73a0"
-    cpe = "cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile11"
     name = "WebSphere Liberty (Web Profile 11)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile11@26.0.0.11"
@@ -320,7 +320,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:0efc2b033eece976d39bba3c5074249fd6cce09157513e83f74741c70dc4883d"
-    cpe = "cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile8"
     name = "WebSphere Liberty (Web Profile 8)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile8@26.0.0.11"
@@ -335,7 +335,7 @@ api = "0.7"
 
   [[metadata.dependencies]]
     checksum = "sha256:bf3e14e19a930e08be11bff88c2b40da124548a32ab1ff1309306aaa99dc228d"
-    cpe = "cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"
+    cpes = ["cpe:2.3:a:ibm:websphere_application_server:26.0.0.11:*:*:*:liberty:*:*:*"]
     id = "websphere-liberty-runtime-webProfile7"
     name = "WebSphere Liberty (Web Profile 7)"
     purl = "pkg:maven/com.ibm.websphere.appserver.runtime/wlp-webProfile7@26.0.0.11"
